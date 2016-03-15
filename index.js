@@ -6,4 +6,7 @@ var data = {
   focus: {value: 45, label: 'Mongolia'}
 };
 
-myRopeChart.render(data);
+myRopeChart
+  .knotRadius(9)
+  .ropeWidth(10)
+  .render(data);

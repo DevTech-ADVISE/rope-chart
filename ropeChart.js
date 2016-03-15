@@ -53,13 +53,15 @@ function ropeChart(selection){
                        y: knotRadius, 
                        r: knotRadius, 
                        fill: nodeColor(max.value),
-                       value: max.value};
+                       value: max.value,
+                       label: max.label};
 
     var bottomNode  = {x: centerPoint.x, 
                        y: svgHeight - knotRadius, 
                        r: knotRadius, 
                        fill: nodeColor(min.value),
-                       value: min.value};
+                       value: min.value,
+                       label: min.label};
 
     var yScale = d3.scale.linear()
       .domain([min.value, max.value])
@@ -69,7 +71,8 @@ function ropeChart(selection){
                        y: yScale(focus.value), 
                        r: knotRadius, 
                        fill: nodeColor(focus.value),
-                       value: focus.value};
+                       value: focus.value,
+                       label: focus.label};
 
     var nodes       = [topNode, bottomNode,focusNode];
 
@@ -129,7 +132,7 @@ function ropeChart(selection){
     
     // render value text
       // update
-    var valueText = svg.selectAll('text')
+    var valueText = svg.selectAll('text.value')
         .data(nodes)
         .attr('text-anchor', function(d) { return 'end'; })
         .attr('x', function(d) { return d.x - (d.r + labelMargin); })
@@ -139,6 +142,7 @@ function ropeChart(selection){
         .text(function(d) { return d.value; });
       // enter
     valueText.enter().append('text')
+        .attr('class', function(d) { return 'value'; })
         .attr('text-anchor', function(d) { return 'end'; })
         .attr('x', function(d) { return d.x - (d.r + labelMargin); })
         .attr('y', function(d) { return d.y; })
@@ -147,6 +151,28 @@ function ropeChart(selection){
         .text(function(d) { return d.value; });
       // exit
     valueText.exit().remove();
+
+    // render label text
+      // update
+    var labelText = svg.selectAll('text.label')
+        .data(nodes)
+        .attr('text-anchor', function(d) { return 'start'; })
+        .attr('x', function(d) { return d.x + (d.r + labelMargin); })
+        .attr('y', function(d) { return d.y; })
+        .attr('dy', function(d) { return '.3em'; })
+        .attr('font-size', function(d) { return d.r * 2 + 'px'; })
+        .text(function(d) { return d.label; });
+      // enter
+    labelText.enter().append('text')
+        .attr('class', function(d) { return 'label'; })
+        .attr('text-anchor', function(d) { return 'start'; })
+        .attr('x', function(d) { return d.x + (d.r + labelMargin); })
+        .attr('y', function(d) { return d.y; })
+        .attr('dy', function(d) { return '.3em'; })
+        .attr('font-size', function(d) { return d.r * 2 + 'px'; })
+        .text(function(d) { return d.label; });
+      // exit
+    labelText.exit().remove();
 
     return chart;
   };
