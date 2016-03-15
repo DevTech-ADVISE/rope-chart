@@ -26,10 +26,10 @@ function ropeChart(selection){
 
   /**
    * Render the ropeChart instance. Simply renders chart when called with no parameter. Updates data, then renders, if called with parameter
-   * @method data
+   * @method render
    * @memberof ropeChart
    * @instance
-   * @param  {Object}
+   * @param  {Object} [data]
    * @return {ropeChart} 
    */
   chart.render = function(_) {
@@ -156,7 +156,7 @@ function ropeChart(selection){
    * @method data
    * @memberof ropeChart
    * @instance
-   * @param  {Object} [none]
+   * @param  {Object} [data]
    * @return {Object} [Acts as getter if called with no parameter]
    * @return {ropeChart} [Acts as setter if called with parameter]
    */

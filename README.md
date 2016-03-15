@@ -57,8 +57,8 @@ var myRopeChart = ropeChart('div#myRopeChart');
 
 * [ropeChart](#ropeChart)
     * [new ropeChart(selection)](#new_ropeChart_new)
-    * [.data()](#ropeChart+data) ⇒ <code>[ropeChart](#ropeChart)</code>
-    * [.data([none])](#ropeChart+data) ⇒ <code>Object</code> &#124; <code>[ropeChart](#ropeChart)</code>
+    * [.render([data])](#ropeChart+render) ⇒ <code>[ropeChart](#ropeChart)</code>
+    * [.data([data])](#ropeChart+data) ⇒ <code>Object</code> &#124; <code>[ropeChart](#ropeChart)</code>
     * [.width([width])](#ropeChart+width) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
     * [.height([height])](#ropeChart+height) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
     * [.knotRadius([knotRadius])](#ropeChart+knotRadius) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
@@ -79,20 +79,20 @@ Rope chart implementation.
 | --- | --- | --- |
 | selection | <code>String</code> | any valid d3 selector. This selector is used to place the chart. |
 
-<a name="ropeChart+data"></a>
+<a name="ropeChart+render"></a>
 
-### ropeChart.data() ⇒ <code>[ropeChart](#ropeChart)</code>
+### ropeChart.render([data]) ⇒ <code>[ropeChart](#ropeChart)</code>
 Render the ropeChart instance. Simply renders chart when called with no parameter. Updates data, then renders, if called with parameter
 
 **Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
 
-| Type |
-| --- |
-| <code>Object</code> | 
+| Param | Type |
+| --- | --- |
+| [data] | <code>Object</code> | 
 
 <a name="ropeChart+data"></a>
 
-### ropeChart.data([none]) ⇒ <code>Object</code> &#124; <code>[ropeChart](#ropeChart)</code>
+### ropeChart.data([data]) ⇒ <code>Object</code> &#124; <code>[ropeChart](#ropeChart)</code>
 Get/set the data for the ropeChart instance
 
 **Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
@@ -100,7 +100,7 @@ Get/set the data for the ropeChart instance
 
 | Param | Type |
 | --- | --- |
-| [none] | <code>Object</code> | 
+| [data] | <code>Object</code> | 
 
 <a name="ropeChart+width"></a>
 
