@@ -6,37 +6,43 @@
  * @return {ropeChart}
  */
 function ropeChart(selection){
+  chart = {};
   // settings
-  var svgWidth        = 250,
-      svgHeight       = 250,
-      nodeRadius      = 20,
-      barWidth        = 10,
-      threshLineWidth = 40,
-      goodColor       = "green",
-      badColor        = "red",
-      baseColor       = "black",
-      flipDirection   = false,
-      labelMargin     = 5;
+  var svgWidth         = 250,
+      svgHeight        = 250,
+      knotRadius       = 20,
+      ropeWidth         = 10,
+      threshLineLength = 40,
+      goodColor        = "green",
+      badColor         = "red",
+      baseColor        = "black",
+      flipDirection    = false,
+      labelMargin      = 5;
 
-  var max, min, thresh, focus;
+  var max, min, thresh, focus, data;
   
   var svg = d3.select(selection)
     .append('svg');
 
-  function chart(data) {
+  /**
+   * Render the ropeChart instance. Simply renders chart when called with no parameter. Updates data, then renders, if called with parameter
+   * @method data
+   * @memberof ropeChart
+   * @instance
+   * @param  {Object}
+   * @return {ropeChart} 
+   */
+  chart.render = function(_) {
 
-    // data inputs
-    max  = data.max,
-    min    = data.min,
-    thresh = data.threshold,
-    focus  = data.focus;
+    if (!!arguments.length)
+      chart.data(_);
 
     // size the svg          
     svg.attr("width", function(){
       return svgWidth;
     });
     svg.attr("height",function(){
-      return svgWidth;
+      return svgHeight;
     });
 
     // reference values
@@ -44,14 +50,14 @@ function ropeChart(selection){
 
     // derive node data & configure scale
     var topNode     = {x: centerPoint.x, 
-                       y: nodeRadius, 
-                       r: nodeRadius, 
+                       y: knotRadius, 
+                       r: knotRadius, 
                        fill: nodeColor(max.value),
                        value: max.value};
 
     var bottomNode  = {x: centerPoint.x, 
-                       y: svgHeight - nodeRadius, 
-                       r: nodeRadius, 
+                       y: svgHeight - knotRadius, 
+                       r: knotRadius, 
                        fill: nodeColor(min.value),
                        value: min.value};
 
@@ -61,19 +67,19 @@ function ropeChart(selection){
 
     var focusNode   = {x: centerPoint.x, 
                        y: yScale(focus.value), 
-                       r: nodeRadius, 
+                       r: knotRadius, 
                        fill: nodeColor(focus.value),
                        value: focus.value};
 
     var nodes       = [topNode, bottomNode,focusNode];
 
     // derive threshold line data
-    var threshLine = {x1: centerPoint.x - (threshLineWidth/2), y1: yScale(thresh.value),
-                      x2: centerPoint.x + (threshLineWidth/2), y2: yScale(thresh.value)};
+    var threshLine = {x1: centerPoint.x - (threshLineLength/2), y1: yScale(thresh.value),
+                      x2: centerPoint.x + (threshLineLength/2), y2: yScale(thresh.value)};
     // derive bar data
-    var barX = centerPoint.x - (barWidth/2);
-    var topBar = {x: barX, y: nodeRadius, height: threshLine.y1 - nodeRadius, width: barWidth, fill: (flipDirection ? badColor : goodColor)};
-    var botBar = {x: barX, y: threshLine.y1, height: svgHeight - (threshLine.y1 + nodeRadius), width: barWidth, fill: (flipDirection ? goodColor : badColor)};
+    var barX = centerPoint.x - (ropeWidth/2);
+    var topBar = {x: barX, y: knotRadius, height: threshLine.y1 - knotRadius, width: ropeWidth, fill: (flipDirection ? badColor : goodColor)};
+    var botBar = {x: barX, y: threshLine.y1, height: svgHeight - (threshLine.y1 + knotRadius), width: ropeWidth, fill: (flipDirection ? goodColor : badColor)};
     var bars = [topBar, botBar];
 
     // render bar svg 
@@ -141,7 +147,31 @@ function ropeChart(selection){
         .text(function(d) { return d.value; });
       // exit
     valueText.exit().remove();
-  }
+
+    return chart;
+  };
+
+  /**
+   * Get/set the data for the ropeChart instance
+   * @method data
+   * @memberof ropeChart
+   * @instance
+   * @param  {Object} [none]
+   * @return {Object} [Acts as getter if called with no parameter]
+   * @return {ropeChart} [Acts as setter if called with parameter]
+   */
+  chart.data = function(_) {
+    if (!arguments.length)
+      return data;
+
+    data = _;
+    max  = data.max,
+    min    = data.min,
+    thresh = data.threshold,
+    focus  = data.focus;
+
+    return chart;
+  };
 
   /**
    * Get/set the width of the chart SVG
@@ -179,52 +209,52 @@ function ropeChart(selection){
 
   /**
    * Get/set the radius of "knot" circles at max, min, and focus value positions.
-   * @method nodeRadius
+   * @method knotRadius
    * @memberof ropeChart
    * @instance
-   * @param  {Integer} [nodeRadius=20]
+   * @param  {Integer} [knotRadius=20]
    * @return {Integer} [Acts as getter if called with no parameter]
    * @return {ropeChart} [Acts as setter if called with parameter]
    */
-  chart.nodeRadius = function(_) {
+  chart.knotRadius = function(_) {
     if (!arguments.length) {
-      return nodeRadius;
+      return knotRadius;
     }
-    nodeRadius = _;
+    knotRadius = _;
     return chart;
   };
 
   /**
    * Get/set the width of the "rope" rectangle.
-   * @method barWidth
+   * @method ropeWidth
    * @memberof ropeChart
    * @instance
-   * @param  {Integer} [barWidth=20]
+   * @param  {Integer} [ropeWidth=20]
    * @return {Integer} [Acts as getter if called with no parameter]
    * @return {ropeChart} [Acts as setter if called with parameter]
    */
-  chart.barWidth = function(_) {
+  chart.ropeWidth = function(_) {
     if (!arguments.length) {
-      return barWidth;
+      return ropeWidth;
     }
-    barWidth = _;
+    ropeWidth = _;
     return chart;
   };
 
   /**
    * Get/set the length of the horizontal "threshold" line.
-   * @method threshLineWidth
+   * @method threshLineLength
    * @memberof ropeChart
    * @instance
-   * @param  {Integer} [threshLineWidth=20]
+   * @param  {Integer} [threshLineLength=20]
    * @return {Integer} [Acts as getter if called with no parameter]
    * @return {ropeChart} [Acts as setter if called with parameter]
    */
-  chart.threshLineWidth = function(_) {
+  chart.threshLineLength = function(_) {
     if (!arguments.length) {
-      return threshLineWidth;
+      return threshLineLength;
     }
-    threshLineWidth = _;
+    threshLineLength = _;
     return chart;
   };
 

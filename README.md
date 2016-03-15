@@ -33,14 +33,20 @@ HTML would look something like this
 And the index.js here would contain something like this
 
 ```
-myRopeChart = ropeChart('div#myRopeChart');
-
-myRopeChart({
+var data = {
   min: {value: 5, label: 'Country A'},
   max: {value: 95, label: 'Country B'},
   threshold: {value: 60, label: 'Region Average'},
   focus: {value: 45, label: 'Mongolia'}
-});
+}
+
+var myRopeChart = ropeChart('div#myRopeChart');
+	.data(data)
+	.width(250)
+	.height(250)
+	.ropeWidth(10)
+	.knotRadius(10)
+	.render();
 ```
 
 # API Reference
@@ -51,11 +57,13 @@ myRopeChart({
 
 * [ropeChart](#ropeChart)
     * [new ropeChart(selection)](#new_ropeChart_new)
+    * [.data()](#ropeChart+data) ⇒ <code>[ropeChart](#ropeChart)</code>
+    * [.data([none])](#ropeChart+data) ⇒ <code>Object</code> &#124; <code>[ropeChart](#ropeChart)</code>
     * [.width([width])](#ropeChart+width) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
     * [.height([height])](#ropeChart+height) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
-    * [.nodeRadius([nodeRadius])](#ropeChart+nodeRadius) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
-    * [.barWidth([barWidth])](#ropeChart+barWidth) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
-    * [.threshLineWidth([threshLineWidth])](#ropeChart+threshLineWidth) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
+    * [.knotRadius([knotRadius])](#ropeChart+knotRadius) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
+    * [.ropeWidth([ropeWidth])](#ropeChart+ropeWidth) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
+    * [.threshLineLength([threshLineLength])](#ropeChart+threshLineLength) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
     * [.goodColor([goodColor])](#ropeChart+goodColor) ⇒ <code>String</code> &#124; <code>[ropeChart](#ropeChart)</code>
     * [.badColor([goodColor])](#ropeChart+badColor) ⇒ <code>String</code> &#124; <code>[ropeChart](#ropeChart)</code>
     * [.flipDirection([flipDirection])](#ropeChart+flipDirection) ⇒ <code>Boolean</code> &#124; <code>[ropeChart](#ropeChart)</code>
@@ -70,6 +78,29 @@ Rope chart implementation.
 | Param | Type | Description |
 | --- | --- | --- |
 | selection | <code>String</code> | any valid d3 selector. This selector is used to place the chart. |
+
+<a name="ropeChart+data"></a>
+
+### ropeChart.data() ⇒ <code>[ropeChart](#ropeChart)</code>
+Render the ropeChart instance. Simply renders chart when called with no parameter. Updates data, then renders, if called with parameter
+
+**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
+
+| Type |
+| --- |
+| <code>Object</code> | 
+
+<a name="ropeChart+data"></a>
+
+### ropeChart.data([none]) ⇒ <code>Object</code> &#124; <code>[ropeChart](#ropeChart)</code>
+Get/set the data for the ropeChart instance
+
+**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
+**Returns**: <code>Object</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type |
+| --- | --- |
+| [none] | <code>Object</code> | 
 
 <a name="ropeChart+width"></a>
 
@@ -95,9 +126,9 @@ Get/set the height of the chart SVG
 | --- | --- | --- |
 | [height] | <code>Integer</code> | <code>500</code> | 
 
-<a name="ropeChart+nodeRadius"></a>
+<a name="ropeChart+knotRadius"></a>
 
-### ropeChart.nodeRadius([nodeRadius]) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
+### ropeChart.knotRadius([knotRadius]) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
 Get/set the radius of "knot" circles at max, min, and focus value positions.
 
 **Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
@@ -105,11 +136,11 @@ Get/set the radius of "knot" circles at max, min, and focus value positions.
 
 | Param | Type | Default |
 | --- | --- | --- |
-| [nodeRadius] | <code>Integer</code> | <code>20</code> | 
+| [knotRadius] | <code>Integer</code> | <code>20</code> | 
 
-<a name="ropeChart+barWidth"></a>
+<a name="ropeChart+ropeWidth"></a>
 
-### ropeChart.barWidth([barWidth]) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
+### ropeChart.ropeWidth([ropeWidth]) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
 Get/set the width of the "rope" rectangle.
 
 **Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
@@ -117,11 +148,11 @@ Get/set the width of the "rope" rectangle.
 
 | Param | Type | Default |
 | --- | --- | --- |
-| [barWidth] | <code>Integer</code> | <code>20</code> | 
+| [ropeWidth] | <code>Integer</code> | <code>20</code> | 
 
-<a name="ropeChart+threshLineWidth"></a>
+<a name="ropeChart+threshLineLength"></a>
 
-### ropeChart.threshLineWidth([threshLineWidth]) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
+### ropeChart.threshLineLength([threshLineLength]) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
 Get/set the length of the horizontal "threshold" line.
 
 **Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
@@ -129,7 +160,7 @@ Get/set the length of the horizontal "threshold" line.
 
 | Param | Type | Default |
 | --- | --- | --- |
-| [threshLineWidth] | <code>Integer</code> | <code>20</code> | 
+| [threshLineLength] | <code>Integer</code> | <code>20</code> | 
 
 <a name="ropeChart+goodColor"></a>
 

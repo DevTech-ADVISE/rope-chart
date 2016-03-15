@@ -33,14 +33,20 @@ HTML would look something like this
 And the index.js here would contain something like this
 
 ```
-myRopeChart = ropeChart('div#myRopeChart');
-
-myRopeChart({
+var data = {
   min: {value: 5, label: 'Country A'},
   max: {value: 95, label: 'Country B'},
   threshold: {value: 60, label: 'Region Average'},
   focus: {value: 45, label: 'Mongolia'}
-});
+}
+
+var myRopeChart = ropeChart('div#myRopeChart');
+	.data(data)
+	.width(250)
+	.height(250)
+	.ropeWidth(10)
+	.knotRadius(10)
+	.render();
 ```
 
 # API Reference
