@@ -1,0 +1,12 @@
+{
+  "name": "rope-chart",
+  "version": "0.0.0",
+  "description": "provides a simplified visualization of where a particular value lies within a group.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "doc": "jsdoc2md --template README.hbs ropeChart.js > README.md"
+  },
+  "author": "Jack Compton",
+  "license": "ISC"
+}

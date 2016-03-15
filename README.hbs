@@ -1,0 +1,47 @@
+# ropeChart
+
+The rope chart provides a simplified visualization of where a particular value lies within a group.
+
+# Getting Started
+
+For now, you must use a script tag to include ropeChart. D3 must be available in the global namespace as well. Download ropeChart.js, put something like the following in your <head> and you should be good to go.
+
+```
+<script src="d3.js" charset="utf-8"></script>
+<script src="ropeChart.js" charset="utf-8"></script>
+```
+
+# Example
+
+HTML would look something like this
+
+```
+<!DOCTYPE html>
+<html lang="en-US">
+	<head>
+		<script src="d3.js" charset="utf-8"></script>
+		<script src="ropeChart.js" charset="utf-8"></script>
+		
+	</head>
+	<body>
+		<div id="myRopeChart"></div>	
+	</body>
+	<script src="index.js"></script>
+</html>
+```
+
+And the index.js here would contain something like this
+
+```
+myRopeChart = ropeChart('div#myRopeChart');
+
+myRopeChart({
+  min: {value: 5, label: 'Country A'},
+  max: {value: 95, label: 'Country B'},
+  threshold: {value: 60, label: 'Region Average'},
+  focus: {value: 45, label: 'Mongolia'}
+});
+```
+
+# API Reference
+{{#class name="ropeChart"}}{{>docs}}{{/class}}
