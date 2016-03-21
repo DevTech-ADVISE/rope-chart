@@ -1,11 +1,11 @@
 /**
  * Rope chart implementation.
  *
- * @class ropeChart
+ * @class RopeChart
  * @param {String} selection - any valid d3 selector. This selector is used to place the chart.
- * @return {ropeChart}s
+ * @return {RopeChart}
  */
-function ropeChart(selection){
+function RopeChart(selection){
   chart = {};
   // settings
   var svgWidth         = 250,
@@ -29,12 +29,12 @@ function ropeChart(selection){
     .append('svg');
 
   /**
-   * Render the ropeChart instance. Simply renders chart when called with no parameter. Updates data, then renders, if called with parameter
+   * Render the RopeChart instance. Simply renders chart when called with no parameter. Updates data, then renders, if called with parameter
    * @method render
-   * @memberof ropeChart
+   * @memberof RopeChart
    * @instance
    * @param  {Object} [data]
-   * @return {ropeChart} 
+   * @return {RopeChart} 
    */
   chart.render = function(_) {
 
@@ -145,13 +145,13 @@ function ropeChart(selection){
   };
 
   /**
-   * Get/set the data for the ropeChart instance
+   * Get/set the data for the RopeChart instance
    * @method data
-   * @memberof ropeChart
+   * @memberof RopeChart
    * @instance
    * @param  {Object} [data]
    * @return {Object} [Acts as getter if called with no parameter]
-   * @return {ropeChart} [Acts as setter if called with parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.data = function(_) {
     if (!arguments.length)
@@ -168,11 +168,11 @@ function ropeChart(selection){
   /**
    * Get/set the name/key used to access the "focus" item for the chart. The "focus" is the member of the data set that you want to compare to the rest of the group.
    * @method width
-   * @memberof ropeChart
+   * @memberof RopeChart
    * @instance
    * @param  {String} [recordName - should be the value of the name property for the record you want as your focus.]
    * @return {Object} [Acts as getter if called with no parameter. Returns a record from your data set.]
-   * @return {ropeChart} [Acts as setter if called with parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.focusName = function(_) {
     if (!arguments.length) {
@@ -185,11 +185,11 @@ function ropeChart(selection){
   /**
    * Get/set the width of the chart SVG
    * @method width
-   * @memberof ropeChart
+   * @memberof RopeChart
    * @instance
    * @param  {Integer} [width=500]
    * @return {Integer} [Acts as getter if called with no parameter]
-   * @return {ropeChart} [Acts as setter if called with parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.width = function(_) {
     if (!arguments.length) {
@@ -202,11 +202,11 @@ function ropeChart(selection){
   /**
    * Get/set the height of the chart SVG
    * @method height
-   * @memberof ropeChart
+   * @memberof RopeChart
    * @instance
    * @param  {Integer} [height=500]
    * @return {Integer} [Acts as getter if called with no parameter]
-   * @return {ropeChart} [Acts as setter if called with parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.height = function(_) {
     if (!arguments.length) {
@@ -219,11 +219,11 @@ function ropeChart(selection){
   /**
    * Get/set the radius of "knot" circles at max, min, and focus value positions.
    * @method knotRadius
-   * @memberof ropeChart
+   * @memberof RopeChart
    * @instance
    * @param  {Integer} [knotRadius=20]
    * @return {Integer} [Acts as getter if called with no parameter]
-   * @return {ropeChart} [Acts as setter if called with parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.knotRadius = function(_) {
     if (!arguments.length) {
@@ -236,11 +236,11 @@ function ropeChart(selection){
   /**
    * Get/set the width of the "rope" rectangle.
    * @method ropeWidth
-   * @memberof ropeChart
+   * @memberof RopeChart
    * @instance
    * @param  {Integer} [ropeWidth=20]
    * @return {Integer} [Acts as getter if called with no parameter]
-   * @return {ropeChart} [Acts as setter if called with parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.ropeWidth = function(_) {
     if (!arguments.length) {
@@ -253,11 +253,11 @@ function ropeChart(selection){
   /**
    * Get/set the length of the horizontal "threshold" line.
    * @method threshLineLength
-   * @memberof ropeChart
+   * @memberof RopeChart
    * @instance
    * @param  {Integer} [threshLineLength=20]
    * @return {Integer} [Acts as getter if called with no parameter]
-   * @return {ropeChart} [Acts as setter if called with parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.threshLineLength = function(_) {
     if (!arguments.length) {
@@ -270,11 +270,11 @@ function ropeChart(selection){
   /**
    * Get/set the color used on the "good" side of the threshold.
    * @method goodColor
-   * @memberof ropeChart
+   * @memberof RopeChart
    * @instance
    * @param  {String} [goodColor=green]
    * @return {String} [Acts as getter if called with no parameter]
-   * @return {ropeChart} [Acts as setter if called with parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.goodColor = function(_) {
     if (!arguments.length) {
@@ -287,11 +287,11 @@ function ropeChart(selection){
   /**
    * Get/set the color used on the "bad" side of the threshold.
    * @method badColor
-   * @memberof ropeChart
+   * @memberof RopeChart
    * @instance
    * @param  {String} [goodColor=red]
    * @return {String} [Acts as getter if called with no parameter]
-   * @return {ropeChart} [Acts as setter if called with parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.badColor = function(_) {
     if (!arguments.length) {
@@ -304,11 +304,11 @@ function ropeChart(selection){
   /**
    * Get/set boolean that "flips direction" of the "good"/"bad" sides of threshold. By default the top section is "good" (green). If flipDirection is true, then top section becomes "bad" (red).
    * @method flipDirection
-   * @memberof ropeChart
+   * @memberof RopeChart
    * @instance
    * @param  {Boolean} [flipDirection=false]
    * @return {Boolean} [Acts as getter if called with no parameter]
-   * @return {ropeChart} [Acts as setter if called with parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.flipDirection = function(_) {
     if (!arguments.length) {
@@ -321,11 +321,11 @@ function ropeChart(selection){
   /**
    * Get/set boolean that toggles display of a "knot" for the group average.
    * @method showAverage
-   * @memberof ropeChart
+   * @memberof RopeChart
    * @instance
    * @param  {Boolean} [showAverage=false]
    * @return {Boolean} [Acts as getter if called with no parameter]
-   * @return {ropeChart} [Acts as setter if called with parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.showAverage = function(_) {
     if (!arguments.length) {
@@ -338,11 +338,11 @@ function ropeChart(selection){
   /**
    * Get/set label for average knot location.
    * @method averageLabel
-   * @memberof ropeChart
+   * @memberof RopeChart
    * @instance
    * @param  {String} [averageLabel="Average"]
    * @return {String} [Acts as getter if called with no parameter]
-   * @return {ropeChart} [Acts as setter if called with parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.averageLabel = function(_) {
     if (!arguments.length) {
@@ -355,11 +355,11 @@ function ropeChart(selection){
   /**
    * Get/set the margin between labels and "knot" circles.
    * @method labelMargin
-   * @memberof ropeChart
+   * @memberof RopeChart
    * @instance
    * @param  {Integer} [labelMargin=5]
    * @return {Integer} [Acts as getter if called with no parameter]
-   * @return {ropeChart} [Acts as setter if called with parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.labelMargin = function(_) {
     if (!arguments.length) {
@@ -375,11 +375,11 @@ function ropeChart(selection){
    * function (d){ return d.value; }
    * ```
    * @method valueAccessor
-   * @memberof ropeChart
+   * @memberof RopeChart
    * @instance
    * @param  {Function} [valueAccessorFunction]
    * @return {Function} [Acts as getter if called with no parameter]
-   * @return {ropeChart} [Acts as setter if called with parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.valueAccessor = function(_) {
     if (!arguments.length) {
@@ -395,11 +395,11 @@ function ropeChart(selection){
    * function (d){ return d.name; }
    * ```
    * @method nameAccessor
-   * @memberof ropeChart
+   * @memberof RopeChart
    * @instance
    * @param  {Function} [nameAccessorFunction]
    * @return {Function} [Acts as getter if called with no parameter]
-   * @return {ropeChart} [Acts as setter if called with parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.nameAccessor = function(_) {
     if (!arguments.length) {

@@ -2,11 +2,27 @@
   "name": "rope-chart",
   "version": "0.0.0",
   "description": "provides a simplified visualization of where a particular value lies within a group.",
-  "main": "index.js",
+  "repository": "BI/rope-chart",
+  "main": "build/ropeChart.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "doc": "jsdoc2md --template README.hbs ropeChart.js > README.md"
+    "doc": "jsdoc2md --template README.hbs ropeChart.js > README.md",
+    "dev": "gulp dev"
   },
-  "author": "Jack Compton",
-  "license": "ISC"
+  "tags": [
+    "d3",
+    "chart",
+    "visualization",
+    "dataviz"
+  ],
+  "author": "Barquin International",
+  "license": "ISC",
+  "devDependencies": {
+    "browser-sync": "^2.11.1",
+    "gulp": "^3.9.1",
+    "gulp-umd": "^0.2.0"
+  },
+  "dependencies": {
+    "d3": "^3.5.16"
+  }
 }
