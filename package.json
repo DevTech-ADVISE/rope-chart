@@ -1,6 +1,6 @@
 {
   "name": "rope-chart",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "provides a simplified visualization of where a particular value lies within a group.",
   "repository": "BI/rope-chart",
   "main": "build/ropeChart.js",
