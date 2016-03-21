@@ -59,6 +59,7 @@ var myRopeChart = ropeChart('div#myRopeChart');
     * [new ropeChart(selection)](#new_ropeChart_new)
     * [.render([data])](#ropeChart+render) ⇒ <code>[ropeChart](#ropeChart)</code>
     * [.data([data])](#ropeChart+data) ⇒ <code>Object</code> &#124; <code>[ropeChart](#ropeChart)</code>
+    * [.width()](#ropeChart+width) ⇒ <code>Object</code> &#124; <code>[ropeChart](#ropeChart)</code>
     * [.width([width])](#ropeChart+width) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
     * [.height([height])](#ropeChart+height) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
     * [.knotRadius([knotRadius])](#ropeChart+knotRadius) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
@@ -67,13 +68,18 @@ var myRopeChart = ropeChart('div#myRopeChart');
     * [.goodColor([goodColor])](#ropeChart+goodColor) ⇒ <code>String</code> &#124; <code>[ropeChart](#ropeChart)</code>
     * [.badColor([goodColor])](#ropeChart+badColor) ⇒ <code>String</code> &#124; <code>[ropeChart](#ropeChart)</code>
     * [.flipDirection([flipDirection])](#ropeChart+flipDirection) ⇒ <code>Boolean</code> &#124; <code>[ropeChart](#ropeChart)</code>
+    * [.showAverage([showAverage])](#ropeChart+showAverage) ⇒ <code>Boolean</code> &#124; <code>[ropeChart](#ropeChart)</code>
+    * [.averageLabel([averageLabel])](#ropeChart+averageLabel) ⇒ <code>String</code> &#124; <code>[ropeChart](#ropeChart)</code>
     * [.labelMargin([labelMargin])](#ropeChart+labelMargin) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
+    * [.valueAccessor([valueAccessorFunction])](#ropeChart+valueAccessor) ⇒ <code>function</code> &#124; <code>[ropeChart](#ropeChart)</code>
+    * [.nameAccessor([nameAccessorFunction])](#ropeChart+nameAccessor) ⇒ <code>function</code> &#124; <code>[ropeChart](#ropeChart)</code>
 
 <a name="new_ropeChart_new"></a>
 
 ### new ropeChart(selection)
 Rope chart implementation.
 
+**Returns**: <code>[ropeChart](#ropeChart)</code> - s  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -101,6 +107,18 @@ Get/set the data for the ropeChart instance
 | Param | Type |
 | --- | --- |
 | [data] | <code>Object</code> | 
+
+<a name="ropeChart+width"></a>
+
+### ropeChart.width() ⇒ <code>Object</code> &#124; <code>[ropeChart](#ropeChart)</code>
+Get/set the name/key used to access the "focus" item for the chart. The "focus" is the member of the data set that you want to compare to the rest of the group.
+
+**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
+**Returns**: <code>Object</code> - [Acts as getter if called with no parameter. Returns a record from your data set.]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type |
+| --- | --- |
+| [recordName - should be the value of the name property for the record you want as your focus.] | <code>String</code> | 
 
 <a name="ropeChart+width"></a>
 
@@ -198,6 +216,30 @@ Get/set boolean that "flips direction" of the "good"/"bad" sides of threshold. B
 | --- | --- | --- |
 | [flipDirection] | <code>Boolean</code> | <code>false</code> | 
 
+<a name="ropeChart+showAverage"></a>
+
+### ropeChart.showAverage([showAverage]) ⇒ <code>Boolean</code> &#124; <code>[ropeChart](#ropeChart)</code>
+Get/set boolean that toggles display of a "knot" for the group average.
+
+**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
+**Returns**: <code>Boolean</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type | Default |
+| --- | --- | --- |
+| [showAverage] | <code>Boolean</code> | <code>false</code> | 
+
+<a name="ropeChart+averageLabel"></a>
+
+### ropeChart.averageLabel([averageLabel]) ⇒ <code>String</code> &#124; <code>[ropeChart](#ropeChart)</code>
+Get/set label for average knot location.
+
+**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
+**Returns**: <code>String</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type | Default |
+| --- | --- | --- |
+| [averageLabel] | <code>String</code> | <code>&quot;Average&quot;</code> | 
+
 <a name="ropeChart+labelMargin"></a>
 
 ### ropeChart.labelMargin([labelMargin]) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
@@ -209,4 +251,34 @@ Get/set the margin between labels and "knot" circles.
 | Param | Type | Default |
 | --- | --- | --- |
 | [labelMargin] | <code>Integer</code> | <code>5</code> | 
+
+<a name="ropeChart+valueAccessor"></a>
+
+### ropeChart.valueAccessor([valueAccessorFunction]) ⇒ <code>function</code> &#124; <code>[ropeChart](#ropeChart)</code>
+Get/set function used to access "value" property from each data record. Defaults to: 
+```
+function (d){ return d.value; }
+```
+
+**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
+**Returns**: <code>function</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type |
+| --- | --- |
+| [valueAccessorFunction] | <code>function</code> | 
+
+<a name="ropeChart+nameAccessor"></a>
+
+### ropeChart.nameAccessor([nameAccessorFunction]) ⇒ <code>function</code> &#124; <code>[ropeChart](#ropeChart)</code>
+Get/set function used to access "name" property from each data record. Defaults to: 
+```
+function (d){ return d.name; }
+```
+
+**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
+**Returns**: <code>function</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type |
+| --- | --- |
+| [nameAccessorFunction] | <code>function</code> | 
 

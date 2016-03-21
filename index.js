@@ -1,12 +1,9 @@
 var myRopeChart = ropeChart('div#myRopeChart');
-var data = {
-  min: {value: 5, label: 'Country A'},
-  max: {value: 95, label: 'Country B'},
-  threshold: {value: 60, label: 'Region Average'},
-  focus: {value: 45, label: 'Mongolia'}
-};
+var data = [{name:'Bill',value:'33'},{name:'Bob',value:'54'},{name:'Jane',value:'21'},{name:'Phil',value:'60'},{name:'James',value:'29'},{name:'Annie',value:'36'},{name:'Eloise',value:'44'}];
 
 myRopeChart
-  .knotRadius(9)
-  .ropeWidth(10)
+  .knotRadius(5)
+  .ropeWidth(2)
+  .showAverage(true)
+  .focusName('Annie')
   .render(data);

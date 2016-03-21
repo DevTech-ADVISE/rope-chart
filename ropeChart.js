@@ -3,7 +3,7 @@
  *
  * @class ropeChart
  * @param {String} selection - any valid d3 selector. This selector is used to place the chart.
- * @return {ropeChart}
+ * @return {ropeChart}s
  */
 function ropeChart(selection){
   chart = {};
@@ -11,15 +11,19 @@ function ropeChart(selection){
   var svgWidth         = 250,
       svgHeight        = 250,
       knotRadius       = 20,
-      ropeWidth         = 10,
-      threshLineLength = 40,
-      goodColor        = "green",
-      badColor         = "red",
-      baseColor        = "black",
+      ropeWidth        = 10,
+      fontSize         = 20,
+      knotColor        = "#666",
+      ropeColor        = "#CCC",        
       flipDirection    = false,
-      labelMargin      = 5;
+      labelMargin      = 5,
+      showAverage      = false,
+      averageLabel     = "Average";
 
-  var max, min, thresh, focus, data;
+  var yScale, centerPoint, max, min, avg, focusName, focus, data;
+
+  var valueAccessor = function (d) { return d.value; };
+  var nameAccessor  = function (d) { return d.name; };
   
   var svg = d3.select(selection)
     .append('svg');
@@ -37,53 +41,25 @@ function ropeChart(selection){
     if (!!arguments.length)
       chart.data(_);
 
-    // size the svg          
+    // size the svg, and reset the center          
     svg.attr("width", function(){
       return svgWidth;
     });
     svg.attr("height",function(){
       return svgHeight;
     });
+    centerPoint = {x: svgWidth/2, y: svgWidth/2};
 
-    // reference values
-    var centerPoint = {x: svgWidth/2, y: svgWidth/2};
+    var nodes = generateNodes(); 
 
-    // derive node data & configure scale
-    var topNode     = {x: centerPoint.x, 
-                       y: knotRadius, 
-                       r: knotRadius, 
-                       fill: nodeColor(max.value),
-                       value: max.value,
-                       label: max.label};
-
-    var bottomNode  = {x: centerPoint.x, 
-                       y: svgHeight - knotRadius, 
-                       r: knotRadius, 
-                       fill: nodeColor(min.value),
-                       value: min.value,
-                       label: min.label};
-
-    var yScale = d3.scale.linear()
-      .domain([min.value, max.value])
-      .range([bottomNode.y, topNode.y]);
-
-    var focusNode   = {x: centerPoint.x, 
-                       y: yScale(focus.value), 
-                       r: knotRadius, 
-                       fill: nodeColor(focus.value),
-                       value: focus.value,
-                       label: focus.label};
-
-    var nodes       = [topNode, bottomNode,focusNode];
-
-    // derive threshold line data
-    var threshLine = {x1: centerPoint.x - (threshLineLength/2), y1: yScale(thresh.value),
-                      x2: centerPoint.x + (threshLineLength/2), y2: yScale(thresh.value)};
     // derive bar data
     var barX = centerPoint.x - (ropeWidth/2);
-    var topBar = {x: barX, y: knotRadius, height: threshLine.y1 - knotRadius, width: ropeWidth, fill: (flipDirection ? badColor : goodColor)};
-    var botBar = {x: barX, y: threshLine.y1, height: svgHeight - (threshLine.y1 + knotRadius), width: ropeWidth, fill: (flipDirection ? goodColor : badColor)};
-    var bars = [topBar, botBar];
+    var bar = {x: barX, 
+               y: knotRadius, 
+               height: svgHeight - 2 * knotRadius, 
+               width: ropeWidth, 
+               fill: ropeColor };
+    var bars = [bar];
 
     // render bar svg 
       // update
@@ -120,15 +96,6 @@ function ropeChart(selection){
         .attr('fill', function(d){ return d.fill; });
       // exit
     circleSvg.exit().remove();
-
-    // render threshold line   
-    svg.selectAll('line').remove();
-    var lineSvg = svg.append('line')
-      .attr('x1', function(){ return threshLine.x1; })
-      .attr('y1', function(){ return threshLine.y1; })
-      .attr('x2', function(){ return threshLine.x2; })
-      .attr('y2', function(){ return threshLine.y2; })
-      .attr('stroke', function(){ return baseColor; });
     
     // render value text
       // update
@@ -190,12 +157,28 @@ function ropeChart(selection){
     if (!arguments.length)
       return data;
 
-    data = _;
-    max  = data.max,
-    min    = data.min,
-    thresh = data.threshold,
-    focus  = data.focus;
+    data   = _;
+    max    = data.filter(function(d) { return chart.valueAccessor()(d) === d3.max(data, chart.valueAccessor()); })[0];
+    min    = data.filter(function(d) { return chart.valueAccessor()(d) === d3.min(data, chart.valueAccessor()); })[0];
+    avg    = d3.round(d3.mean(data, chart.valueAccessor()));
 
+    return chart;
+  };
+
+  /**
+   * Get/set the name/key used to access the "focus" item for the chart. The "focus" is the member of the data set that you want to compare to the rest of the group.
+   * @method width
+   * @memberof ropeChart
+   * @instance
+   * @param  {String} [recordName - should be the value of the name property for the record you want as your focus.]
+   * @return {Object} [Acts as getter if called with no parameter. Returns a record from your data set.]
+   * @return {ropeChart} [Acts as setter if called with parameter]
+   */
+  chart.focusName = function(_) {
+    if (!arguments.length) {
+      return focusName;
+    }
+    focusName = _;
     return chart;
   };
 
@@ -336,6 +319,40 @@ function ropeChart(selection){
   };
 
   /**
+   * Get/set boolean that toggles display of a "knot" for the group average.
+   * @method showAverage
+   * @memberof ropeChart
+   * @instance
+   * @param  {Boolean} [showAverage=false]
+   * @return {Boolean} [Acts as getter if called with no parameter]
+   * @return {ropeChart} [Acts as setter if called with parameter]
+   */
+  chart.showAverage = function(_) {
+    if (!arguments.length) {
+      return showAverage;
+    }
+    showAverage = _;
+    return chart;
+  };
+
+  /**
+   * Get/set label for average knot location.
+   * @method averageLabel
+   * @memberof ropeChart
+   * @instance
+   * @param  {String} [averageLabel="Average"]
+   * @return {String} [Acts as getter if called with no parameter]
+   * @return {ropeChart} [Acts as setter if called with parameter]
+   */
+  chart.averageLabel = function(_) {
+    if (!arguments.length) {
+      return averageLabel;
+    }
+    averageLabel = _;
+    return chart;
+  };
+
+  /**
    * Get/set the margin between labels and "knot" circles.
    * @method labelMargin
    * @memberof ropeChart
@@ -352,20 +369,89 @@ function ropeChart(selection){
     return chart;
   };
 
-  function nodeColor(value) {
-    if (flipDirection) {
-      if (value > thresh.value) {
-        return  badColor;
-      } else {
-        return goodColor;
-      }
-    } else {
-      if (value < thresh.value) {
-        return badColor;
-      } else {
-        return goodColor;
-      }
+  /**
+   * Get/set function used to access "value" property from each data record. Defaults to: 
+   * ```
+   * function (d){ return d.value; }
+   * ```
+   * @method valueAccessor
+   * @memberof ropeChart
+   * @instance
+   * @param  {Function} [valueAccessorFunction]
+   * @return {Function} [Acts as getter if called with no parameter]
+   * @return {ropeChart} [Acts as setter if called with parameter]
+   */
+  chart.valueAccessor = function(_) {
+    if (!arguments.length) {
+      return valueAccessor;
     }
+    valueAccessor = _;
+    return chart;
+  };
+
+  /**
+   * Get/set function used to access "name" property from each data record. Defaults to: 
+   * ```
+   * function (d){ return d.name; }
+   * ```
+   * @method nameAccessor
+   * @memberof ropeChart
+   * @instance
+   * @param  {Function} [nameAccessorFunction]
+   * @return {Function} [Acts as getter if called with no parameter]
+   * @return {ropeChart} [Acts as setter if called with parameter]
+   */
+  chart.nameAccessor = function(_) {
+    if (!arguments.length) {
+      return nameAccessor;
+    }
+    nameAccessor = _;
+    return chart;
+  };
+
+  function generateNodes() {
+    // derive node data & configure scale
+    var topNode     = {x: centerPoint.x, 
+                       y: knotRadius, 
+                       r: knotRadius, 
+                       fill: knotColor,
+                       value: chart.valueAccessor()(max),
+                       label: chart.nameAccessor()(max)};
+
+    var bottomNode  = {x: centerPoint.x, 
+                       y: svgHeight - knotRadius, 
+                       r: knotRadius, 
+                       fill: knotColor,
+                       value: chart.valueAccessor()(min),
+                       label: chart.nameAccessor()(min)};
+
+    yScale = d3.scale.linear()
+      .domain([min.value, max.value])
+      .range([bottomNode.y, topNode.y]);
+   
+    var nodes;
+
+    focus = data.filter(function(d){ return chart.nameAccessor()(d) === chart.focusName();})[0];
+    var focusNode   = {x: centerPoint.x, 
+                       y: yScale(chart.valueAccessor()(focus)), 
+                       r: knotRadius, 
+                       fill: knotColor,
+                       value: chart.valueAccessor()(focus),
+                       label: chart.nameAccessor()(focus)};
+
+    if (chart.showAverage()) {
+      var averageNode = {x: centerPoint.x, 
+                         y: yScale(avg), 
+                         r: knotRadius, 
+                         fill: knotColor,
+                         value: avg,
+                         label: averageLabel};
+      nodes = [topNode, bottomNode, averageNode, focusNode];
+    } else {
+      nodes = [topNode, bottomNode, focusNode];
+    }
+
+    return nodes;
   }
 
   return chart;
