@@ -7,7 +7,12 @@ gulp.task('default', function() {
   // place code for your default task here
 });
 
-gulp.task('serve', ['build'], function() {
+gulp.task('demoDeps', function() {
+  return gulp.src('node_modules/d3/d3.js')
+    .pipe(gulp.dest('demo'));
+});
+
+gulp.task('serve', ['build', 'demoDeps'], function() {
   browserSync({
     server: {
       baseDir: 'demo'
