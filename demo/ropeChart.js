@@ -15,7 +15,7 @@
  * @return {RopeChart}
  */
 function RopeChart(selection){
-  chart = {};
+  var chart = {};
   // settings
   var svgWidth         = 250,
       svgHeight        = 250,
