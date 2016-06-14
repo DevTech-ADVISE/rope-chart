@@ -5,7 +5,11 @@
  * @param {String} selection - any valid d3 selector. This selector is used to place the chart.
  * @return {RopeChart}
  */
-function RopeChart(selection){
+
+// d3 is an external, it won't be bundled in
+var d3 = require('d3');
+
+var RopeChart = function (selection){
   var chart = {};
   // settings
   var svgWidth         = 250,
@@ -456,3 +460,5 @@ function RopeChart(selection){
 
   return chart;
 }
+
+module.exports = RopeChart;
