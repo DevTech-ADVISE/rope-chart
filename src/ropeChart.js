@@ -8,6 +8,7 @@
 
 // d3 is an external, it won't be bundled in
 var d3 = require('d3');
+require('./ropeChart.scss');
 
 var RopeChart = function (selection){
   var chart = {};
@@ -17,8 +18,6 @@ var RopeChart = function (selection){
       knotRadius       = 20,
       ropeWidth        = 10,
       fontSize         = 20,
-      knotColor        = "#666",
-      ropeColor        = "#CCC",        
       flipDirection    = false,
       labelMargin      = 5,
       showAverage      = false,
@@ -30,6 +29,7 @@ var RopeChart = function (selection){
   var nameAccessor  = function (d) { return d.name; };
   
   var svg = d3.select(selection)
+    .classed('Rope-Chart', true)
     .append('svg');
 
   /**
@@ -62,7 +62,7 @@ var RopeChart = function (selection){
                y: knotRadius, 
                height: svgHeight - 2 * knotRadius, 
                width: ropeWidth, 
-               fill: ropeColor };
+               className: 'rope' };
     var bars = [bar];
 
     // render bar svg 
@@ -73,14 +73,14 @@ var RopeChart = function (selection){
         .attr('y', function(d){ return d.y; })
         .attr('height', function(d){ return d.height; })
         .attr('width', function(d){ return d.width; })
-        .attr('fill', function(d){ return d.fill; });
+        .attr('class', function(d){ return d.className; });
       // enter
     barSvg.enter().append('rect')
         .attr('x', function(d){ return d.x; })
         .attr('y', function(d){ return d.y; })
         .attr('height', function(d){ return d.height; })
         .attr('width', function(d){ return d.width; })
-        .attr('fill', function(d){ return d.fill; });
+        .attr('class', function(d){ return d.className; });
       // exit
     barSvg.exit().remove();
 
@@ -91,13 +91,13 @@ var RopeChart = function (selection){
         .attr('cx', function(d){ return d.x; })
         .attr('cy', function(d){ return d.y; })
         .attr('r', function(d){ return d.r; })
-        .attr('fill', function(d){ return d.fill; });
+        .attr('class', function(d){ return d.className; });
       // enter
     circleSvg.enter().append('circle')
         .attr('cx', function(d){ return d.x; })
         .attr('cy', function(d){ return d.y; })
         .attr('r', function(d){ return d.r; })
-        .attr('fill', function(d){ return d.fill; });
+        .attr('class', function(d){ return d.className; });
       // exit
     circleSvg.exit().remove();
     
@@ -418,14 +418,14 @@ var RopeChart = function (selection){
     var topNode     = {x: centerPoint.x, 
                        y: knotRadius, 
                        r: knotRadius, 
-                       fill: knotColor,
+                       className: "top-knot",
                        value: chart.valueAccessor()(max),
                        label: chart.nameAccessor()(max)};
 
     var bottomNode  = {x: centerPoint.x, 
                        y: svgHeight - knotRadius, 
                        r: knotRadius, 
-                       fill: knotColor,
+                       className: "bottom-knot",
                        value: chart.valueAccessor()(min),
                        label: chart.nameAccessor()(min)};
 
@@ -439,7 +439,7 @@ var RopeChart = function (selection){
     var focusNode   = {x: centerPoint.x, 
                        y: yScale(chart.valueAccessor()(focus)), 
                        r: knotRadius, 
-                       fill: knotColor,
+                       className: "focus-knot",
                        value: chart.valueAccessor()(focus),
                        label: chart.nameAccessor()(focus)};
 
@@ -447,7 +447,7 @@ var RopeChart = function (selection){
       var averageNode = {x: centerPoint.x, 
                          y: yScale(avg), 
                          r: knotRadius, 
-                         fill: knotColor,
+                         className: "average-knot",
                          value: avg,
                          label: averageLabel};
       nodes = [topNode, bottomNode, averageNode, focusNode];
