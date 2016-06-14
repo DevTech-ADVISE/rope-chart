@@ -15,7 +15,9 @@ var RopeChart = function (selection){
   // settings
   var svgWidth         = 250,
       svgHeight        = 250,
+      marginLeftPercentage = 50,
       knotRadius       = 20,
+      chartGutter      = knotRadius,
       ropeWidth        = 10,
       fontSize         = 20,
       flipDirection    = false,
@@ -23,7 +25,7 @@ var RopeChart = function (selection){
       showAverage      = false,
       averageLabel     = "Average";
 
-  var yScale, centerPoint, max, min, avg, focusName, focus, data;
+  var yScale, ropeX, max, min, avg, focusName, focus, data;
 
   var valueAccessor = function (d) { return d.value; };
   var nameAccessor  = function (d) { return d.name; };
@@ -52,12 +54,11 @@ var RopeChart = function (selection){
     svg.attr("height",function(){
       return svgHeight;
     });
-    centerPoint = {x: svgWidth/2, y: svgWidth/2};
 
-    var nodes = generateNodes(); 
+    var nodes = chart.generateNodes(); 
 
     // derive bar data
-    var barX = centerPoint.x - (ropeWidth/2);
+    var barX = ropeX - (ropeWidth/2);
     var bar = {x: barX, 
                y: knotRadius, 
                height: svgHeight - 2 * knotRadius, 
@@ -158,16 +159,41 @@ var RopeChart = function (selection){
    * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.data = function(_) {
-    if (!arguments.length)
+    if (!arguments.length){
       return data;
+    }
 
     data   = _;
     max    = data.filter(function(d) { return chart.valueAccessor()(d) === d3.max(data, chart.valueAccessor()); })[0];
     min    = data.filter(function(d) { return chart.valueAccessor()(d) === d3.min(data, chart.valueAccessor()); })[0];
     avg    = d3.round(d3.mean(data, chart.valueAccessor()));
 
+    yScale = d3.scale.linear()
+      .domain([min.value, max.value])
+      .range([svgHeight - chartGutter, chartGutter]);
+      
+    ropeX = chart.getRopeX();
+
     return chart;
   };
+
+  /**
+   * Get/set the y-scale
+   * @method yScale
+   * @memberof RopeChart
+   * @instance
+   * @param {object} [d3 scale]
+   * @return {Object} [Acts as getter if called with no parameter. Returns the y-scale used to place knots on the rope.]
+   * @return {RopeChart} [Acts as setter if called with parameter]
+   */
+  chart.yScale = function(_) {
+    if(!arguments.length){
+      return yScale;
+    }
+    yScale = _;
+
+    return chart;
+  }
 
   /**
    * Get/set the name/key used to access the "focus" item for the chart. The "focus" is the member of the data set that you want to compare to the rest of the group.
@@ -217,8 +243,31 @@ var RopeChart = function (selection){
       return svgHeight;
     }
     svgHeight = _;
+
     return chart;
   };  
+
+  chart.getRopeX = function() {
+    return svgWidth * (marginLeftPercentage / 100);
+  };
+
+    /**
+   * Get/set the position of the rope horizontally from the left
+   * @method marginLeftPercentage
+   * @memberof RopeChart
+   * @instance
+   * @param  {Integer} [percentage=50]
+   * @return {Integer} [Acts as getter if called with no parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
+   */
+  chart.marginLeftPercentage = function(_) {
+    if (!arguments.length) {
+      return marginLeftPercentage;
+    }
+    marginLeftPercentage = _;
+
+    return chart;
+  };
 
   /**
    * Get/set the radius of "knot" circles at max, min, and focus value positions.
@@ -234,6 +283,8 @@ var RopeChart = function (selection){
       return knotRadius;
     }
     knotRadius = _;
+    chartGutter = knotRadius;
+
     return chart;
   };
 
@@ -251,6 +302,23 @@ var RopeChart = function (selection){
       return ropeWidth;
     }
     ropeWidth = _;
+    return chart;
+  };
+
+  /**
+   * Get/set the chart gutter to account for the knot radius
+   * @method chartGutter
+   * @memberof RopeChart
+   * @instance
+   * @param  {Integer} [chartGutter=knotRadius]
+   * @return {Integer} [Acts as getter if called with no parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
+   */
+  chart.chartGutter = function(_) {
+    if (!arguments.length) {
+      return chartGutter;
+    }
+    chartGutter = _;
     return chart;
   };
 
@@ -413,38 +481,18 @@ var RopeChart = function (selection){
     return chart;
   };
 
-  function generateNodes() {
+  chart.generateNodes = function() {
     // derive node data & configure scale
-    var topNode     = {x: centerPoint.x, 
-                       y: knotRadius, 
-                       r: knotRadius, 
-                       className: "top-knot",
-                       value: chart.valueAccessor()(max),
-                       label: chart.nameAccessor()(max)};
+    var topNode     = chart.generateNode(max, "top-knot");
+    var bottomNode  = chart.generateNode(min, "bottom-knot");
 
-    var bottomNode  = {x: centerPoint.x, 
-                       y: svgHeight - knotRadius, 
-                       r: knotRadius, 
-                       className: "bottom-knot",
-                       value: chart.valueAccessor()(min),
-                       label: chart.nameAccessor()(min)};
-
-    yScale = d3.scale.linear()
-      .domain([min.value, max.value])
-      .range([bottomNode.y, topNode.y]);
-   
     var nodes;
 
     focus = data.filter(function(d){ return chart.nameAccessor()(d) === chart.focusName();})[0];
-    var focusNode   = {x: centerPoint.x, 
-                       y: yScale(chart.valueAccessor()(focus)), 
-                       r: knotRadius, 
-                       className: "focus-knot",
-                       value: chart.valueAccessor()(focus),
-                       label: chart.nameAccessor()(focus)};
+    var focusNode   = chart.generateNode(focus, "focus-knot");
 
     if (chart.showAverage()) {
-      var averageNode = {x: centerPoint.x, 
+      var averageNode = {x: ropeX, 
                          y: yScale(avg), 
                          r: knotRadius, 
                          className: "average-knot",
@@ -456,6 +504,18 @@ var RopeChart = function (selection){
     }
 
     return nodes;
+  }
+
+  chart.generateNode = function(datum, className) {
+
+    return {
+      x: ropeX,
+      y: yScale(chart.valueAccessor()(datum)),
+      r: knotRadius,
+      className: className,
+      value: chart.valueAccessor()(datum),
+      label: chart.nameAccessor()(datum)
+    };
   }
 
   return chart;

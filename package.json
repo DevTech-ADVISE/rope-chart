@@ -37,9 +37,6 @@
     "moduleNameMapper": {
       "^.+\\.(scss|css)$": "<rootDir>/__mocks__/styleMock.js"
     },
-    "collectCoverage": true,
-    "collectCoverageOnlyFrom": {
-      "<rootDir>/src/lollipopChart.js": true
-    }
+    "collectCoverage": true
   }
 }
