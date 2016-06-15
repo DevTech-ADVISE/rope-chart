@@ -108,7 +108,7 @@ var RopeChart = function (selection){
         .data(nodes)
         .attr('text-anchor', function(d) { return 'end'; })
         .attr('x', function(d) { return d.x - (d.r + labelMargin); })
-        .attr('y', function(d) { return d.y; })
+        .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
         .attr('dy', function(d) { return '.3em'; })
         .attr('font-size', function(d) { return d.r * 2 + 'px'; })
         .text(function(d) { return d.value; });
@@ -117,7 +117,7 @@ var RopeChart = function (selection){
         .attr('class', function(d) { return 'value'; })
         .attr('text-anchor', function(d) { return 'end'; })
         .attr('x', function(d) { return d.x - (d.r + labelMargin); })
-        .attr('y', function(d) { return d.y; })
+        .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
         .attr('dy', function(d) { return '.3em'; })
         .attr('font-size', function(d) { return d.r * 2 + 'px'; })
         .text(function(d) { return d.value; });
@@ -130,7 +130,7 @@ var RopeChart = function (selection){
         .data(nodes)
         .attr('text-anchor', function(d) { return 'start'; })
         .attr('x', function(d) { return d.x + (d.r + labelMargin); })
-        .attr('y', function(d) { return d.y; })
+        .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
         .attr('dy', function(d) { return '.3em'; })
         .attr('font-size', function(d) { return d.r * 2 + 'px'; })
         .text(function(d) { return d.label; });
@@ -139,7 +139,7 @@ var RopeChart = function (selection){
         .attr('class', function(d) { return 'label'; })
         .attr('text-anchor', function(d) { return 'start'; })
         .attr('x', function(d) { return d.x + (d.r + labelMargin); })
-        .attr('y', function(d) { return d.y; })
+        .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
         .attr('dy', function(d) { return '.3em'; })
         .attr('font-size', function(d) { return d.r * 2 + 'px'; })
         .text(function(d) { return d.label; });
@@ -171,7 +171,7 @@ var RopeChart = function (selection){
     yScale = d3.scale.linear()
       .domain([min.value, max.value])
       .range([svgHeight - chartGutter, chartGutter]);
-      
+
     ropeX = chart.getRopeX();
 
     return chart;
@@ -486,7 +486,7 @@ var RopeChart = function (selection){
     var topNode     = chart.generateNode(max, "top-knot");
     var bottomNode  = chart.generateNode(min, "bottom-knot");
 
-    var nodes;
+    var nodes, adjustedNodes;
 
     focus = data.filter(function(d){ return chart.nameAccessor()(d) === chart.focusName();})[0];
     var focusNode   = chart.generateNode(focus, "focus-knot");
@@ -494,16 +494,19 @@ var RopeChart = function (selection){
     if (chart.showAverage()) {
       var averageNode = {x: ropeX, 
                          y: yScale(avg), 
+                         adjustTextOverlap: 0,
                          r: knotRadius, 
                          className: "average-knot",
-                         value: avg,
+                         value: Number(avg),
                          label: averageLabel};
       nodes = [topNode, bottomNode, averageNode, focusNode];
+      adjustedNodes = chart.adjustForOverlap(topNode, bottomNode, focusNode, averageNode);
     } else {
       nodes = [topNode, bottomNode, focusNode];
+      adjustedNodes = chart.adjustForOverlap(topNode, bottomNode, focusNode);
     }
 
-    return nodes;
+    return adjustedNodes;
   }
 
   chart.generateNode = function(datum, className) {
@@ -512,11 +515,57 @@ var RopeChart = function (selection){
       x: ropeX,
       y: yScale(chart.valueAccessor()(datum)),
       r: knotRadius,
+      adjustTextOverlap: 0,
       className: className,
-      value: chart.valueAccessor()(datum),
+      value: Number(chart.valueAccessor()(datum)),
       label: chart.nameAccessor()(datum)
     };
-  }
+  };
+
+  chart.adjustForOverlap = function(top, bottom, focus, average) {
+    var topOverlap = chart.nodeIsOverlapping(focus, top);
+    var bottomOverlap = chart.nodeIsOverlapping(focus, bottom);
+    // the focus is in overlap range of the top knot
+    if(topOverlap !== false) {
+      focus.adjustTextOverlap = topOverlap;
+    }
+    // the focus is in overlap range of the bottom knot
+    else if(bottomOverlap !== false) {
+      if(focus.value = bottom.value) focus.adjustTextOverlap = -bottomOverlap;
+      else focus.adjustTextOverlap = bottomOverlap;
+    }
+    // the focus is in overlap range of the average knot
+    else if(average) {
+      var avgOverlap = chart.nodeIsOverlapping(focus, average);
+
+      if(average.value === focus.value) {
+        average.adjustTextOverlap = avgOverlap / 2;
+        focus.adjustTextOverlap = -avgOverlap / 2;
+      }
+      else {
+        average.adjustTextOverlap = -(avgOverlap / 2);
+        focus.adjustTextOverlap = avgOverlap /2;
+      }
+    }
+
+    var adjustedNodes = [top, bottom, average];
+    if(focus) adjustedNodes.push(focus);
+
+    return adjustedNodes;
+  };
+
+  chart.nodeIsOverlapping = function(node, compareToNode) {
+    if(node.y <= (compareToNode.y + (2 * knotRadius)) && node.y >= (compareToNode.y - (2 * knotRadius))) {
+      var nodeDistance = compareToNode.y - node.y;
+
+      // node is greater than compareToNode
+      if(nodeDistance < 0) return (2 * knotRadius) - Math.abs(nodeDistance);
+      else if(nodeDistance > 0) return -((2 * knotRadius) - nodeDistance);
+      else return 2 * knotRadius;
+    }
+
+    return false;
+  };
 
   return chart;
 }

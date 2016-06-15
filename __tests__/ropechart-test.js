@@ -8,7 +8,7 @@ describe('RopeChart', () => {
   // -----------------------------------------------------------------------------------
   // All of the unit tests for data calculations go here separate from the svg rendering
   // -----------------------------------------------------------------------------------
-  describe('chart calculations', () => {
+  describe('chart calculations for normal positioning', () => {
     var PARENT_ID = 'test';
     var RopeChart = require('../src/ropeChart.js')('#' + PARENT_ID);
     var data = [
@@ -69,6 +69,32 @@ describe('RopeChart', () => {
       expect(node.label).toEqual(RopeChart.nameAccessor()(datum));
 
     });
+  });
+
+  // The edge cases include things like multiple datum as the max or min, and datum that may overlap when rendered
+  describe('chart calculations for edge cases', () => {
+    var PARENT_ID = 'test';
+    var RopeChart = require('../src/ropeChart.js')('#' + PARENT_ID);
+    var data = [
+      {name:'Bill',value:'33'},
+      {name:'Bob',value:'54'},
+      {name:'Janet',value:'21'},
+      {name:'Phil',value:'60'},
+      {name:'James',value:'29'},
+      {name:'Annie',value:'36'},
+      {name:'Eloise',value:'44'}
+    ];
+
+    var HEIGHT = 300, WIDTH = 300;
+    RopeChart
+      .width(WIDTH)
+      .height(HEIGHT)
+      .data(data);
+
+    var valueAccessor = function(d) { return d.value; };
+    var yScale = d3.scale.linear()
+      .domain([d3.min(data, valueAccessor), d3.max(data, valueAccessor)])
+      .range([HEIGHT - RopeChart.chartGutter(), RopeChart.chartGutter()]);
 
 
   });
