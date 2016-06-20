@@ -56,12 +56,21 @@ var RopeChart = function (selection){
 
     // derive bar data
     var barX = ropeX - (ropeWidth/2);
-    var bar = {x: barX, 
-               y: knotRadius, 
-               height: svgHeight - 2 * knotRadius, 
-               width: ropeWidth, 
-               className: 'rope' };
-    var bars = [bar];
+    var bottomBar = {
+      x: barX, 
+      y: yScale(avg), 
+      height: svgHeight - yScale(avg) - knotRadius, 
+      width: ropeWidth, 
+      className: (flipDirection) ? 'top-rope' : 'bottom-rope'
+    };
+    var topBar = {
+      x: barX,
+      y: knotRadius,
+      height: yScale(avg) - knotRadius,
+      width: ropeWidth,
+      className: (flipDirection) ? 'bottom-rope' : 'top-rope'
+    }
+    var bars = [bottomBar, topBar];
 
     // render bar svg 
       // update
@@ -332,57 +341,6 @@ var RopeChart = function (selection){
       return chartGutter;
     }
     chartGutter = _;
-    return chart;
-  };
-
-  /**
-   * Get/set the length of the horizontal "threshold" line.
-   * @method threshLineLength
-   * @memberof RopeChart
-   * @instance
-   * @param  {Integer} [threshLineLength=20]
-   * @return {Integer} [Acts as getter if called with no parameter]
-   * @return {RopeChart} [Acts as setter if called with parameter]
-   */
-  chart.threshLineLength = function(_) {
-    if (!arguments.length) {
-      return threshLineLength;
-    }
-    threshLineLength = _;
-    return chart;
-  };
-
-  /**
-   * Get/set the color used on the "good" side of the threshold.
-   * @method goodColor
-   * @memberof RopeChart
-   * @instance
-   * @param  {String} [goodColor=green]
-   * @return {String} [Acts as getter if called with no parameter]
-   * @return {RopeChart} [Acts as setter if called with parameter]
-   */
-  chart.goodColor = function(_) {
-    if (!arguments.length) {
-      return goodColor;
-    }
-    goodColor = _;
-    return chart;
-  };
-
-  /**
-   * Get/set the color used on the "bad" side of the threshold.
-   * @method badColor
-   * @memberof RopeChart
-   * @instance
-   * @param  {String} [goodColor=red]
-   * @return {String} [Acts as getter if called with no parameter]
-   * @return {RopeChart} [Acts as setter if called with parameter]
-   */
-  chart.badColor = function(_) {
-    if (!arguments.length) {
-      return badColor;
-    }
-    badColor = _;
     return chart;
   };
 

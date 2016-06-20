@@ -405,24 +405,6 @@ describe('RopeChart', () => {
       expect(RopeChart.chartGutter()).toEqual(15);
     });
 
-    it('should have a getter/setter for the threshold line length', () => {
-      RopeChart.threshLineLength(5);
-
-      expect(RopeChart.threshLineLength()).toEqual(5);
-    });
-
-    it('should have a getter/setter for the good color of the thresh line', () => {
-      RopeChart.goodColor('#ccc');
-
-      expect(RopeChart.goodColor()).toEqual('#ccc');
-    });
-
-    it('should have a getter/setter for the bad color of the thresh line', () => {
-      RopeChart.badColor('#eee');
-
-      expect(RopeChart.badColor()).toEqual('#eee');
-    });
-
     it('should have a getter/setter for the flip direction of the thresh line', () => {
       RopeChart.flipDirection(true);
 
