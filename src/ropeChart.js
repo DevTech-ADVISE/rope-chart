@@ -25,14 +25,10 @@ var RopeChart = function (selection){
       showAverage      = false,
       averageLabel     = "Average";
 
-  var yScale, ropeX, max, min, avg, focusName, focus, data;
+  var yScale, ropeX, max, min, avg, focusName, focus, data, multipleMax, multipleMin, nodes;
 
-  var valueAccessor = function (d) { return d.value; };
+  var valueAccessor = function (d) { return Number(d.value); };
   var nameAccessor  = function (d) { return d.name; };
-  
-  var svg = d3.select(selection)
-    .classed('Rope-Chart', true)
-    .append('svg');
 
   /**
    * Render the RopeChart instance. Simply renders chart when called with no parameter. Updates data, then renders, if called with parameter
@@ -44,6 +40,9 @@ var RopeChart = function (selection){
    */
   chart.render = function(_) {
 
+    // initialize svg
+    var svg = d3.select(selection).html('').classed('Rope-Chart', true).append('svg');
+
     if (!!arguments.length)
       chart.data(_);
 
@@ -53,9 +52,7 @@ var RopeChart = function (selection){
     });
     svg.attr("height",function(){
       return svgHeight;
-    });
-
-    var nodes = chart.generateNodes(); 
+    }); 
 
     // derive bar data
     var barX = ropeX - (ropeWidth/2);
@@ -167,6 +164,8 @@ var RopeChart = function (selection){
     max    = data.filter(function(d) { return chart.valueAccessor()(d) === d3.max(data, chart.valueAccessor()); })[0];
     min    = data.filter(function(d) { return chart.valueAccessor()(d) === d3.min(data, chart.valueAccessor()); })[0];
     avg    = d3.round(d3.mean(data, chart.valueAccessor()));
+    multipleMaxes = chart.getMultipleMaxes();
+    multipleMins = chart.getMultipleMins();
 
     yScale = d3.scale.linear()
       .domain([min.value, max.value])
@@ -174,7 +173,21 @@ var RopeChart = function (selection){
 
     ropeX = chart.getRopeX();
 
+    nodes = chart.generateNodes();
+
     return chart;
+  };
+
+  chart.getMultipleMaxes = function() {
+    var maxes = data.filter( d => chart.valueAccessor()(d) === chart.valueAccessor()(max));
+    if(maxes.length === 1) return false;
+    return maxes;
+  };
+
+  chart.getMultipleMins = function() {
+    var mins = data.filter( d => chart.valueAccessor()(d) === chart.valueAccessor()(min));
+    if(mins.length === 1) return false;
+    return mins;
   };
 
   /**
@@ -497,13 +510,13 @@ var RopeChart = function (selection){
                          adjustTextOverlap: 0,
                          r: knotRadius, 
                          className: "average-knot",
-                         value: Number(avg),
+                         value: avg,
                          label: averageLabel};
       nodes = [topNode, bottomNode, averageNode, focusNode];
-      adjustedNodes = chart.adjustForOverlap(topNode, bottomNode, focusNode, averageNode);
+      adjustedNodes = chart.adjustForOverlapAndMultiples(topNode, bottomNode, focusNode, averageNode);
     } else {
       nodes = [topNode, bottomNode, focusNode];
-      adjustedNodes = chart.adjustForOverlap(topNode, bottomNode, focusNode);
+      adjustedNodes = chart.adjustForOverlapAndMultiples(topNode, bottomNode, focusNode);
     }
 
     return adjustedNodes;
@@ -517,12 +530,12 @@ var RopeChart = function (selection){
       r: knotRadius,
       adjustTextOverlap: 0,
       className: className,
-      value: Number(chart.valueAccessor()(datum)),
+      value: chart.valueAccessor()(datum),
       label: chart.nameAccessor()(datum)
     };
   };
 
-  chart.adjustForOverlap = function(top, bottom, focus, average) {
+  chart.adjustForOverlapAndMultiples = function(top, bottom, focus, average) {
     var topOverlap = chart.nodeIsOverlapping(focus, top);
     var bottomOverlap = chart.nodeIsOverlapping(focus, bottom);
     // the focus is in overlap range of the top knot
@@ -531,8 +544,7 @@ var RopeChart = function (selection){
     }
     // the focus is in overlap range of the bottom knot
     else if(bottomOverlap !== false) {
-      if(focus.value = bottom.value) focus.adjustTextOverlap = -bottomOverlap;
-      else focus.adjustTextOverlap = bottomOverlap;
+      focus.adjustTextOverlap = bottomOverlap;
     }
     // the focus is in overlap range of the average knot
     else if(average) {
@@ -548,7 +560,47 @@ var RopeChart = function (selection){
       }
     }
 
-    var adjustedNodes = [top, bottom, average];
+    // if the focus is the max or min, show the max or min as the focus
+    // if there are multiple maxes or mins show all of the maxes or mins
+    if(multipleMaxes) {
+      if(focus.value === top.value) {
+        top.className = "max-focus-knot";
+        top.label = focus.label + " and others";    
+        focus = undefined;  
+      }
+      else {
+        top.label = "Multiple: ";
+        multipleMaxes.forEach( d => top.label += chart.nameAccessor()(d) + ", " );
+        top.label = top.label.substring(0, top.label.length - 2);
+      } 
+    }
+    // remove the focus knot if the focus is the only max, show the max as the focus
+    else if(focus.value === top.value) {
+      focus = undefined;
+      top.className = "max-focus-knot";
+    }
+
+    if(multipleMins) {
+      if(focus && focus.value === bottom.value) {
+        bottom.className = "min-focus-knot";
+        bottom.label = focus.label + " and others";
+        focus = undefined;
+      }
+      else {
+        bottom.label = "Multiple: ";
+        multipleMins.forEach( d => bottom.label += chart.nameAccessor()(d) + ", " );
+        bottom.label = bottom.label.substring(0, bottom.label.length - 2);
+      }
+    }
+    // remove the focus knot if the focus is the only min, show the min as the focus
+    else if(focus && focus.value === bottom.value) {
+      focus = undefined;
+      bottom.className = "min-focus-knot";
+    }
+
+
+    var adjustedNodes = [top, bottom];
+    if(average) adjustedNodes.push(average);
     if(focus) adjustedNodes.push(focus);
 
     return adjustedNodes;
