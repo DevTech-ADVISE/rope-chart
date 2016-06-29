@@ -1,0 +1,41 @@
+
+.Rope-Chart {
+	.top-knot {
+		fill: #7DD0D4;
+	}
+
+	.bottom-knot {
+		fill: #7DD0D4;
+	}
+
+	.focus-knot {
+		fill: #338ED8;
+		stroke: #C55353;
+		stroke-width: 2px;
+	}
+
+	.max-focus-knot {
+		fill: #338ED8;
+		stroke: #C55353;
+		stroke-width: 2px;
+	}
+
+	.min-focus-knot {
+		fill: #338ED8;
+		stroke: #C55353;
+		stroke-width: 2px;
+	}
+
+	.average-knot {
+		fill: #105B98;
+
+	}
+
+	.bottom-rope {
+		fill: #B1B1B1;
+	}
+
+	.top-rope {
+		fill: #E4E4E4;
+	}
+}

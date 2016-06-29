@@ -5,28 +5,30 @@
  * @param {String} selection - any valid d3 selector. This selector is used to place the chart.
  * @return {RopeChart}
  */
-function RopeChart(selection){
+
+// d3 is an external, it won't be bundled in
+var d3 = require('d3');
+require('./ropeChart.scss');
+
+var RopeChart = function (selection){
   var chart = {};
   // settings
   var svgWidth         = 250,
       svgHeight        = 250,
+      marginLeftPercentage = 50,
       knotRadius       = 20,
+      chartGutter      = knotRadius,
       ropeWidth        = 10,
       fontSize         = 20,
-      knotColor        = "#666",
-      ropeColor        = "#CCC",        
       flipDirection    = false,
       labelMargin      = 5,
       showAverage      = false,
       averageLabel     = "Average";
 
-  var yScale, centerPoint, max, min, avg, focusName, focus, data;
+  var yScale, ropeX, max, min, avg, focusName, focus, data, multipleMax, multipleMin, nodes;
 
-  var valueAccessor = function (d) { return d.value; };
+  var valueAccessor = function (d) { return Number(d.value); };
   var nameAccessor  = function (d) { return d.name; };
-  
-  var svg = d3.select(selection)
-    .append('svg');
 
   /**
    * Render the RopeChart instance. Simply renders chart when called with no parameter. Updates data, then renders, if called with parameter
@@ -38,6 +40,9 @@ function RopeChart(selection){
    */
   chart.render = function(_) {
 
+    // initialize svg
+    var svg = d3.select(selection).html('').classed('Rope-Chart', true).append('svg');
+
     if (!!arguments.length)
       chart.data(_);
 
@@ -47,19 +52,25 @@ function RopeChart(selection){
     });
     svg.attr("height",function(){
       return svgHeight;
-    });
-    centerPoint = {x: svgWidth/2, y: svgWidth/2};
-
-    var nodes = generateNodes(); 
+    }); 
 
     // derive bar data
-    var barX = centerPoint.x - (ropeWidth/2);
-    var bar = {x: barX, 
-               y: knotRadius, 
-               height: svgHeight - 2 * knotRadius, 
-               width: ropeWidth, 
-               fill: ropeColor };
-    var bars = [bar];
+    var barX = ropeX - (ropeWidth/2);
+    var bottomBar = {
+      x: barX, 
+      y: yScale(avg), 
+      height: svgHeight - yScale(avg) - knotRadius, 
+      width: ropeWidth, 
+      className: (flipDirection) ? 'top-rope' : 'bottom-rope'
+    };
+    var topBar = {
+      x: barX,
+      y: knotRadius,
+      height: yScale(avg) - knotRadius,
+      width: ropeWidth,
+      className: (flipDirection) ? 'bottom-rope' : 'top-rope'
+    }
+    var bars = [bottomBar, topBar];
 
     // render bar svg 
       // update
@@ -69,14 +80,14 @@ function RopeChart(selection){
         .attr('y', function(d){ return d.y; })
         .attr('height', function(d){ return d.height; })
         .attr('width', function(d){ return d.width; })
-        .attr('fill', function(d){ return d.fill; });
+        .attr('class', function(d){ return d.className; });
       // enter
     barSvg.enter().append('rect')
         .attr('x', function(d){ return d.x; })
         .attr('y', function(d){ return d.y; })
         .attr('height', function(d){ return d.height; })
         .attr('width', function(d){ return d.width; })
-        .attr('fill', function(d){ return d.fill; });
+        .attr('class', function(d){ return d.className; });
       // exit
     barSvg.exit().remove();
 
@@ -87,13 +98,13 @@ function RopeChart(selection){
         .attr('cx', function(d){ return d.x; })
         .attr('cy', function(d){ return d.y; })
         .attr('r', function(d){ return d.r; })
-        .attr('fill', function(d){ return d.fill; });
+        .attr('class', function(d){ return d.className; });
       // enter
     circleSvg.enter().append('circle')
         .attr('cx', function(d){ return d.x; })
         .attr('cy', function(d){ return d.y; })
         .attr('r', function(d){ return d.r; })
-        .attr('fill', function(d){ return d.fill; });
+        .attr('class', function(d){ return d.className; });
       // exit
     circleSvg.exit().remove();
     
@@ -103,7 +114,7 @@ function RopeChart(selection){
         .data(nodes)
         .attr('text-anchor', function(d) { return 'end'; })
         .attr('x', function(d) { return d.x - (d.r + labelMargin); })
-        .attr('y', function(d) { return d.y; })
+        .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
         .attr('dy', function(d) { return '.3em'; })
         .attr('font-size', function(d) { return d.r * 2 + 'px'; })
         .text(function(d) { return d.value; });
@@ -112,7 +123,7 @@ function RopeChart(selection){
         .attr('class', function(d) { return 'value'; })
         .attr('text-anchor', function(d) { return 'end'; })
         .attr('x', function(d) { return d.x - (d.r + labelMargin); })
-        .attr('y', function(d) { return d.y; })
+        .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
         .attr('dy', function(d) { return '.3em'; })
         .attr('font-size', function(d) { return d.r * 2 + 'px'; })
         .text(function(d) { return d.value; });
@@ -125,7 +136,7 @@ function RopeChart(selection){
         .data(nodes)
         .attr('text-anchor', function(d) { return 'start'; })
         .attr('x', function(d) { return d.x + (d.r + labelMargin); })
-        .attr('y', function(d) { return d.y; })
+        .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
         .attr('dy', function(d) { return '.3em'; })
         .attr('font-size', function(d) { return d.r * 2 + 'px'; })
         .text(function(d) { return d.label; });
@@ -134,7 +145,7 @@ function RopeChart(selection){
         .attr('class', function(d) { return 'label'; })
         .attr('text-anchor', function(d) { return 'start'; })
         .attr('x', function(d) { return d.x + (d.r + labelMargin); })
-        .attr('y', function(d) { return d.y; })
+        .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
         .attr('dy', function(d) { return '.3em'; })
         .attr('font-size', function(d) { return d.r * 2 + 'px'; })
         .text(function(d) { return d.label; });
@@ -154,16 +165,57 @@ function RopeChart(selection){
    * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.data = function(_) {
-    if (!arguments.length)
+    if (!arguments.length){
       return data;
+    }
 
     data   = _;
     max    = data.filter(function(d) { return chart.valueAccessor()(d) === d3.max(data, chart.valueAccessor()); })[0];
     min    = data.filter(function(d) { return chart.valueAccessor()(d) === d3.min(data, chart.valueAccessor()); })[0];
     avg    = d3.round(d3.mean(data, chart.valueAccessor()));
+    multipleMaxes = chart.getMultipleMaxes();
+    multipleMins = chart.getMultipleMins();
+
+    yScale = d3.scale.linear()
+      .domain([min.value, max.value])
+      .range([svgHeight - chartGutter, chartGutter]);
+
+    ropeX = chart.getRopeX();
+
+    nodes = chart.generateNodes();
 
     return chart;
   };
+
+  chart.getMultipleMaxes = function() {
+    var maxes = data.filter( d => chart.valueAccessor()(d) === chart.valueAccessor()(max));
+    if(maxes.length === 1) return false;
+    return maxes;
+  };
+
+  chart.getMultipleMins = function() {
+    var mins = data.filter( d => chart.valueAccessor()(d) === chart.valueAccessor()(min));
+    if(mins.length === 1) return false;
+    return mins;
+  };
+
+  /**
+   * Get/set the y-scale
+   * @method yScale
+   * @memberof RopeChart
+   * @instance
+   * @param {object} [d3 scale]
+   * @return {Object} [Acts as getter if called with no parameter. Returns the y-scale used to place knots on the rope.]
+   * @return {RopeChart} [Acts as setter if called with parameter]
+   */
+  chart.yScale = function(_) {
+    if(!arguments.length){
+      return yScale;
+    }
+    yScale = _;
+
+    return chart;
+  }
 
   /**
    * Get/set the name/key used to access the "focus" item for the chart. The "focus" is the member of the data set that you want to compare to the rest of the group.
@@ -213,8 +265,31 @@ function RopeChart(selection){
       return svgHeight;
     }
     svgHeight = _;
+
     return chart;
   };  
+
+  chart.getRopeX = function() {
+    return svgWidth * (marginLeftPercentage / 100);
+  };
+
+    /**
+   * Get/set the position of the rope horizontally from the left
+   * @method marginLeftPercentage
+   * @memberof RopeChart
+   * @instance
+   * @param  {Integer} [percentage=50]
+   * @return {Integer} [Acts as getter if called with no parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
+   */
+  chart.marginLeftPercentage = function(_) {
+    if (!arguments.length) {
+      return marginLeftPercentage;
+    }
+    marginLeftPercentage = _;
+
+    return chart;
+  };
 
   /**
    * Get/set the radius of "knot" circles at max, min, and focus value positions.
@@ -230,6 +305,8 @@ function RopeChart(selection){
       return knotRadius;
     }
     knotRadius = _;
+    chartGutter = knotRadius;
+
     return chart;
   };
 
@@ -251,53 +328,19 @@ function RopeChart(selection){
   };
 
   /**
-   * Get/set the length of the horizontal "threshold" line.
-   * @method threshLineLength
+   * Get/set the chart gutter to account for the knot radius
+   * @method chartGutter
    * @memberof RopeChart
    * @instance
-   * @param  {Integer} [threshLineLength=20]
+   * @param  {Integer} [chartGutter=knotRadius]
    * @return {Integer} [Acts as getter if called with no parameter]
    * @return {RopeChart} [Acts as setter if called with parameter]
    */
-  chart.threshLineLength = function(_) {
+  chart.chartGutter = function(_) {
     if (!arguments.length) {
-      return threshLineLength;
+      return chartGutter;
     }
-    threshLineLength = _;
-    return chart;
-  };
-
-  /**
-   * Get/set the color used on the "good" side of the threshold.
-   * @method goodColor
-   * @memberof RopeChart
-   * @instance
-   * @param  {String} [goodColor=green]
-   * @return {String} [Acts as getter if called with no parameter]
-   * @return {RopeChart} [Acts as setter if called with parameter]
-   */
-  chart.goodColor = function(_) {
-    if (!arguments.length) {
-      return goodColor;
-    }
-    goodColor = _;
-    return chart;
-  };
-
-  /**
-   * Get/set the color used on the "bad" side of the threshold.
-   * @method badColor
-   * @memberof RopeChart
-   * @instance
-   * @param  {String} [goodColor=red]
-   * @return {String} [Acts as getter if called with no parameter]
-   * @return {RopeChart} [Acts as setter if called with parameter]
-   */
-  chart.badColor = function(_) {
-    if (!arguments.length) {
-      return badColor;
-    }
-    badColor = _;
+    chartGutter = _;
     return chart;
   };
 
@@ -409,50 +452,132 @@ function RopeChart(selection){
     return chart;
   };
 
-  function generateNodes() {
+  chart.generateNodes = function() {
     // derive node data & configure scale
-    var topNode     = {x: centerPoint.x, 
-                       y: knotRadius, 
-                       r: knotRadius, 
-                       fill: knotColor,
-                       value: chart.valueAccessor()(max),
-                       label: chart.nameAccessor()(max)};
+    var topNode     = chart.generateNode(max, "top-knot");
+    var bottomNode  = chart.generateNode(min, "bottom-knot");
 
-    var bottomNode  = {x: centerPoint.x, 
-                       y: svgHeight - knotRadius, 
-                       r: knotRadius, 
-                       fill: knotColor,
-                       value: chart.valueAccessor()(min),
-                       label: chart.nameAccessor()(min)};
-
-    yScale = d3.scale.linear()
-      .domain([min.value, max.value])
-      .range([bottomNode.y, topNode.y]);
-   
-    var nodes;
+    var nodes, adjustedNodes;
 
     focus = data.filter(function(d){ return chart.nameAccessor()(d) === chart.focusName();})[0];
-    var focusNode   = {x: centerPoint.x, 
-                       y: yScale(chart.valueAccessor()(focus)), 
-                       r: knotRadius, 
-                       fill: knotColor,
-                       value: chart.valueAccessor()(focus),
-                       label: chart.nameAccessor()(focus)};
+    var focusNode   = chart.generateNode(focus, "focus-knot");
 
     if (chart.showAverage()) {
-      var averageNode = {x: centerPoint.x, 
+      var averageNode = {x: ropeX, 
                          y: yScale(avg), 
+                         adjustTextOverlap: 0,
                          r: knotRadius, 
-                         fill: knotColor,
+                         className: "average-knot",
                          value: avg,
                          label: averageLabel};
       nodes = [topNode, bottomNode, averageNode, focusNode];
+      adjustedNodes = chart.adjustForOverlapAndMultiples(topNode, bottomNode, focusNode, averageNode);
     } else {
       nodes = [topNode, bottomNode, focusNode];
+      adjustedNodes = chart.adjustForOverlapAndMultiples(topNode, bottomNode, focusNode);
     }
 
-    return nodes;
+    return adjustedNodes;
   }
+
+  chart.generateNode = function(datum, className) {
+
+    return {
+      x: ropeX,
+      y: yScale(chart.valueAccessor()(datum)),
+      r: knotRadius,
+      adjustTextOverlap: 0,
+      className: className,
+      value: chart.valueAccessor()(datum),
+      label: chart.nameAccessor()(datum)
+    };
+  };
+
+  chart.adjustForOverlapAndMultiples = function(top, bottom, focus, average) {
+    var topOverlap = chart.nodeIsOverlapping(focus, top);
+    var bottomOverlap = chart.nodeIsOverlapping(focus, bottom);
+    // the focus is in overlap range of the top knot
+    if(topOverlap !== false) {
+      focus.adjustTextOverlap = topOverlap;
+    }
+    // the focus is in overlap range of the bottom knot
+    else if(bottomOverlap !== false) {
+      focus.adjustTextOverlap = bottomOverlap;
+    }
+    // the focus is in overlap range of the average knot
+    else if(average) {
+      var avgOverlap = chart.nodeIsOverlapping(focus, average);
+
+      if(average.value === focus.value) {
+        average.adjustTextOverlap = avgOverlap / 2;
+        focus.adjustTextOverlap = -avgOverlap / 2;
+      }
+      else {
+        average.adjustTextOverlap = -(avgOverlap / 2);
+        focus.adjustTextOverlap = avgOverlap /2;
+      }
+    }
+
+    // if the focus is the max or min, show the max or min as the focus
+    // if there are multiple maxes or mins show all of the maxes or mins
+    if(multipleMaxes) {
+      if(focus.value === top.value) {
+        top.className = "max-focus-knot";
+        top.label = focus.label + " and others";    
+        focus = undefined;  
+      }
+      else {
+        top.label = "Multiple: ";
+        multipleMaxes.forEach( d => top.label += chart.nameAccessor()(d) + ", " );
+        top.label = top.label.substring(0, top.label.length - 2);
+      } 
+    }
+    // remove the focus knot if the focus is the only max, show the max as the focus
+    else if(focus.value === top.value) {
+      focus = undefined;
+      top.className = "max-focus-knot";
+    }
+
+    if(multipleMins) {
+      if(focus && focus.value === bottom.value) {
+        bottom.className = "min-focus-knot";
+        bottom.label = focus.label + " and others";
+        focus = undefined;
+      }
+      else {
+        bottom.label = "Multiple: ";
+        multipleMins.forEach( d => bottom.label += chart.nameAccessor()(d) + ", " );
+        bottom.label = bottom.label.substring(0, bottom.label.length - 2);
+      }
+    }
+    // remove the focus knot if the focus is the only min, show the min as the focus
+    else if(focus && focus.value === bottom.value) {
+      focus = undefined;
+      bottom.className = "min-focus-knot";
+    }
+
+
+    var adjustedNodes = [top, bottom];
+    if(average) adjustedNodes.push(average);
+    if(focus) adjustedNodes.push(focus);
+
+    return adjustedNodes;
+  };
+
+  chart.nodeIsOverlapping = function(node, compareToNode) {
+    if(node.y <= (compareToNode.y + (2 * knotRadius)) && node.y >= (compareToNode.y - (2 * knotRadius))) {
+      var nodeDistance = compareToNode.y - node.y;
+
+      // node is greater than compareToNode
+      if(nodeDistance < 0) return (2 * knotRadius) - Math.abs(nodeDistance);
+      else if(nodeDistance > 0) return -((2 * knotRadius) - nodeDistance);
+      else return 2 * knotRadius;
+    }
+
+    return false;
+  };
 
   return chart;
 }
+
+module.exports = RopeChart;

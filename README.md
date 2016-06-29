@@ -50,233 +50,232 @@ var myRopeChart = ropeChart('div#myRopeChart');
 ```
 
 # API Reference
-<a name="ropeChart"></a>
+<a name="RopeChart"></a>
 
-## ropeChart
+## RopeChart
 **Kind**: global class  
 
-* [ropeChart](#ropeChart)
-    * [new ropeChart(selection)](#new_ropeChart_new)
-    * [.render([data])](#ropeChart+render) ⇒ <code>[ropeChart](#ropeChart)</code>
-    * [.data([data])](#ropeChart+data) ⇒ <code>Object</code> &#124; <code>[ropeChart](#ropeChart)</code>
-    * [.width()](#ropeChart+width) ⇒ <code>Object</code> &#124; <code>[ropeChart](#ropeChart)</code>
-    * [.width([width])](#ropeChart+width) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
-    * [.height([height])](#ropeChart+height) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
-    * [.knotRadius([knotRadius])](#ropeChart+knotRadius) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
-    * [.ropeWidth([ropeWidth])](#ropeChart+ropeWidth) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
-    * [.threshLineLength([threshLineLength])](#ropeChart+threshLineLength) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
-    * [.goodColor([goodColor])](#ropeChart+goodColor) ⇒ <code>String</code> &#124; <code>[ropeChart](#ropeChart)</code>
-    * [.badColor([goodColor])](#ropeChart+badColor) ⇒ <code>String</code> &#124; <code>[ropeChart](#ropeChart)</code>
-    * [.flipDirection([flipDirection])](#ropeChart+flipDirection) ⇒ <code>Boolean</code> &#124; <code>[ropeChart](#ropeChart)</code>
-    * [.showAverage([showAverage])](#ropeChart+showAverage) ⇒ <code>Boolean</code> &#124; <code>[ropeChart](#ropeChart)</code>
-    * [.averageLabel([averageLabel])](#ropeChart+averageLabel) ⇒ <code>String</code> &#124; <code>[ropeChart](#ropeChart)</code>
-    * [.labelMargin([labelMargin])](#ropeChart+labelMargin) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
-    * [.valueAccessor([valueAccessorFunction])](#ropeChart+valueAccessor) ⇒ <code>function</code> &#124; <code>[ropeChart](#ropeChart)</code>
-    * [.nameAccessor([nameAccessorFunction])](#ropeChart+nameAccessor) ⇒ <code>function</code> &#124; <code>[ropeChart](#ropeChart)</code>
+* [RopeChart](#RopeChart)
+    * [new RopeChart(selection)](#new_RopeChart_new)
+    * [.render([data])](#RopeChart+render) ⇒ <code>[RopeChart](#RopeChart)</code>
+    * [.data([data])](#RopeChart+data) ⇒ <code>Object</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.yScale([d3 scale])](#RopeChart+yScale) ⇒ <code>Object</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.width()](#RopeChart+width) ⇒ <code>Object</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.width([width])](#RopeChart+width) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.height([height])](#RopeChart+height) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.marginLeftPercentage([percentage])](#RopeChart+marginLeftPercentage) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.knotRadius([knotRadius])](#RopeChart+knotRadius) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.ropeWidth([ropeWidth])](#RopeChart+ropeWidth) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.chartGutter([chartGutter])](#RopeChart+chartGutter) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.flipDirection([flipDirection])](#RopeChart+flipDirection) ⇒ <code>Boolean</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.showAverage([showAverage])](#RopeChart+showAverage) ⇒ <code>Boolean</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.averageLabel([averageLabel])](#RopeChart+averageLabel) ⇒ <code>String</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.labelMargin([labelMargin])](#RopeChart+labelMargin) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.valueAccessor([valueAccessorFunction])](#RopeChart+valueAccessor) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.nameAccessor([nameAccessorFunction])](#RopeChart+nameAccessor) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
 
-<a name="new_ropeChart_new"></a>
+<a name="new_RopeChart_new"></a>
 
-### new ropeChart(selection)
+### new RopeChart(selection)
 Rope chart implementation.
 
-**Returns**: <code>[ropeChart](#ropeChart)</code> - s  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | selection | <code>String</code> | any valid d3 selector. This selector is used to place the chart. |
 
-<a name="ropeChart+render"></a>
+<a name="RopeChart+render"></a>
 
-### ropeChart.render([data]) ⇒ <code>[ropeChart](#ropeChart)</code>
-Render the ropeChart instance. Simply renders chart when called with no parameter. Updates data, then renders, if called with parameter
+### ropeChart.render([data]) ⇒ <code>[RopeChart](#RopeChart)</code>
+Render the RopeChart instance. Simply renders chart when called with no parameter. Updates data, then renders, if called with parameter
 
-**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
-
-| Param | Type |
-| --- | --- |
-| [data] | <code>Object</code> | 
-
-<a name="ropeChart+data"></a>
-
-### ropeChart.data([data]) ⇒ <code>Object</code> &#124; <code>[ropeChart](#ropeChart)</code>
-Get/set the data for the ropeChart instance
-
-**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
-**Returns**: <code>Object</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
 
 | Param | Type |
 | --- | --- |
 | [data] | <code>Object</code> | 
 
-<a name="ropeChart+width"></a>
+<a name="RopeChart+data"></a>
 
-### ropeChart.width() ⇒ <code>Object</code> &#124; <code>[ropeChart](#ropeChart)</code>
+### ropeChart.data([data]) ⇒ <code>Object</code> &#124; <code>[RopeChart](#RopeChart)</code>
+Get/set the data for the RopeChart instance
+
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>Object</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type |
+| --- | --- |
+| [data] | <code>Object</code> | 
+
+<a name="RopeChart+yScale"></a>
+
+### ropeChart.yScale([d3 scale]) ⇒ <code>Object</code> &#124; <code>[RopeChart](#RopeChart)</code>
+Get/set the y-scale
+
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>Object</code> - [Acts as getter if called with no parameter. Returns the y-scale used to place knots on the rope.]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type |
+| --- | --- |
+| [d3 scale] | <code>object</code> | 
+
+<a name="RopeChart+width"></a>
+
+### ropeChart.width() ⇒ <code>Object</code> &#124; <code>[RopeChart](#RopeChart)</code>
 Get/set the name/key used to access the "focus" item for the chart. The "focus" is the member of the data set that you want to compare to the rest of the group.
 
-**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
-**Returns**: <code>Object</code> - [Acts as getter if called with no parameter. Returns a record from your data set.]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>Object</code> - [Acts as getter if called with no parameter. Returns a record from your data set.]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
 
 | Param | Type |
 | --- | --- |
 | [recordName - should be the value of the name property for the record you want as your focus.] | <code>String</code> | 
 
-<a name="ropeChart+width"></a>
+<a name="RopeChart+width"></a>
 
-### ropeChart.width([width]) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
+### ropeChart.width([width]) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
 Get/set the width of the chart SVG
 
-**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
-**Returns**: <code>Integer</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>Integer</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
 
 | Param | Type | Default |
 | --- | --- | --- |
 | [width] | <code>Integer</code> | <code>500</code> | 
 
-<a name="ropeChart+height"></a>
+<a name="RopeChart+height"></a>
 
-### ropeChart.height([height]) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
+### ropeChart.height([height]) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
 Get/set the height of the chart SVG
 
-**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
-**Returns**: <code>Integer</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>Integer</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
 
 | Param | Type | Default |
 | --- | --- | --- |
 | [height] | <code>Integer</code> | <code>500</code> | 
 
-<a name="ropeChart+knotRadius"></a>
+<a name="RopeChart+marginLeftPercentage"></a>
 
-### ropeChart.knotRadius([knotRadius]) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
+### ropeChart.marginLeftPercentage([percentage]) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
+Get/set the position of the rope horizontally from the left
+
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>Integer</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type | Default |
+| --- | --- | --- |
+| [percentage] | <code>Integer</code> | <code>50</code> | 
+
+<a name="RopeChart+knotRadius"></a>
+
+### ropeChart.knotRadius([knotRadius]) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
 Get/set the radius of "knot" circles at max, min, and focus value positions.
 
-**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
-**Returns**: <code>Integer</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>Integer</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
 
 | Param | Type | Default |
 | --- | --- | --- |
 | [knotRadius] | <code>Integer</code> | <code>20</code> | 
 
-<a name="ropeChart+ropeWidth"></a>
+<a name="RopeChart+ropeWidth"></a>
 
-### ropeChart.ropeWidth([ropeWidth]) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
+### ropeChart.ropeWidth([ropeWidth]) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
 Get/set the width of the "rope" rectangle.
 
-**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
-**Returns**: <code>Integer</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>Integer</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
 
 | Param | Type | Default |
 | --- | --- | --- |
 | [ropeWidth] | <code>Integer</code> | <code>20</code> | 
 
-<a name="ropeChart+threshLineLength"></a>
+<a name="RopeChart+chartGutter"></a>
 
-### ropeChart.threshLineLength([threshLineLength]) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
-Get/set the length of the horizontal "threshold" line.
+### ropeChart.chartGutter([chartGutter]) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
+Get/set the chart gutter to account for the knot radius
 
-**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
-**Returns**: <code>Integer</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
-
-| Param | Type | Default |
-| --- | --- | --- |
-| [threshLineLength] | <code>Integer</code> | <code>20</code> | 
-
-<a name="ropeChart+goodColor"></a>
-
-### ropeChart.goodColor([goodColor]) ⇒ <code>String</code> &#124; <code>[ropeChart](#ropeChart)</code>
-Get/set the color used on the "good" side of the threshold.
-
-**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
-**Returns**: <code>String</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>Integer</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
 
 | Param | Type | Default |
 | --- | --- | --- |
-| [goodColor] | <code>String</code> | <code>green</code> | 
+| [chartGutter] | <code>Integer</code> | <code>knotRadius</code> | 
 
-<a name="ropeChart+badColor"></a>
+<a name="RopeChart+flipDirection"></a>
 
-### ropeChart.badColor([goodColor]) ⇒ <code>String</code> &#124; <code>[ropeChart](#ropeChart)</code>
-Get/set the color used on the "bad" side of the threshold.
-
-**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
-**Returns**: <code>String</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
-
-| Param | Type | Default |
-| --- | --- | --- |
-| [goodColor] | <code>String</code> | <code>red</code> | 
-
-<a name="ropeChart+flipDirection"></a>
-
-### ropeChart.flipDirection([flipDirection]) ⇒ <code>Boolean</code> &#124; <code>[ropeChart](#ropeChart)</code>
+### ropeChart.flipDirection([flipDirection]) ⇒ <code>Boolean</code> &#124; <code>[RopeChart](#RopeChart)</code>
 Get/set boolean that "flips direction" of the "good"/"bad" sides of threshold. By default the top section is "good" (green). If flipDirection is true, then top section becomes "bad" (red).
 
-**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
-**Returns**: <code>Boolean</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>Boolean</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
 
 | Param | Type | Default |
 | --- | --- | --- |
 | [flipDirection] | <code>Boolean</code> | <code>false</code> | 
 
-<a name="ropeChart+showAverage"></a>
+<a name="RopeChart+showAverage"></a>
 
-### ropeChart.showAverage([showAverage]) ⇒ <code>Boolean</code> &#124; <code>[ropeChart](#ropeChart)</code>
+### ropeChart.showAverage([showAverage]) ⇒ <code>Boolean</code> &#124; <code>[RopeChart](#RopeChart)</code>
 Get/set boolean that toggles display of a "knot" for the group average.
 
-**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
-**Returns**: <code>Boolean</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>Boolean</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
 
 | Param | Type | Default |
 | --- | --- | --- |
 | [showAverage] | <code>Boolean</code> | <code>false</code> | 
 
-<a name="ropeChart+averageLabel"></a>
+<a name="RopeChart+averageLabel"></a>
 
-### ropeChart.averageLabel([averageLabel]) ⇒ <code>String</code> &#124; <code>[ropeChart](#ropeChart)</code>
+### ropeChart.averageLabel([averageLabel]) ⇒ <code>String</code> &#124; <code>[RopeChart](#RopeChart)</code>
 Get/set label for average knot location.
 
-**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
-**Returns**: <code>String</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>String</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
 
 | Param | Type | Default |
 | --- | --- | --- |
 | [averageLabel] | <code>String</code> | <code>&quot;Average&quot;</code> | 
 
-<a name="ropeChart+labelMargin"></a>
+<a name="RopeChart+labelMargin"></a>
 
-### ropeChart.labelMargin([labelMargin]) ⇒ <code>Integer</code> &#124; <code>[ropeChart](#ropeChart)</code>
+### ropeChart.labelMargin([labelMargin]) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
 Get/set the margin between labels and "knot" circles.
 
-**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
-**Returns**: <code>Integer</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>Integer</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
 
 | Param | Type | Default |
 | --- | --- | --- |
 | [labelMargin] | <code>Integer</code> | <code>5</code> | 
 
-<a name="ropeChart+valueAccessor"></a>
+<a name="RopeChart+valueAccessor"></a>
 
-### ropeChart.valueAccessor([valueAccessorFunction]) ⇒ <code>function</code> &#124; <code>[ropeChart](#ropeChart)</code>
+### ropeChart.valueAccessor([valueAccessorFunction]) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
 Get/set function used to access "value" property from each data record. Defaults to: 
 ```
 function (d){ return d.value; }
 ```
 
-**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
-**Returns**: <code>function</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>function</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
 
 | Param | Type |
 | --- | --- |
 | [valueAccessorFunction] | <code>function</code> | 
 
-<a name="ropeChart+nameAccessor"></a>
+<a name="RopeChart+nameAccessor"></a>
 
-### ropeChart.nameAccessor([nameAccessorFunction]) ⇒ <code>function</code> &#124; <code>[ropeChart](#ropeChart)</code>
+### ropeChart.nameAccessor([nameAccessorFunction]) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
 Get/set function used to access "name" property from each data record. Defaults to: 
 ```
 function (d){ return d.name; }
 ```
 
-**Kind**: instance method of <code>[ropeChart](#ropeChart)</code>  
-**Returns**: <code>function</code> - [Acts as getter if called with no parameter]<code>[ropeChart](#ropeChart)</code> - [Acts as setter if called with parameter]  
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>function</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
 
 | Param | Type |
 | --- | --- |
