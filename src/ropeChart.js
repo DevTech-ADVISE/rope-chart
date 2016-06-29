@@ -22,13 +22,14 @@ var RopeChart = function (selection){
       fontSize         = 20,
       flipDirection    = false,
       labelMargin      = 5,
-      showAverage      = false,
-      averageLabel     = "Average";
+      showThreshold      = false,
+      thresholdLabel     = "Average";
 
-  var yScale, ropeX, max, min, avg, focusName, focus, data, multipleMax, multipleMin, nodes;
+  var yScale, ropeX, max, min, thresholdValue, focusName, focus, data, multipleMax, multipleMin, nodes;
 
   var valueAccessor = function (d) { return Number(d.value); };
   var nameAccessor  = function (d) { return d.name; };
+  var thresholdGenerator = function(chartData) { return d3.round(d3.mean(chartData, chart.valueAccessor()));};
 
   /**
    * Render the RopeChart instance. Simply renders chart when called with no parameter. Updates data, then renders, if called with parameter
@@ -58,15 +59,15 @@ var RopeChart = function (selection){
     var barX = ropeX - (ropeWidth/2);
     var bottomBar = {
       x: barX, 
-      y: yScale(avg), 
-      height: svgHeight - yScale(avg) - knotRadius, 
+      y: yScale(thresholdValue), 
+      height: svgHeight - yScale(thresholdValue) - knotRadius, 
       width: ropeWidth, 
       className: (flipDirection) ? 'top-rope' : 'bottom-rope'
     };
     var topBar = {
       x: barX,
       y: knotRadius,
-      height: yScale(avg) - knotRadius,
+      height: yScale(thresholdValue) - knotRadius,
       width: ropeWidth,
       className: (flipDirection) ? 'bottom-rope' : 'top-rope'
     }
@@ -172,7 +173,7 @@ var RopeChart = function (selection){
     data   = _;
     max    = data.filter(function(d) { return chart.valueAccessor()(d) === d3.max(data, chart.valueAccessor()); })[0];
     min    = data.filter(function(d) { return chart.valueAccessor()(d) === d3.min(data, chart.valueAccessor()); })[0];
-    avg    = d3.round(d3.mean(data, chart.valueAccessor()));
+    thresholdValue = thresholdGenerator(data);
     multipleMaxes = chart.getMultipleMaxes();
     multipleMins = chart.getMultipleMins();
 
@@ -362,38 +363,54 @@ var RopeChart = function (selection){
   };
 
   /**
-   * Get/set boolean that toggles display of a "knot" for the group average.
-   * @method showAverage
+   * Get/set boolean that toggles display of a "knot" for the threshold.
+   * @method showThreshold
    * @memberof RopeChart
    * @instance
-   * @param  {Boolean} [showAverage=false]
+   * @param  {Boolean} [showThreshold=false]
    * @return {Boolean} [Acts as getter if called with no parameter]
    * @return {RopeChart} [Acts as setter if called with parameter]
    */
-  chart.showAverage = function(_) {
+  chart.showThreshold = function(_) {
     if (!arguments.length) {
-      return showAverage;
+      return showThreshold;
     }
-    showAverage = _;
+    showThreshold = _;
     return chart;
   };
 
   /**
-   * Get/set label for average knot location.
-   * @method averageLabel
+   * Get/set label for threshold knot location.
+   * @method thresholdLabel
    * @memberof RopeChart
    * @instance
-   * @param  {String} [averageLabel="Average"]
+   * @param  {String} [thresholdLabel="Average"]
    * @return {String} [Acts as getter if called with no parameter]
    * @return {RopeChart} [Acts as setter if called with parameter]
    */
-  chart.averageLabel = function(_) {
+  chart.thresholdLabel = function(_) {
     if (!arguments.length) {
-      return averageLabel;
+      return thresholdLabel;
     }
-    averageLabel = _;
+    thresholdLabel = _;
     return chart;
   };
+
+  /**
+   * Get/set the threshold generator function
+   * @method yScale
+   * @memberof RopeChart
+   * @instance
+   * @param {object} [d3 scale]
+   * @return {Object} [Acts as getter if called with no parameter. Returns the y-scale used to place knots on the rope.]
+   * @return {RopeChart} [Acts as setter if called with parameter]
+   */
+  chart.thresholdGenerator = function(_) {
+    if(!arguments.length) return thresholdGenerator;
+    thresholdGenerator = _;
+
+    return chart;
+  } ;
 
   /**
    * Get/set the margin between labels and "knot" circles.
@@ -462,16 +479,16 @@ var RopeChart = function (selection){
     focus = data.filter(function(d){ return chart.nameAccessor()(d) === chart.focusName();})[0];
     var focusNode   = chart.generateNode(focus, "focus-knot");
 
-    if (chart.showAverage()) {
-      var averageNode = {x: ropeX, 
-                         y: yScale(avg), 
+    if (chart.showThreshold()) {
+      var thresholdNode = {x: ropeX, 
+                         y: yScale(thresholdValue), 
                          adjustTextOverlap: 0,
                          r: knotRadius, 
-                         className: "average-knot",
-                         value: avg,
-                         label: averageLabel};
-      nodes = [topNode, bottomNode, averageNode, focusNode];
-      adjustedNodes = chart.adjustForOverlapAndMultiples(topNode, bottomNode, focusNode, averageNode);
+                         className: "threshold-knot",
+                         value: thresholdValue,
+                         label: thresholdLabel};
+      nodes = [topNode, bottomNode, thresholdNode, focusNode];
+      adjustedNodes = chart.adjustForOverlapAndMultiples(topNode, bottomNode, focusNode, thresholdNode);
     } else {
       nodes = [topNode, bottomNode, focusNode];
       adjustedNodes = chart.adjustForOverlapAndMultiples(topNode, bottomNode, focusNode);
@@ -493,7 +510,7 @@ var RopeChart = function (selection){
     };
   };
 
-  chart.adjustForOverlapAndMultiples = function(top, bottom, focus, average) {
+  chart.adjustForOverlapAndMultiples = function(top, bottom, focus, threshold) {
     var topOverlap = chart.nodeIsOverlapping(focus, top);
     var bottomOverlap = chart.nodeIsOverlapping(focus, bottom);
     // the focus is in overlap range of the top knot
@@ -504,17 +521,17 @@ var RopeChart = function (selection){
     else if(bottomOverlap !== false) {
       focus.adjustTextOverlap = bottomOverlap;
     }
-    // the focus is in overlap range of the average knot
-    else if(average) {
-      var avgOverlap = chart.nodeIsOverlapping(focus, average);
+    // the focus is in overlap range of the threshold knot
+    else if(threshold) {
+      var thresholdOverlap = chart.nodeIsOverlapping(focus, threshold);
 
-      if(average.value === focus.value) {
-        average.adjustTextOverlap = avgOverlap / 2;
-        focus.adjustTextOverlap = -avgOverlap / 2;
+      if(threshold.value === focus.value) {
+        threshold.adjustTextOverlap = thresholdOverlap / 2;
+        focus.adjustTextOverlap = -thresholdOverlap / 2;
       }
       else {
-        average.adjustTextOverlap = -(avgOverlap / 2);
-        focus.adjustTextOverlap = avgOverlap /2;
+        threshold.adjustTextOverlap = -(thresholdOverlap / 2);
+        focus.adjustTextOverlap = thresholdOverlap /2;
       }
     }
 
@@ -558,7 +575,7 @@ var RopeChart = function (selection){
 
 
     var adjustedNodes = [top, bottom];
-    if(average) adjustedNodes.push(average);
+    if(threshold) adjustedNodes.push(threshold);
     if(focus) adjustedNodes.push(focus);
 
     return adjustedNodes;

@@ -17,7 +17,7 @@ var data = [
 myRopeChart
   .knotRadius(10)
   .ropeWidth(4)
-  .showAverage(true)
+  .showThreshold(true)
   .focusName('Bob')
   .render(data);
 
@@ -26,27 +26,27 @@ myRopeChart
 averageJoe
   .knotRadius(10)
   .ropeWidth(4)
-  .showAverage(true)
+  .showThreshold(true)
   .focusName('Average Joe')
   .render(data);
 
 amazingPhil
  .knotRadius(10)
  .ropeWidth(4)
- .showAverage(true)
+ .showThreshold(true)
  .focusName('Phil')
  .render(data);
 
 james
  .knotRadius(10)
  .ropeWidth(4)
- .showAverage(true)
+ .showThreshold(true)
  .focusName('James')
  .render(data);
 
 annie
  .knotRadius(10)
  .ropeWidth(4)
- .showAverage(true)
+ .showThreshold(true)
  .focusName('Annie')
  .render(data);

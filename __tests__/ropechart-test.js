@@ -25,7 +25,7 @@ describe('RopeChart', () => {
     RopeChart
       .width(WIDTH)
       .height(HEIGHT)
-      .showAverage(true)
+      .showThreshold(true)
       .focusName('Annie')
       .data(data);
 
@@ -36,7 +36,7 @@ describe('RopeChart', () => {
 
     var max = d3.max(data, RopeChart.valueAccessor());
     var min = d3.min(data, RopeChart.valueAccessor());
-    var average = d3.round(d3.mean(data, RopeChart.valueAccessor()));
+    var threshold = d3.round(d3.mean(data, RopeChart.valueAccessor()));
 
     it('should have a height set for the chart', () => {
       expect(RopeChart.height()).toEqual(HEIGHT);
@@ -89,10 +89,20 @@ describe('RopeChart', () => {
       expect(bottomValue).toEqual(min);
     });
 
-    it('should calculate the average node as the average correctly', () => {
-      var avgNode = RopeChart.generateNodes()[2];
-      var avgValue = RopeChart.valueAccessor()(avgNode);
-      expect(avgValue).toEqual(average);
+    it('should calculate the threshold node as the default threshold as the average correctly', () => {
+      var thresholdNode = RopeChart.generateNodes()[2];
+      var thresholdValue = RopeChart.valueAccessor()(thresholdNode);
+      expect(thresholdValue).toEqual(threshold);
+    });
+
+    it('should set the custom threshold value if a threshold accessor is given', () => {
+      var expectedThreshold = 55;
+      var thresholdGenerator = function(chartData) { return expectedThreshold; };
+      RopeChart.thresholdGenerator(thresholdGenerator);
+      RopeChart.data(data); // to refresh data calculations
+
+      var actualThreshold = RopeChart.generateNodes()[2].value;
+      expect(actualThreshold).toEqual(expectedThreshold);
     });
 
     it('should set the chart gutter as the chart radius', () => {
@@ -122,7 +132,7 @@ describe('RopeChart', () => {
     RopeChart
       .width(WIDTH)
       .height(HEIGHT)
-      .showAverage(true);
+      .showThreshold(true);
 
     var valueAccessor = function(d) { return d.value; };
     var yScale = d3.scale.linear()
@@ -131,7 +141,7 @@ describe('RopeChart', () => {
 
     var max = d3.max(data, RopeChart.valueAccessor());
     var min = d3.min(data, RopeChart.valueAccessor());
-    var average = d3.round(d3.mean(data, RopeChart.valueAccessor()));
+    var threshold = d3.round(d3.mean(data, RopeChart.valueAccessor()));
 
     it('should calculate the correct text adjustment when the focus overlaps with the top knot', () => {
       RopeChart.focusName('Annie').data(data);
@@ -157,36 +167,36 @@ describe('RopeChart', () => {
       expect(generatedTextOverlapAdjust).toEqual(expectedTextOverlapAdjust);
     });
 
-    it('should calculate the correct text adjustment when the focus overlaps above the average knot', () => {
+    it('should calculate the correct text adjustment when the focus overlaps above the threshold knot', () => {
       RopeChart.focusName('Eloise').data(data);
       var nodes = RopeChart.generateNodes();
       var focusY = yScale(41);
-      var averageY = yScale(average);
-      var nodeDistance = averageY - focusY;
+      var thresholdY = yScale(threshold);
+      var nodeDistance = thresholdY - focusY;
       var expectedTextOverlapAdjust = -(2 * RopeChart.knotRadius() -  nodeDistance) / 2;
       var generatedTextOverlapAdjust = nodes[3].adjustTextOverlap;
 
       expect(generatedTextOverlapAdjust).toEqual(expectedTextOverlapAdjust);
     });
 
-    it('should calculate the correct text adjustment when the focus overlaps below the average knot', () => {
+    it('should calculate the correct text adjustment when the focus overlaps below the threshold knot', () => {
       RopeChart.focusName('Bob').data(data);
       var nodes = RopeChart.generateNodes();
       var focusY = yScale(38);
-      var averageY = yScale(average);
-      var nodeDistance = focusY - averageY;
+      var thresholdY = yScale(threshold);
+      var nodeDistance = focusY - thresholdY;
       var expectedTextOverlapAdjust = (2 * RopeChart.knotRadius() -  nodeDistance) / 2;
       var generatedTextOverlapAdjust = nodes[3].adjustTextOverlap;
 
       expect(generatedTextOverlapAdjust).toEqual(expectedTextOverlapAdjust);
     });
 
-    it('should calculate the correct text adjustment when the focus equals the average', () => {
+    it('should calculate the correct text adjustment when the focus equals the threshold', () => {
       RopeChart.focusName('Average Joe').data(data);
       var nodes = RopeChart.generateNodes();
       var focusY = yScale(40);
-      var averageY = yScale(average);
-      var nodeDistance = averageY - focusY;
+      var thresholdY = yScale(threshold);
+      var nodeDistance = thresholdY - focusY;
       var expectedTextOverlapAdjust = -(2 * RopeChart.knotRadius() -  nodeDistance) / 2;
       var generatedTextOverlapAdjust = nodes[3].adjustTextOverlap;
 
@@ -213,7 +223,7 @@ describe('RopeChart', () => {
     RopeChart
       .width(WIDTH)
       .height(HEIGHT)
-      .showAverage(true);
+      .showThreshold(true);
 
     var valueAccessor = function(d) { return d.value; };
     var yScale = d3.scale.linear()
@@ -286,7 +296,7 @@ describe('RopeChart', () => {
     RopeChart
       .width(WIDTH)
       .height(HEIGHT)
-      .showAverage(true);
+      .showThreshold(true);
 
     it('should set the top knot as the focus if the focus is the only max', () => {
       RopeChart.focusName('Phil').data(data);
@@ -330,7 +340,7 @@ describe('RopeChart', () => {
     RopeChart
       .width(WIDTH)
       .height(HEIGHT)
-      .showAverage(true)
+      .showThreshold(true)
       .focusName('Annie');
 
     it('should render an svg into the parent selection', () => {
@@ -411,10 +421,10 @@ describe('RopeChart', () => {
       expect(RopeChart.flipDirection()).toBe(true);
     });
 
-    it('should have a getter/setter for the average label', () => {
-      RopeChart.averageLabel('Average here');
+    it('should have a getter/setter for the threshold label', () => {
+      RopeChart.thresholdLabel('Average here');
 
-      expect(RopeChart.averageLabel()).toEqual('Average here');
+      expect(RopeChart.thresholdLabel()).toEqual('Average here');
     });
 
     it('should have a getter/setter for the label margin', () => {
@@ -423,7 +433,7 @@ describe('RopeChart', () => {
       expect(RopeChart.labelMargin()).toEqual(5);
     });
 
-    it('should not create and average node if showAverage is not set to true', () => {
+    it('should not create a threshold node if showThreshold is not set to true', () => {
       var nodes = RopeChart.generateNodes();
 
       expect(nodes.length).toEqual(3);
