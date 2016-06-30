@@ -68,11 +68,15 @@ var myRopeChart = ropeChart('div#myRopeChart');
     * [.ropeWidth([ropeWidth])](#RopeChart+ropeWidth) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.chartGutter([chartGutter])](#RopeChart+chartGutter) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.flipDirection([flipDirection])](#RopeChart+flipDirection) ⇒ <code>Boolean</code> &#124; <code>[RopeChart](#RopeChart)</code>
-    * [.showAverage([showAverage])](#RopeChart+showAverage) ⇒ <code>Boolean</code> &#124; <code>[RopeChart](#RopeChart)</code>
-    * [.averageLabel([averageLabel])](#RopeChart+averageLabel) ⇒ <code>String</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.showThreshold([showThreshold])](#RopeChart+showThreshold) ⇒ <code>Boolean</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.thresholdLabel([thresholdLabel])](#RopeChart+thresholdLabel) ⇒ <code>String</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.yScale([d3 scale])](#RopeChart+yScale) ⇒ <code>Object</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.labelMargin([labelMargin])](#RopeChart+labelMargin) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.valueAccessor([valueAccessorFunction])](#RopeChart+valueAccessor) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.nameAccessor([nameAccessorFunction])](#RopeChart+nameAccessor) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.tooltipContent([tooltipContentFunction])](#RopeChart+tooltipContent) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.showTooltip([showTooltip])](#RopeChart+showTooltip) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.tooltipLabel([tooltipLabel])](#RopeChart+tooltipLabel) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
 
 <a name="new_RopeChart_new"></a>
 
@@ -215,29 +219,41 @@ Get/set boolean that "flips direction" of the "good"/"bad" sides of threshold. B
 | --- | --- | --- |
 | [flipDirection] | <code>Boolean</code> | <code>false</code> | 
 
-<a name="RopeChart+showAverage"></a>
+<a name="RopeChart+showThreshold"></a>
 
-### ropeChart.showAverage([showAverage]) ⇒ <code>Boolean</code> &#124; <code>[RopeChart](#RopeChart)</code>
-Get/set boolean that toggles display of a "knot" for the group average.
+### ropeChart.showThreshold([showThreshold]) ⇒ <code>Boolean</code> &#124; <code>[RopeChart](#RopeChart)</code>
+Get/set boolean that toggles display of a "knot" for the threshold.
 
 **Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
 **Returns**: <code>Boolean</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
 
 | Param | Type | Default |
 | --- | --- | --- |
-| [showAverage] | <code>Boolean</code> | <code>false</code> | 
+| [showThreshold] | <code>Boolean</code> | <code>false</code> | 
 
-<a name="RopeChart+averageLabel"></a>
+<a name="RopeChart+thresholdLabel"></a>
 
-### ropeChart.averageLabel([averageLabel]) ⇒ <code>String</code> &#124; <code>[RopeChart](#RopeChart)</code>
-Get/set label for average knot location.
+### ropeChart.thresholdLabel([thresholdLabel]) ⇒ <code>String</code> &#124; <code>[RopeChart](#RopeChart)</code>
+Get/set label for threshold knot location.
 
 **Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
 **Returns**: <code>String</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
 
 | Param | Type | Default |
 | --- | --- | --- |
-| [averageLabel] | <code>String</code> | <code>&quot;Average&quot;</code> | 
+| [thresholdLabel] | <code>String</code> | <code>&quot;Average&quot;</code> | 
+
+<a name="RopeChart+yScale"></a>
+
+### ropeChart.yScale([d3 scale]) ⇒ <code>Object</code> &#124; <code>[RopeChart](#RopeChart)</code>
+Get/set the threshold generator function
+
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>Object</code> - [Acts as getter if called with no parameter. Returns the y-scale used to place knots on the rope.]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type |
+| --- | --- |
+| [d3 scale] | <code>object</code> | 
 
 <a name="RopeChart+labelMargin"></a>
 
@@ -280,4 +296,48 @@ function (d){ return d.name; }
 | Param | Type |
 | --- | --- |
 | [nameAccessorFunction] | <code>function</code> | 
+
+<a name="RopeChart+tooltipContent"></a>
+
+### ropeChart.tooltipContent([tooltipContentFunction]) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
+Get/set function used to set the tooltip of each data knot. Defaults to: 
+```
+ var tooltipContentFunc = function(d) {
+   var tooltipContent = "<label>Name: </label>" + chart.nameAccessor()(d);
+   tooltipContent += "<br/><label>Value: " + chart.valueAccessor()(d);
+
+   return tooltipContent;
+ };
+```
+
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>function</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type |
+| --- | --- |
+| [tooltipContentFunction] | <code>function</code> | 
+
+<a name="RopeChart+showTooltip"></a>
+
+### ropeChart.showTooltip([showTooltip]) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
+Set whether or not to show the tooltip. The tooltip gets displayed next to the threshold knot
+
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>function</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type |
+| --- | --- |
+| [showTooltip] | <code>boolean</code> | 
+
+<a name="RopeChart+tooltipLabel"></a>
+
+### ropeChart.tooltipLabel([tooltipLabel]) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
+Set the text, that when hovered over will display the tooltip. The text gets displayed next to the threshold knot. It accepts unicode codes, so you can include icons from something like font-awesome if you have the unicode.
+
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>function</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type |
+| --- | --- |
+| [tooltipLabel] | <code>string</code> | 
 

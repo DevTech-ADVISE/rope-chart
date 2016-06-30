@@ -38,4 +38,12 @@
 	.top-rope {
 		fill: #E4E4E4;
 	}
+
+	tspan.tooltip-label {
+		fill: #6482a5;
+		
+		&:hover {
+			fill: #30619a;
+		}
+	}
 }

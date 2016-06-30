@@ -15,7 +15,8 @@ require('./tooltips.scss');
 var RopeChart = function (selection){
   var chart = {};
   // settings
-  var svgWidth         = 250,
+  var svg,
+      svgWidth         = 250,
       svgHeight        = 250,
       marginLeftPercentage = 50,
       knotRadius       = 20,
@@ -26,7 +27,9 @@ var RopeChart = function (selection){
       labelMargin      = 5,
       showThreshold      = false,
       thresholdLabel     = "Average",
-      ttOffset = [0, 0];
+      ttOffset = [0, 0],
+      showTooltip = true,
+      tooltipLabel = "&#8505;";
 
   // css class names
   var d3TipClass = "d3-tip-mouse",
@@ -37,17 +40,16 @@ var RopeChart = function (selection){
     focusKnotClass = "focus-knot",
     thresholdKnotClass = "threshold-knot";
 
-
   var yScale, ropeX, max, min, thresholdValue, focusName, focus, data, multipleMax, multipleMin, nodes;
 
   var valueAccessor = function (d) { return Number(d.value); };
   var nameAccessor  = function (d) { return d.name; };
   var thresholdGenerator = function(chartData) { return d3.round(d3.mean(chartData, chart.valueAccessor()));};
-  var tooltipMarkupFunc = function(d) {
-    var tooltipMarkup = "<label>Name: </label>" + d.label;
-    tooltipMarkup += "<br/><label>Value: " + d.value;
+  var tooltipContentFunc = function(d) {
+    var tooltipContent = "<label>Name: </label>" + d.label;
+    tooltipContent += "<br/><label>Value: " + d.value;
 
-    return tooltipMarkup;
+    return tooltipContent;
   };
 
   /**
@@ -61,12 +63,12 @@ var RopeChart = function (selection){
   chart.render = function(_) {
 
     // initialize svg
-    var svg = d3.select(selection).html('').classed('Rope-Chart', true).append('svg');
+    svg = d3.select(selection).html('').classed('Rope-Chart', true).append('svg');
     var ttId = d3.select(selection).attr('id') + '-tip';
     var tt = d3.tip()
       .attr("class", d3TipClass)
       .attr("id", ttId)
-      .html(tooltipMarkupFunc)
+      .html(tooltipContentFunc)
       .offset(ttOffset)
       .positionAnchor("mouse");
 
@@ -167,6 +169,7 @@ var RopeChart = function (selection){
         .attr('dy', function(d) { return '.3em'; })
         .attr('font-size', function(d) { return d.r * 2 + 'px'; })
         .text(function(d) { return d.label; });
+    
       // enter
     labelText.enter().append('text')
         .attr('class', function(d) { return 'label'; })
@@ -175,14 +178,21 @@ var RopeChart = function (selection){
         .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
         .attr('dy', function(d) { return '.3em'; })
         .attr('font-size', function(d) { return d.r * 2 + 'px'; })
-        .text(function(d) { return d.label; });
+        .text(function(d) { return d.label; })
+      .filter(function(d) { return d.tooltipLabel !== undefined; })
+        .append('tspan')
+        .classed('tooltip-label', true)
+        .style("cursor", "default")
+        .html(function(d) { 
+          return " " + tooltipLabel;
+        });
       // exit
     labelText.exit().remove();
 
     // remove previous tooltip if there was one for this chart
     if (!d3.select('#' + tt.attr("id")).empty()) d3.select('#' + tt.attr("id")).remove(); 
 
-    var tippables = svg.selectAll("circle");
+    var tippables = svg.selectAll("tspan.tooltip-label");
     tippables.call(tt);
     tippables.on("mouseover", tt.show)
       .on("mouseout", tt.hide)
@@ -507,23 +517,55 @@ var RopeChart = function (selection){
   /**
    * Get/set function used to set the tooltip of each data knot. Defaults to: 
    * ```
-   *  var tooltipMarkupFunc = function(d) {
-   *    var tooltipMarkup = "<label>Name: </label>" + chart.nameAccessor()(d);
-   *    tooltipMarkup += "<br/><label>Value: " + chart.valueAccessor()(d);
+   *  var tooltipContentFunc = function(d) {
+   *    var tooltipContent = "<label>Name: </label>" + chart.nameAccessor()(d);
+   *    tooltipContent += "<br/><label>Value: " + chart.valueAccessor()(d);
    *
-   *    return tooltipMarkup;
+   *    return tooltipContent;
    *  };
    * ```
-   * @method tooltipMarkup
+   * @method tooltipContent
    * @memberof RopeChart
    * @instance
-   * @param  {Function} [tooltipMarkupFunction]
+   * @param  {Function} [tooltipContentFunction]
    * @return {Function} [Acts as getter if called with no parameter]
    * @return {RopeChart} [Acts as setter if called with parameter]
    */
-  chart.tooltipMarkup = function(_) {
-    if(!arguments.length) return tooltipMarkupFunc;
-    tooltipMarkupFunc = _;
+  chart.tooltipContent = function(_) {
+    if(!arguments.length) return tooltipContentFunc;
+    tooltipContentFunc = _;
+
+    return chart;
+  };
+
+  /**
+   * Set whether or not to show the tooltip. The tooltip gets displayed next to the threshold knot
+   * @method showTooltip
+   * @memberof RopeChart
+   * @instance
+   * @param  {boolean} [showTooltip]
+   * @return {Function} [Acts as getter if called with no parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
+   */
+  chart.showTooltip = function(_) {
+    if(!arguments.length) return showTooltip;
+    showTooltip = _;
+
+    return chart;
+  };
+
+  /**
+   * Set the text, that when hovered over will display the tooltip. The text gets displayed next to the threshold knot. It accepts unicode codes, so you can include icons from something like font-awesome if you have the unicode. 
+   * @method tooltipLabel
+   * @memberof RopeChart
+   * @instance
+   * @param  {string} [tooltipLabel]
+   * @return {Function} [Acts as getter if called with no parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
+   */
+  chart.tooltipLabel = function(_) {
+    if(!arguments.length) return tooltipLabel;
+    tooltipLabel = _;
 
     return chart;
   };
@@ -539,14 +581,18 @@ var RopeChart = function (selection){
     var focusNode   = chart.generateNode(focus, focusKnotClass);
 
     if (chart.showThreshold()) {
+      var ttLabel = "";
+      if(showTooltip) ttLabel = tooltipLabel;
       var thresholdNode = {x: ropeX, 
-                         y: yScale(thresholdValue), 
-                         adjustTextOverlap: 0,
-                         r: knotRadius, 
-                         className: thresholdKnotClass,
-                         value: thresholdValue,
-                         name: thresholdLabel,
-                         label: thresholdLabel};
+        y: yScale(thresholdValue), 
+        adjustTextOverlap: 0,
+        r: knotRadius, 
+        className: thresholdKnotClass,
+        value: thresholdValue,
+        name: thresholdLabel,
+        label: thresholdLabel,
+        tooltipLabel: ttLabel
+      };
       nodes = [topNode, bottomNode, thresholdNode, focusNode];
       adjustedNodes = chart.adjustForOverlapAndMultiples(topNode, bottomNode, focusNode, thresholdNode);
     } else {

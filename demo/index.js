@@ -19,7 +19,8 @@ myRopeChart
   .ropeWidth(4)
   .showThreshold(true)
   .focusName('Bob')
-  .tooltipMarkup(function(d) { return "Custom markup showing <em>" + d.label + "</em> has a score of <em>" + d.value + "</em>"; })
+  .tooltipContent(function(d) { return "Custom markup showing <em>" + d.label + "</em> score is <em>" + d.value + "</em>"; })
+  .tooltipLabel('&#128129;')
   .render(data);
 
 averageJoe
