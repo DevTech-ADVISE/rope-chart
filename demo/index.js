@@ -19,9 +19,8 @@ myRopeChart
   .ropeWidth(4)
   .showThreshold(true)
   .focusName('Bob')
+  .tooltipMarkup(function(d) { return "Custom markup showing <em>" + d.label + "</em> has a score of <em>" + d.value + "</em>"; })
   .render(data);
-
-
 
 averageJoe
   .knotRadius(10)

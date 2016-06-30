@@ -8,7 +8,9 @@
 
 // d3 is an external, it won't be bundled in
 var d3 = require('d3');
+var dtip = require('d3-tip')(d3);
 require('./ropeChart.scss');
+require('./tooltips.scss');
 
 var RopeChart = function (selection){
   var chart = {};
@@ -23,13 +25,30 @@ var RopeChart = function (selection){
       flipDirection    = false,
       labelMargin      = 5,
       showThreshold      = false,
-      thresholdLabel     = "Average";
+      thresholdLabel     = "Average",
+      ttOffset = [0, 0];
+
+  // css class names
+  var d3TipClass = "d3-tip-mouse",
+    topRopeClass = "top-rope",
+    bottomRopeClass = "bottom-rope",
+    topKnotClass = "top-knot",
+    bottomKnotClass = "bottom-knot",
+    focusKnotClass = "focus-knot",
+    thresholdKnotClass = "threshold-knot";
+
 
   var yScale, ropeX, max, min, thresholdValue, focusName, focus, data, multipleMax, multipleMin, nodes;
 
   var valueAccessor = function (d) { return Number(d.value); };
   var nameAccessor  = function (d) { return d.name; };
   var thresholdGenerator = function(chartData) { return d3.round(d3.mean(chartData, chart.valueAccessor()));};
+  var tooltipMarkupFunc = function(d) {
+    var tooltipMarkup = "<label>Name: </label>" + d.label;
+    tooltipMarkup += "<br/><label>Value: " + d.value;
+
+    return tooltipMarkup;
+  };
 
   /**
    * Render the RopeChart instance. Simply renders chart when called with no parameter. Updates data, then renders, if called with parameter
@@ -43,6 +62,13 @@ var RopeChart = function (selection){
 
     // initialize svg
     var svg = d3.select(selection).html('').classed('Rope-Chart', true).append('svg');
+    var ttId = d3.select(selection).attr('id') + '-tip';
+    var tt = d3.tip()
+      .attr("class", d3TipClass)
+      .attr("id", ttId)
+      .html(tooltipMarkupFunc)
+      .offset(ttOffset)
+      .positionAnchor("mouse");
 
     if (!!arguments.length)
       chart.data(_);
@@ -62,14 +88,14 @@ var RopeChart = function (selection){
       y: yScale(thresholdValue), 
       height: svgHeight - yScale(thresholdValue) - knotRadius, 
       width: ropeWidth, 
-      className: (flipDirection) ? 'top-rope' : 'bottom-rope'
+      className: (flipDirection) ? topRopeClass : bottomRopeClass
     };
     var topBar = {
       x: barX,
       y: knotRadius,
       height: yScale(thresholdValue) - knotRadius,
       width: ropeWidth,
-      className: (flipDirection) ? 'bottom-rope' : 'top-rope'
+      className: (flipDirection) ? bottomRopeClass : topRopeClass
     }
     var bars = [bottomBar, topBar];
 
@@ -152,6 +178,15 @@ var RopeChart = function (selection){
         .text(function(d) { return d.label; });
       // exit
     labelText.exit().remove();
+
+    // remove previous tooltip if there was one for this chart
+    if (!d3.select('#' + tt.attr("id")).empty()) d3.select('#' + tt.attr("id")).remove(); 
+
+    var tippables = svg.selectAll("circle");
+    tippables.call(tt);
+    tippables.on("mouseover", tt.show)
+      .on("mouseout", tt.hide)
+      .on("mousemove", tt.updatePosition);
 
     return chart;
   };
@@ -469,23 +504,48 @@ var RopeChart = function (selection){
     return chart;
   };
 
+  /**
+   * Get/set function used to set the tooltip of each data knot. Defaults to: 
+   * ```
+   *  var tooltipMarkupFunc = function(d) {
+   *    var tooltipMarkup = "<label>Name: </label>" + chart.nameAccessor()(d);
+   *    tooltipMarkup += "<br/><label>Value: " + chart.valueAccessor()(d);
+   *
+   *    return tooltipMarkup;
+   *  };
+   * ```
+   * @method tooltipMarkup
+   * @memberof RopeChart
+   * @instance
+   * @param  {Function} [tooltipMarkupFunction]
+   * @return {Function} [Acts as getter if called with no parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
+   */
+  chart.tooltipMarkup = function(_) {
+    if(!arguments.length) return tooltipMarkupFunc;
+    tooltipMarkupFunc = _;
+
+    return chart;
+  };
+
   chart.generateNodes = function() {
     // derive node data & configure scale
-    var topNode     = chart.generateNode(max, "top-knot");
-    var bottomNode  = chart.generateNode(min, "bottom-knot");
+    var topNode     = chart.generateNode(max, topKnotClass);
+    var bottomNode  = chart.generateNode(min, bottomKnotClass);
 
     var nodes, adjustedNodes;
 
     focus = data.filter(function(d){ return chart.nameAccessor()(d) === chart.focusName();})[0];
-    var focusNode   = chart.generateNode(focus, "focus-knot");
+    var focusNode   = chart.generateNode(focus, focusKnotClass);
 
     if (chart.showThreshold()) {
       var thresholdNode = {x: ropeX, 
                          y: yScale(thresholdValue), 
                          adjustTextOverlap: 0,
                          r: knotRadius, 
-                         className: "threshold-knot",
+                         className: thresholdKnotClass,
                          value: thresholdValue,
+                         name: thresholdLabel,
                          label: thresholdLabel};
       nodes = [topNode, bottomNode, thresholdNode, focusNode];
       adjustedNodes = chart.adjustForOverlapAndMultiples(topNode, bottomNode, focusNode, thresholdNode);
@@ -506,6 +566,7 @@ var RopeChart = function (selection){
       adjustTextOverlap: 0,
       className: className,
       value: chart.valueAccessor()(datum),
+      name: chart.nameAccessor()(datum),
       label: chart.nameAccessor()(datum)
     };
   };
