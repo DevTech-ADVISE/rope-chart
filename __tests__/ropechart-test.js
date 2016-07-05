@@ -438,6 +438,34 @@ describe('RopeChart', () => {
 
       expect(nodes.length).toEqual(3);
     });
+
+    it('should have a getter for threshold generator function', () => {
+      var expectedThreshold = 40;
+      var generatedThreshold = RopeChart.thresholdGenerator()(data);
+
+      expect(generatedThreshold).toEqual(expectedThreshold);
+    });
+
+    it('should have a getter/setter for tooltip content function', () => {
+      var expectedContentFunc = function(d) { return "<em>content test</em>" + d.name; };
+      RopeChart.tooltipContent(expectedContentFunc);
+      var actualContentFunc = RopeChart.tooltipContent();
+
+      expect(actualContentFunc).toEqual(expectedContentFunc);
+    });
+
+    it('should have a getter/setter for whether or not to show the tooltip', () => {
+      RopeChart.showTooltip(false);
+
+      expect(RopeChart.showTooltip()).toBe(false);
+    });
+
+    it('should have a getter/setter for the tooltip label', () => {
+      var label = 'hover over me for tooltip';
+      RopeChart.tooltipLabel(label);
+
+      expect(RopeChart.tooltipLabel()).toEqual(label);
+    });
   });
 
 });
