@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "provides a simplified visualization of where a particular value lies within a group.",
   "repository": "BI/rope-chart",
-  "main": "build/ropeChart.js",
+  "main": "dist/ropeChart.js",
   "scripts": {
     "dev": "webpack-dev-server --inline --hot --config webpack.demo.config.js --content-base demo/",
     "dist": "NODE_ENV=production webpack -p --config webpack.dist.config.js",
