@@ -231,7 +231,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    // enter
 	    valueText.enter().append('text').attr('class', function (d) {
-	      return 'value';
+	      return d.className + '-value';
 	    }).attr('text-anchor', function (d) {
 	      return 'end';
 	    }).attr('x', function (d) {
@@ -266,7 +266,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    // enter
 	    labelText.enter().append('text').attr('class', function (d) {
-	      return 'label';
+	      return d.className + '-label';
 	    }).attr('text-anchor', function (d) {
 	      return 'start';
 	    }).attr('x', function (d) {

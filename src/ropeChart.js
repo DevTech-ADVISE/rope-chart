@@ -150,7 +150,7 @@ var RopeChart = function (selection){
         .text(function(d) { return valueDisplayFormatter(valueAccessor(d)); });
       // enter
     valueText.enter().append('text')
-        .attr('class', function(d) { return 'value'; })
+        .attr('class', function(d) { return d.className + '-value'; })
         .attr('text-anchor', function(d) { return 'end'; })
         .attr('x', function(d) { return d.x - (d.r + labelMargin); })
         .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
@@ -173,7 +173,7 @@ var RopeChart = function (selection){
     
       // enter
     labelText.enter().append('text')
-        .attr('class', function(d) { return 'label'; })
+        .attr('class', function(d) { return d.className + '-label'; })
         .attr('text-anchor', function(d) { return 'start'; })
         .attr('x', function(d) { return d.x + (d.r + labelMargin); })
         .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
