@@ -29,7 +29,8 @@ var RopeChart = function (selection){
       thresholdLabel     = "Average",
       ttOffset = [0, 0],
       showTooltip = true,
-      tooltipLabel = "&#8505;";
+      tooltipLabel = "&#8505;",
+      valueDisplayFormatter = function(d) { return d; };
 
   // css class names
   var d3TipClass = "d3-tip-mouse",
@@ -146,7 +147,7 @@ var RopeChart = function (selection){
         .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
         .attr('dy', function(d) { return '.3em'; })
         .attr('font-size', function(d) { return d.r * 2 + 'px'; })
-        .text(function(d) { return d.value; });
+        .text(function(d) { return valueDisplayFormatter(valueAccessor(d)); });
       // enter
     valueText.enter().append('text')
         .attr('class', function(d) { return 'value'; })
@@ -155,7 +156,7 @@ var RopeChart = function (selection){
         .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
         .attr('dy', function(d) { return '.3em'; })
         .attr('font-size', function(d) { return d.r * 2 + 'px'; })
-        .text(function(d) { return d.value; });
+        .text(function(d) { return valueDisplayFormatter(valueAccessor(d)); });
       // exit
     valueText.exit().remove();
 
@@ -475,7 +476,7 @@ var RopeChart = function (selection){
   };
 
   /**
-   * Get/set function used to access "value" property from each data record. Defaults to: 
+   * Get/set the function used to access "value" property from each data record. Defaults to: 
    * ```
    * function (d){ return d.value; }
    * ```
@@ -495,7 +496,7 @@ var RopeChart = function (selection){
   };
 
   /**
-   * Get/set function used to access "name" property from each data record. Defaults to: 
+   * Get/set the function used to access "name" property from each data record. Defaults to: 
    * ```
    * function (d){ return d.name; }
    * ```
@@ -511,6 +512,22 @@ var RopeChart = function (selection){
       return nameAccessor;
     }
     nameAccessor = _;
+    return chart;
+  };
+
+  /**
+   * Get/set the function to format the display of data values shown next to the knots
+   * @method valueDisplayFormatter
+   * @memberof RopeChart
+   * @instance
+   * @param {Function} [valueFormatterFunction]
+   * @return {Function} [Acts as getter if called with no parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
+   */
+  chart.valueDisplayFormatter = function(_) {
+    if(!arguments.length) return valueDisplayFormatter;
+    valueDisplayFormatter = _;
+
     return chart;
   };
 

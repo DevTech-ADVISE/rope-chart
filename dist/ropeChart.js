@@ -87,7 +87,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      thresholdLabel = "Average",
 	      ttOffset = [0, 0],
 	      showTooltip = true,
-	      tooltipLabel = "&#8505;";
+	      tooltipLabel = "&#8505;",
+	      valueDisplayFormatter = function valueDisplayFormatter(d) {
+	    return d;
+	  };
 
 	  // css class names
 	  var d3TipClass = "d3-tip-mouse",
@@ -224,7 +227,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }).attr('font-size', function (d) {
 	      return d.r * 2 + 'px';
 	    }).text(function (d) {
-	      return d.value;
+	      return valueDisplayFormatter(valueAccessor(d));
 	    });
 	    // enter
 	    valueText.enter().append('text').attr('class', function (d) {
@@ -240,7 +243,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }).attr('font-size', function (d) {
 	      return d.r * 2 + 'px';
 	    }).text(function (d) {
-	      return d.value;
+	      return valueDisplayFormatter(valueAccessor(d));
 	    });
 	    // exit
 	    valueText.exit().remove();
@@ -574,7 +577,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get/set function used to access "value" property from each data record. Defaults to: 
+	   * Get/set the function used to access "value" property from each data record. Defaults to: 
 	   * ```
 	   * function (d){ return d.value; }
 	   * ```
@@ -594,7 +597,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get/set function used to access "name" property from each data record. Defaults to: 
+	   * Get/set the function used to access "name" property from each data record. Defaults to: 
 	   * ```
 	   * function (d){ return d.name; }
 	   * ```
@@ -610,6 +613,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return nameAccessor;
 	    }
 	    nameAccessor = _;
+	    return chart;
+	  };
+
+	  /**
+	   * Get/set the function to format the display of data values shown next to the knots
+	   * @method valueDisplayFormatter
+	   * @memberof RopeChart
+	   * @instance
+	   * @param {Function} [valueFormatterFunction]
+	   * @return {Function} [Acts as getter if called with no parameter]
+	   * @return {RopeChart} [Acts as setter if called with parameter]
+	   */
+	  chart.valueDisplayFormatter = function (_) {
+	    if (!arguments.length) return valueDisplayFormatter;
+	    valueDisplayFormatter = _;
+
 	    return chart;
 	  };
 

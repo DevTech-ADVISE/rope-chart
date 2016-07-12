@@ -74,6 +74,7 @@ var myRopeChart = ropeChart('div#myRopeChart');
     * [.labelMargin([labelMargin])](#RopeChart+labelMargin) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.valueAccessor([valueAccessorFunction])](#RopeChart+valueAccessor) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.nameAccessor([nameAccessorFunction])](#RopeChart+nameAccessor) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.valueDisplayFormatter([valueFormatterFunction])](#RopeChart+valueDisplayFormatter) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.tooltipContent([tooltipContentFunction])](#RopeChart+tooltipContent) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.showTooltip([showTooltip])](#RopeChart+showTooltip) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.tooltipLabel([tooltipLabel])](#RopeChart+tooltipLabel) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
@@ -270,7 +271,7 @@ Get/set the margin between labels and "knot" circles.
 <a name="RopeChart+valueAccessor"></a>
 
 ### ropeChart.valueAccessor([valueAccessorFunction]) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
-Get/set function used to access "value" property from each data record. Defaults to: 
+Get/set the function used to access "value" property from each data record. Defaults to: 
 ```
 function (d){ return d.value; }
 ```
@@ -285,7 +286,7 @@ function (d){ return d.value; }
 <a name="RopeChart+nameAccessor"></a>
 
 ### ropeChart.nameAccessor([nameAccessorFunction]) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
-Get/set function used to access "name" property from each data record. Defaults to: 
+Get/set the function used to access "name" property from each data record. Defaults to: 
 ```
 function (d){ return d.name; }
 ```
@@ -296,6 +297,18 @@ function (d){ return d.name; }
 | Param | Type |
 | --- | --- |
 | [nameAccessorFunction] | <code>function</code> | 
+
+<a name="RopeChart+valueDisplayFormatter"></a>
+
+### ropeChart.valueDisplayFormatter([valueFormatterFunction]) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
+Get/set the function to format the display of data values shown next to the knots
+
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>function</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type |
+| --- | --- |
+| [valueFormatterFunction] | <code>function</code> | 
 
 <a name="RopeChart+tooltipContent"></a>
 
