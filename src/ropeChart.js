@@ -40,7 +40,7 @@ var RopeChart = function (selection){
     focusKnotClass = "focus-knot",
     thresholdKnotClass = "threshold-knot";
 
-  var yScale, ropeX, max, min, thresholdValue, focusName, focus, data, multipleMax, multipleMin, nodes;
+  var yScale, ropeX, max, min, thresholdValue, focusName, focus, data, multipleMaxes, multipleMins, nodes;
 
   var valueAccessor = function (d) { return Number(d.value); };
   var nameAccessor  = function (d) { return d.name; };

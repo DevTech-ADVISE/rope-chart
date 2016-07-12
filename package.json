@@ -6,7 +6,7 @@
   "main": "dist/ropeChart.js",
   "scripts": {
     "dev": "webpack-dev-server --inline --hot --config webpack.demo.config.js --content-base demo/",
-    "dist": "NODE_ENV=production webpack -p --config webpack.dist.config.js",
+    "dist": "NODE_ENV=production webpack --config webpack.dist.config.js",
     "doc": "jsdoc2md --template README.hbs src/ropeChart.js > README.md",
     "test": "jest"
   },
