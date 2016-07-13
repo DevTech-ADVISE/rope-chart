@@ -589,13 +589,13 @@ var RopeChart = function (selection){
 
   chart.generateNodes = function() {
     // derive node data & configure scale
-    var topNode     = chart.generateNode(max, topKnotClass);
-    var bottomNode  = chart.generateNode(min, bottomKnotClass);
+    var topNode     = chart.generateNode(max, topKnotClass, 2, 'top');
+    var bottomNode  = chart.generateNode(min, bottomKnotClass, 2, 'bottom');
 
     var nodes, adjustedNodes;
 
     focus = data.filter(function(d){ return chart.nameAccessor()(d) === chart.focusName();})[0];
-    var focusNode   = chart.generateNode(focus, focusKnotClass);
+    var focusNode   = chart.generateNode(focus, focusKnotClass, 1, 'focus');
 
     if (chart.showThreshold()) {
       var ttLabel = "";
@@ -608,7 +608,9 @@ var RopeChart = function (selection){
         value: thresholdValue,
         name: thresholdLabel,
         label: thresholdLabel,
-        tooltipLabel: ttLabel
+        tooltipLabel: ttLabel,
+        labelOrderPriority: 0,
+        nodeName: 'threshold'
       };
       nodes = [topNode, bottomNode, thresholdNode, focusNode];
       adjustedNodes = chart.adjustForOverlapAndMultiples(topNode, bottomNode, focusNode, thresholdNode);
@@ -617,10 +619,22 @@ var RopeChart = function (selection){
       adjustedNodes = chart.adjustForOverlapAndMultiples(topNode, bottomNode, focusNode);
     }
 
+    if(flipDirection) {
+      var topValue = adjustedNodes[0].value,
+        topLabel = adjustedNodes[0].label,
+        bottomValue = adjustedNodes[1].value,
+        bottomLabel = adjustedNodes[1].label;
+
+      adjustedNodes[0].value = bottomValue
+      adjustedNodes[0].label = bottomLabel
+      adjustedNodes[1].value = topValue
+      adjustedNodes[1].label = topLabel
+    }
+
     return adjustedNodes;
   }
 
-  chart.generateNode = function(datum, className) {
+  chart.generateNode = function(datum, className, labelOrderPriority, nodeName) {
 
     return {
       x: ropeX,
@@ -630,34 +644,60 @@ var RopeChart = function (selection){
       className: className,
       value: chart.valueAccessor()(datum),
       name: chart.nameAccessor()(datum),
-      label: chart.nameAccessor()(datum)
+      label: chart.nameAccessor()(datum),
+      labelOrderPriority: labelOrderPriority,
+      nodeName: nodeName
     };
   };
 
   chart.adjustForOverlapAndMultiples = function(top, bottom, focus, threshold) {
-    var topOverlap = chart.nodeIsOverlapping(focus, top);
-    var bottomOverlap = chart.nodeIsOverlapping(focus, bottom);
-    // the focus is in overlap range of the top knot
-    if(topOverlap !== false) {
-      focus.adjustTextOverlap = topOverlap;
-    }
-    // the focus is in overlap range of the bottom knot
-    else if(bottomOverlap !== false) {
-      focus.adjustTextOverlap = bottomOverlap;
-    }
-    // the focus is in overlap range of the threshold knot
-    else if(threshold) {
-      var thresholdOverlap = chart.nodeIsOverlapping(focus, threshold);
 
-      if(threshold.value === focus.value) {
-        threshold.adjustTextOverlap = thresholdOverlap / 2;
-        focus.adjustTextOverlap = -thresholdOverlap / 2;
+    var multiNodeOverlap = false;
+    if(chart.showThreshold()) {
+      // When the threshold, focus and top or bottom knots overlap
+      var topOverlapNodes = [top, threshold, focus];
+      var bottomOverlapNodes = [bottom, threshold, focus];
+      if(!nodesHaveMinimumSpace(topOverlapNodes)) {
+        multiNodeOverlap = true;
+        var overlapIndexing = getOverlapIndex(topOverlapNodes);
+        threshold.adjustTextOverlap = 2 * knotRadius * (topOverlapNodes.length - overlapIndexing.threshold - 1) - threshold.y + chartGutter;
+        focus.adjustTextOverlap = 2 * knotRadius * (topOverlapNodes.length - overlapIndexing.focus - 1) - focus.y + chartGutter;
       }
-      else {
-        threshold.adjustTextOverlap = -(thresholdOverlap / 2);
-        focus.adjustTextOverlap = thresholdOverlap /2;
+      else if(!nodesHaveMinimumSpace(bottomOverlapNodes)) {
+        multiNodeOverlap = true;
+        var overlapIndexing = getOverlapIndex(bottomOverlapNodes);
+        threshold.adjustTextOverlap = svgHeight - chartGutter - (2 * knotRadius * overlapIndexing.threshold) - threshold.y;
+        focus.adjustTextOverlap = svgHeight - chartGutter - (2 * knotRadius * overlapIndexing.focus) - focus.y;
+      }
+
+    }
+    
+    if(!multiNodeOverlap) {
+      var topOverlap = chart.nodeIsOverlapping(focus, top);
+      var bottomOverlap = chart.nodeIsOverlapping(focus, bottom);
+      // the focus is in overlap range of the top knot
+      if(topOverlap !== false) {
+        focus.adjustTextOverlap = topOverlap;
+      }
+      // the focus is in overlap range of the bottom knot
+      else if(bottomOverlap !== false) {
+        focus.adjustTextOverlap = bottomOverlap;
+      }
+      // the focus is in overlap range of the threshold knot(and not overlapping top or bottom)
+      else if(threshold && topOverlap === false && bottomOverlap === false) {
+        var thresholdOverlap = chart.nodeIsOverlapping(focus, threshold);
+
+        if(threshold.value === focus.value) {
+          threshold.adjustTextOverlap = thresholdOverlap / 2;
+          focus.adjustTextOverlap = -thresholdOverlap / 2;
+        }
+        else {
+          threshold.adjustTextOverlap = -(thresholdOverlap / 2);
+          focus.adjustTextOverlap = thresholdOverlap /2;
+        }
       }
     }
+    
 
     // if the focus is the max or min, show the max or min as the focus
     // if there are multiple maxes or mins show all of the maxes or mins
@@ -697,15 +737,15 @@ var RopeChart = function (selection){
       bottom.className = "min-focus-knot";
     }
 
-
     var adjustedNodes = [top, bottom];
-    if(threshold) adjustedNodes.push(threshold);
+    if(chart.showThreshold()) adjustedNodes.push(threshold);
     if(focus) adjustedNodes.push(focus);
 
     return adjustedNodes;
   };
 
   chart.nodeIsOverlapping = function(node, compareToNode) {
+    // if the center of the knot is within 2 knot radii of the other knot center
     if(node.y <= (compareToNode.y + (2 * knotRadius)) && node.y >= (compareToNode.y - (2 * knotRadius))) {
       var nodeDistance = compareToNode.y - node.y;
 
@@ -717,6 +757,50 @@ var RopeChart = function (selection){
 
     return false;
   };
+
+  // if the distance between any two of the nodes is >= the minimum distance needed for no overlap, then the nodesHaveMinimumSpace
+  function nodesHaveMinimumSpace(nodes) {
+    var nodeLength = nodes.length;
+    var inOverlapRange = true;
+    var minimumSpace = (nodeLength - 1) * 2 * knotRadius;
+
+    for(var i = 0; i < nodeLength; i ++) {
+      var yPosition = nodes[i].y;
+      for(var j = 0; j < nodeLength; j ++) {
+        var compareYPosition = nodes[j].y;
+        var yDistance = Math.abs(yPosition - compareYPosition);
+        if(yDistance <= minimumSpace) continue;
+        else {
+          inOverlapRange = false;
+          break;
+        }
+      }
+
+      if(inOverlapRange === false) break;
+    }
+
+    return !inOverlapRange;
+  }
+
+  function getOverlapIndex(nodes) {
+
+    var sortedNodes = nodes.sort(function(a, b) {
+      if(a.value > b.value) return 1;
+      if(a.value < b.value) return -1;
+      if(a.value === b.value) {
+        if(a.labelOrderPriority > b.labelOrderPriority) return -1;
+        if(a.labelOrderPriority < b.labelOrderPriority) return 1;
+        return 0;
+      }
+    });
+
+    var keyedNodes = {};
+    sortedNodes.forEach(function(node, index) {
+      keyedNodes[node.nodeName] = index;
+    });
+
+    return keyedNodes;
+  }
 
   return chart;
 }

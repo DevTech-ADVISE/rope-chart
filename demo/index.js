@@ -10,7 +10,7 @@ var data = [
   {name:'Janet',value:'21'},
   {name:'Phil',value:'60'},
   {name:'James',value:'22'},
-  {name:'Annie',value: '59'},
+  {name:'Annie',value: '57'},
   {name:'Eloise',value:'41'}
 ];
 
