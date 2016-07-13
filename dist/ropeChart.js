@@ -809,14 +809,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var bottomOverlapNodes = [bottom, threshold, focus];
 	      if (!nodesHaveMinimumSpace(topOverlapNodes)) {
 	        multiNodeOverlap = true;
-	        var overlapIndexing = getOverlapIndex(topOverlapNodes);
-	        threshold.adjustTextOverlap = 2 * knotRadius * (topOverlapNodes.length - overlapIndexing.threshold - 1) - threshold.y + chartGutter;
-	        focus.adjustTextOverlap = 2 * knotRadius * (topOverlapNodes.length - overlapIndexing.focus - 1) - focus.y + chartGutter;
+	        var stackedIndex = getStackedIndex(topOverlapNodes);
+	        var stackFromBottom = flipDirection ? true : false;
+	        threshold.adjustTextOverlap = stackedPositionFromOrientation(topOverlapNodes.length - stackedIndex.threshold - 1, threshold.y, stackFromBottom);
+	        focus.adjustTextOverlap = stackedPositionFromOrientation(topOverlapNodes.length - stackedIndex.focus - 1, focus.y, stackFromBottom);
 	      } else if (!nodesHaveMinimumSpace(bottomOverlapNodes)) {
 	        multiNodeOverlap = true;
-	        var overlapIndexing = getOverlapIndex(bottomOverlapNodes);
-	        threshold.adjustTextOverlap = svgHeight - chartGutter - 2 * knotRadius * overlapIndexing.threshold - threshold.y;
-	        focus.adjustTextOverlap = svgHeight - chartGutter - 2 * knotRadius * overlapIndexing.focus - focus.y;
+	        var stackedIndex = getStackedIndex(bottomOverlapNodes);
+	        var stackFromBottom = flipDirection ? false : true;
+	        threshold.adjustTextOverlap = stackedPositionFromOrientation(stackedIndex.threshold, threshold.y, stackFromBottom);
+	        focus.adjustTextOverlap = stackedPositionFromOrientation(stackedIndex.focus, focus.y, stackFromBottom);
 	      }
 	    }
 
@@ -832,9 +834,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	          focus.adjustTextOverlap = topFocusOverlap;
 	        }
 	        // the focus is in overlap range of the bottom knot
-	        else if (bottomFocusOverlap !== false) {
-	            focus.adjustTextOverlap = bottomFocusOverlap;
+	        if (bottomFocusOverlap !== false) {
+	          focus.adjustTextOverlap = bottomFocusOverlap;
+	        }
+
+	        if (threshold) {
+	          var thresholdOverlap = chart.nodeIsOverlapping(focus, threshold);
+
+	          if (threshold.value === focus.value) {
+	            threshold.adjustTextOverlap = thresholdOverlap / 2;
+	            focus.adjustTextOverlap = -thresholdOverlap / 2;
+	          } else {
+	            threshold.adjustTextOverlap = -(thresholdOverlap / 2);
+	            focus.adjustTextOverlap = thresholdOverlap / 2;
 	          }
+	        }
 	      }
 	      // fix threshold knot overlap with top/bottom or focus knot
 	      else if (threshold) {
@@ -902,7 +916,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return !inOverlapRange;
 	  }
 
-	  function getOverlapIndex(nodes) {
+	  // Stack the nodes ascending by value, and higher priority first
+	  function getStackedIndex(nodes) {
 
 	    var sortedNodes = nodes.sort(function (a, b) {
 	      if (a.value > b.value) return 1;
@@ -920,6 +935,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    return keyedNodes;
+	  }
+
+	  // Get the actual Y position to place the stacked text
+	  function stackedPositionFromOrientation(overlapIndex, nodePosition, bottom) {
+	    if (!bottom) {
+	      return 0 + 2 * knotRadius * overlapIndex - nodePosition + chartGutter;
+	    } else {
+	      return svgHeight - 2 * knotRadius * overlapIndex - nodePosition - chartGutter;
+	    }
 	  }
 
 	  return chart;
