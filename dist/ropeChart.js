@@ -110,7 +110,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return d.name;
 	  };
 	  var thresholdGenerator = function thresholdGenerator(chartData) {
-	    return d3.round(d3.mean(chartData, chart.valueAccessor()));
+	    return d3.mean(chartData, chart.valueAccessor());
 	  };
 	  var tooltipContentFunc = function tooltipContentFunc(d) {
 	    var tooltipContent = "<label>Name: </label>" + d.label;

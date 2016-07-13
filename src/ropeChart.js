@@ -45,7 +45,7 @@ var RopeChart = function (selection){
 
   var valueAccessor = function (d) { return Number(d.value); };
   var nameAccessor  = function (d) { return d.name; };
-  var thresholdGenerator = function(chartData) { return d3.round(d3.mean(chartData, chart.valueAccessor()));};
+  var thresholdGenerator = function(chartData) { return d3.mean(chartData, chart.valueAccessor());};
   var tooltipContentFunc = function(d) {
     var tooltipContent = "<label>Name: </label>" + d.label;
     tooltipContent += "<br/><label>Value: " + d.value;
