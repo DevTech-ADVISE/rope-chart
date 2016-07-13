@@ -755,9 +755,56 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  chart.adjustForOverlapAndMultiples = function (top, bottom, focus, threshold) {
 
+	    // if the focus is the max or min, show the max or min as the focus
+	    // if there are multiple maxes or mins show all of the maxes or mins
+	    var focusIsMax = false,
+	        focusIsMin = false;
+	    if (multipleMaxes) {
+	      if (focus.value === top.value) {
+	        focusIsMax = true;
+	        top.className = "max-focus-knot";
+	        top.label = focus.label + " and others";
+	        focus = undefined;
+	      } else {
+	        top.label = "Multiple: ";
+	        multipleMaxes.forEach(function (d) {
+	          return top.label += chart.nameAccessor()(d) + ", ";
+	        });
+	        top.label = top.label.substring(0, top.label.length - 2);
+	      }
+	    }
+	    // remove the focus knot if the focus is the only max, show the max as the focus
+	    else if (focus.value === top.value) {
+	        focusIsMax = true;
+	        focus = undefined;
+	        top.className = "max-focus-knot";
+	      }
+
+	    if (multipleMins) {
+	      if (focus && focus.value === bottom.value) {
+	        focusIsMin = true;
+	        bottom.className = "min-focus-knot";
+	        bottom.label = focus.label + " and others";
+	        focus = undefined;
+	      } else {
+	        bottom.label = "Multiple: ";
+	        multipleMins.forEach(function (d) {
+	          return bottom.label += chart.nameAccessor()(d) + ", ";
+	        });
+	        bottom.label = bottom.label.substring(0, bottom.label.length - 2);
+	      }
+	    }
+	    // remove the focus knot if the focus is the only min, show the min as the focus
+	    else if (focus && focus.value === bottom.value) {
+	        focusIsMin = true;
+	        focus = undefined;
+	        bottom.className = "min-focus-knot";
+	      }
+
+	    // Node overlapping algorithm for top/threshold/focus, or bottom/threshold/focus overlap
 	    var multiNodeOverlap = false;
-	    if (chart.showThreshold()) {
-	      // When the threshold, focus and top or bottom knots overlap
+	    if (chart.showThreshold() && !focusIsMax && !focusIsMin) {
+
 	      var topOverlapNodes = [top, threshold, focus];
 	      var bottomOverlapNodes = [bottom, threshold, focus];
 	      if (!nodesHaveMinimumSpace(topOverlapNodes)) {
@@ -773,19 +820,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 
+	    // Normal overlapping algorithm for top/focus, bottom/focus, threshold/focus, threshold/top(focus=top), threshold/bottom(focus=bottom)
 	    if (!multiNodeOverlap) {
-	      var topOverlap = chart.nodeIsOverlapping(focus, top);
-	      var bottomOverlap = chart.nodeIsOverlapping(focus, bottom);
-	      // the focus is in overlap range of the top knot
-	      if (topOverlap !== false) {
-	        focus.adjustTextOverlap = topOverlap;
-	      }
-	      // the focus is in overlap range of the bottom knot
-	      else if (bottomOverlap !== false) {
-	          focus.adjustTextOverlap = bottomOverlap;
+
+	      // fix focus knot overlap with top/bottom
+	      if (!focusIsMax && !focusIsMin) {
+	        var topFocusOverlap = chart.nodeIsOverlapping(focus, top);
+	        var bottomFocusOverlap = chart.nodeIsOverlapping(focus, bottom);
+	        // the focus is in overlap range of the top knot
+	        if (topFocusOverlap !== false) {
+	          focus.adjustTextOverlap = topFocusOverlap;
 	        }
-	        // the focus is in overlap range of the threshold knot(and not overlapping top or bottom)
-	        else if (threshold && topOverlap === false && bottomOverlap === false) {
+	        // the focus is in overlap range of the bottom knot
+	        else if (bottomFocusOverlap !== false) {
+	            focus.adjustTextOverlap = bottomFocusOverlap;
+	          }
+	      }
+	      // fix threshold knot overlap with top/bottom or focus knot
+	      else if (threshold) {
+
+	          if (focusIsMax) {
+	            var thresholdTopOverlap = chart.nodeIsOverlapping(threshold, top);
+	            threshold.adjustTextOverlap = thresholdTopOverlap;
+	          } else if (focusIsMin) {
+	            var thresholdBottomOverlap = chart.nodeIsOverlapping(threshold, bottom);
+	            threshold.adjustTextOverlap = thresholdBottomOverlap;
+	          } else {
 	            var thresholdOverlap = chart.nodeIsOverlapping(focus, threshold);
 
 	            if (threshold.value === focus.value) {
@@ -796,48 +856,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	              focus.adjustTextOverlap = thresholdOverlap / 2;
 	            }
 	          }
+	        }
 	    }
 
-	    // if the focus is the max or min, show the max or min as the focus
-	    // if there are multiple maxes or mins show all of the maxes or mins
-	    if (multipleMaxes) {
-	      if (focus.value === top.value) {
-	        top.className = "max-focus-knot";
-	        top.label = focus.label + " and others";
-	        focus = undefined;
-	      } else {
-	        top.label = "Multiple: ";
-	        multipleMaxes.forEach(function (d) {
-	          return top.label += chart.nameAccessor()(d) + ", ";
-	        });
-	        top.label = top.label.substring(0, top.label.length - 2);
-	      }
-	    }
-	    // remove the focus knot if the focus is the only max, show the max as the focus
-	    else if (focus.value === top.value) {
-	        focus = undefined;
-	        top.className = "max-focus-knot";
-	      }
-
-	    if (multipleMins) {
-	      if (focus && focus.value === bottom.value) {
-	        bottom.className = "min-focus-knot";
-	        bottom.label = focus.label + " and others";
-	        focus = undefined;
-	      } else {
-	        bottom.label = "Multiple: ";
-	        multipleMins.forEach(function (d) {
-	          return bottom.label += chart.nameAccessor()(d) + ", ";
-	        });
-	        bottom.label = bottom.label.substring(0, bottom.label.length - 2);
-	      }
-	    }
-	    // remove the focus knot if the focus is the only min, show the min as the focus
-	    else if (focus && focus.value === bottom.value) {
-	        focus = undefined;
-	        bottom.className = "min-focus-knot";
-	      }
-
+	    // put back together the adjusted nodes
 	    var adjustedNodes = [top, bottom];
 	    if (chart.showThreshold()) adjustedNodes.push(threshold);
 	    if (focus) adjustedNodes.push(focus);
