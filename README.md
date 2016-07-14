@@ -1,10 +1,12 @@
 # ropeChart
 
-The rope chart provides a simplified visualization of where a particular value lies within a group.
+The rope chart provides a simplified visualization of where a particular value lies within a group. 
+
+Look at the [Demo](http://BI.github.io/rope-chart)
 
 # Getting Started
 
-For now, you must use a script tag to include ropeChart. D3 must be available in the global namespace as well. Download ropeChart.js, put something like the following in your <head> and you should be good to go.
+LollipopChart is a UMD module, you can add the javascript in a scripts tag or require it using something like webpack. D3 must either be available in the global namespace or bundled in with your bundle tool. For the global namespace method download lollipopChart.js, put something like the following in your and you should be good to go.
 
 ```
 <script src="d3.js" charset="utf-8"></script>
@@ -33,12 +35,12 @@ HTML would look something like this
 And the index.js here would contain something like this
 
 ```
-var data = {
-  min: {value: 5, label: 'Country A'},
-  max: {value: 95, label: 'Country B'},
-  threshold: {value: 60, label: 'Region Average'},
-  focus: {value: 45, label: 'Mongolia'}
-}
+var data = [
+  {value: 5, label: 'Foo'},
+  {value: 95, label: 'Bar'},
+  {value: 60, label: 'Baz'},
+  {value: 45, label: 'Qux'}
+];
 
 var myRopeChart = ropeChart('div#myRopeChart');
 	.data(data)
