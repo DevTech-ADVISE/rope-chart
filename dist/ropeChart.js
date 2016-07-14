@@ -87,6 +87,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      thresholdLabel = "Average",
 	      ttOffset = [0, 0],
 	      showTooltip = true,
+	      handleTooltipExternally = false,
 	      tooltipLabel = "&#8505;",
 	      valueDisplayFormatter = function valueDisplayFormatter(d) {
 	    return d;
@@ -287,12 +288,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // exit
 	    labelText.exit().remove();
 
-	    // remove previous tooltip if there was one for this chart
-	    if (!d3.select('#' + tt.attr("id")).empty()) d3.select('#' + tt.attr("id")).remove();
+	    if (!handleTooltipExternally) {
+	      // remove previous tooltip if there was one for this chart
+	      if (!d3.select('#' + tt.attr("id")).empty()) d3.select('#' + tt.attr("id")).remove();
 
-	    var tippables = svg.selectAll("tspan.tooltip-label");
-	    tippables.call(tt);
-	    tippables.on("mouseover", tt.show).on("mouseout", tt.hide).on("mousemove", tt.updatePosition);
+	      var tippables = svg.selectAll("tspan.tooltip-label");
+	      tippables.call(tt);
+	      tippables.on("mouseover", tt.show).on("mouseout", tt.hide).on("mousemove", tt.updatePosition);
+	    }
 
 	    return chart;
 	  };
@@ -668,6 +671,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	  chart.showTooltip = function (_) {
 	    if (!arguments.length) return showTooltip;
 	    showTooltip = _;
+
+	    return chart;
+	  };
+
+	  /**
+	   * Get/Set whether or not the tooltip generation will be handled outside the chart
+	   * This can be useful if the standard d3-tip solution doesn't fit your needs
+	   * @method handleTooltipExternally
+	   * @memberof RopeChart
+	   * @instance
+	   * @param  {boolean} [handleTooltipExternally]
+	   * @return {Function} [Acts as getter if called with no parameter]
+	   * @return {RopeChart} [Acts as setter if called with parameter]
+	   */
+	  chart.handleTooltipExternally = function (_) {
+	    if (!arguments.length) return handleTooltipExternally;
+	    handleTooltipExternally = _;
 
 	    return chart;
 	  };
