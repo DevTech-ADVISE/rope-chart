@@ -8,6 +8,7 @@
     "dev": "webpack-dev-server --inline --hot --config webpack.demo.config.js --content-base demo/",
     "dist": "NODE_ENV=production webpack --config webpack.dist.config.js",
     "doc": "jsdoc2md --template README.hbs src/ropeChart.js > README.md",
+    "publish-demo": "node publishDemo.js",
     "test": "jest"
   },
   "tags": [
@@ -23,6 +24,7 @@
     "babel-loader": "^6.2.4",
     "babel-preset-es2015": "^6.9.0",
     "css-loader": "^0.23.1",
+    "gh-pages": "^0.11.0",
     "jest-cli": "^12.1.1",
     "jsdoc-to-markdown": "^1.3.6",
     "node-sass": "^3.7.0",
