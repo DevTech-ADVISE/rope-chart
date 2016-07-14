@@ -11,41 +11,41 @@
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-
+/******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-
+/******/
 /******/ 		// Check if module is in cache
 /******/ 		if(installedModules[moduleId])
 /******/ 			return installedModules[moduleId].exports;
-
+/******/
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			exports: {},
 /******/ 			id: moduleId,
 /******/ 			loaded: false
 /******/ 		};
-
+/******/
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-
+/******/
 /******/ 		// Flag the module as loaded
 /******/ 		module.loaded = true;
-
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-
-
+/******/
+/******/
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
-
+/******/
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-
+/******/
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
-
+/******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
 /******/ })
@@ -54,8 +54,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
-
 	/**
 	 * Rope chart implementation.
 	 *
@@ -63,14 +61,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {String} selection - any valid d3 selector. This selector is used to place the chart.
 	 * @return {RopeChart}
 	 */
-
+	
 	// d3 is an external, it won't be bundled in
 	var d3 = __webpack_require__(1);
 	var dtip = __webpack_require__(2)(d3);
 	__webpack_require__(3);
 	__webpack_require__(7);
-
-	var RopeChart = function RopeChart(selection) {
+	
+	var RopeChart = function (selection) {
 	  var chart = {};
 	  // settings
 	  var svg,
@@ -89,10 +87,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      showTooltip = true,
 	      handleTooltipExternally = false,
 	      tooltipLabel = "&#8505;",
-	      valueDisplayFormatter = function valueDisplayFormatter(d) {
+	      valueDisplayFormatter = function (d) {
 	    return Math.round(d);
 	  };
-
+	
 	  // css class names
 	  var d3TipClass = "d3-tip-mouse",
 	      topRopeClass = "top-rope",
@@ -101,25 +99,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	      bottomKnotClass = "bottom-knot",
 	      focusKnotClass = "focus-knot",
 	      thresholdKnotClass = "threshold-knot";
-
+	
 	  var yScale, ropeX, max, min, thresholdValue, focusName, focus, data, multipleMaxes, multipleMins, nodes;
-
-	  var valueAccessor = function valueAccessor(d) {
+	
+	  var valueAccessor = function (d) {
 	    return Number(d.value);
 	  };
-	  var nameAccessor = function nameAccessor(d) {
+	  var nameAccessor = function (d) {
 	    return d.name;
 	  };
-	  var thresholdGenerator = function thresholdGenerator(chartData) {
+	  var thresholdGenerator = function (chartData) {
 	    return d3.mean(chartData, chart.valueAccessor());
 	  };
-	  var tooltipContentFunc = function tooltipContentFunc(d) {
+	  var tooltipContentFunc = function (d) {
 	    var tooltipContent = "<label>Name: </label>" + d.label;
 	    tooltipContent += "<br/><label>Value: " + valueDisplayFormatter(d.value);
-
+	
 	    return tooltipContent;
 	  };
-
+	
 	  /**
 	   * Render the RopeChart instance. Simply renders chart when called with no parameter. Updates data, then renders, if called with parameter
 	   * @method render
@@ -129,14 +127,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @return {RopeChart} 
 	   */
 	  chart.render = function (_) {
-
+	
 	    // initialize svg
 	    svg = d3.select(selection).html('').classed('Rope-Chart', true).append('svg');
 	    var ttId = d3.select(selection).attr('id') + '-tip';
 	    var tt = d3.tip().attr("class", d3TipClass).attr("id", ttId).html(tooltipContentFunc).offset(ttOffset).positionAnchor("mouse");
-
+	
 	    if (!!arguments.length) chart.data(_);
-
+	
 	    // size the svg, and reset the center         
 	    svg.attr("width", function () {
 	      return svgWidth;
@@ -144,7 +142,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    svg.attr("height", function () {
 	      return svgHeight;
 	    });
-
+	
 	    // derive bar data
 	    var barX = ropeX - ropeWidth / 2;
 	    var bottomBar = {
@@ -162,7 +160,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      className: flipDirection ? bottomRopeClass : topRopeClass
 	    };
 	    var bars = [bottomBar, topBar];
-
+	
 	    // render bar svg
 	    // update
 	    var barSvg = svg.selectAll('rect').data(bars).attr('x', function (d) {
@@ -190,7 +188,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    // exit
 	    barSvg.exit().remove();
-
+	
 	    // render nodes svg
 	    // update
 	    var circleSvg = svg.selectAll('circle').data(nodes).attr('cx', function (d) {
@@ -214,7 +212,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    // exit
 	    circleSvg.exit().remove();
-
+	
 	    // render value text
 	    // update
 	    var valueText = svg.selectAll('text.value').data(nodes).attr('text-anchor', function (d) {
@@ -248,7 +246,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    // exit
 	    valueText.exit().remove();
-
+	
 	    // render label text
 	    // update
 	    var labelText = svg.selectAll('text.label').data(nodes).attr('text-anchor', function (d) {
@@ -264,7 +262,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }).text(function (d) {
 	      return d.label;
 	    });
-
+	
 	    // enter
 	    labelText.enter().append('text').attr('class', function (d) {
 	      return d.className + '-label';
@@ -287,19 +285,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    // exit
 	    labelText.exit().remove();
-
+	
 	    if (!handleTooltipExternally) {
 	      // remove previous tooltip if there was one for this chart
 	      if (!d3.select('#' + tt.attr("id")).empty()) d3.select('#' + tt.attr("id")).remove();
-
+	
 	      var tippables = svg.selectAll("tspan.tooltip-label");
 	      tippables.call(tt);
 	      tippables.on("mouseover", tt.show).on("mouseout", tt.hide).on("mousemove", tt.updatePosition);
 	    }
-
+	
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Get/set the data for the RopeChart instance
 	   * @method data
@@ -313,7 +311,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!arguments.length) {
 	      return data;
 	    }
-
+	
 	    data = _;
 	    max = data.filter(function (d) {
 	      return chart.valueAccessor()(d) === d3.max(data, chart.valueAccessor());
@@ -324,32 +322,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	    thresholdValue = thresholdGenerator(data);
 	    multipleMaxes = chart.getMultipleMaxes();
 	    multipleMins = chart.getMultipleMins();
-
+	
 	    yScale = d3.scale.linear().domain([min.value, max.value]).range([svgHeight - chartGutter, chartGutter]);
-
+	
 	    ropeX = chart.getRopeX();
-
+	
 	    nodes = chart.generateNodes();
-
+	
 	    return chart;
 	  };
-
+	
 	  chart.getMultipleMaxes = function () {
-	    var maxes = data.filter(function (d) {
-	      return chart.valueAccessor()(d) === chart.valueAccessor()(max);
-	    });
+	    var maxes = data.filter(d => chart.valueAccessor()(d) === chart.valueAccessor()(max));
 	    if (maxes.length === 1) return false;
 	    return maxes;
 	  };
-
+	
 	  chart.getMultipleMins = function () {
-	    var mins = data.filter(function (d) {
-	      return chart.valueAccessor()(d) === chart.valueAccessor()(min);
-	    });
+	    var mins = data.filter(d => chart.valueAccessor()(d) === chart.valueAccessor()(min));
 	    if (mins.length === 1) return false;
 	    return mins;
 	  };
-
+	
 	  /**
 	   * Get/set the y-scale
 	   * @method yScale
@@ -364,10 +358,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return yScale;
 	    }
 	    yScale = _;
-
+	
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Get/set the name/key used to access the "focus" item for the chart. The "focus" is the member of the data set that you want to compare to the rest of the group.
 	   * @method width
@@ -384,7 +378,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    focusName = _;
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Get/set the width of the chart SVG
 	   * @method width
@@ -401,7 +395,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    svgWidth = _;
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Get/set the height of the chart SVG
 	   * @method height
@@ -416,14 +410,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return svgHeight;
 	    }
 	    svgHeight = _;
-
+	
 	    return chart;
 	  };
-
+	
 	  chart.getRopeX = function () {
 	    return svgWidth * (marginLeftPercentage / 100);
 	  };
-
+	
 	  /**
 	  * Get/set the position of the rope horizontally from the left
 	  * @method marginLeftPercentage
@@ -438,10 +432,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return marginLeftPercentage;
 	    }
 	    marginLeftPercentage = _;
-
+	
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Get/set the radius of "knot" circles at max, min, and focus value positions.
 	   * @method knotRadius
@@ -457,10 +451,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    knotRadius = _;
 	    chartGutter = knotRadius;
-
+	
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Get/set the width of the "rope" rectangle.
 	   * @method ropeWidth
@@ -477,7 +471,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ropeWidth = _;
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Get/set the chart gutter to account for the knot radius
 	   * @method chartGutter
@@ -494,7 +488,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    chartGutter = _;
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Get/set boolean that "flips direction" of the "good"/"bad" sides of threshold. By default the top section is "good" (green). If flipDirection is true, then top section becomes "bad" (red).
 	   * @method flipDirection
@@ -511,7 +505,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    flipDirection = _;
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Get/set boolean that toggles display of a "knot" for the threshold.
 	   * @method showThreshold
@@ -528,7 +522,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    showThreshold = _;
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Get/set label for threshold knot location.
 	   * @method thresholdLabel
@@ -545,7 +539,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    thresholdLabel = _;
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Get/set the threshold generator function
 	   * @method yScale
@@ -558,10 +552,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  chart.thresholdGenerator = function (_) {
 	    if (!arguments.length) return thresholdGenerator;
 	    thresholdGenerator = _;
-
+	
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Get/set the margin between labels and "knot" circles.
 	   * @method labelMargin
@@ -578,7 +572,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    labelMargin = _;
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Get/set the function used to access "value" property from each data record. Defaults to: 
 	   * ```
@@ -598,7 +592,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    valueAccessor = _;
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Get/set the function used to access "name" property from each data record. Defaults to: 
 	   * ```
@@ -618,7 +612,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    nameAccessor = _;
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Get/set the function to format the display of data values shown next to the knots
 	   * @method valueDisplayFormatter
@@ -631,10 +625,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  chart.valueDisplayFormatter = function (_) {
 	    if (!arguments.length) return valueDisplayFormatter;
 	    valueDisplayFormatter = _;
-
+	
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Get/set function used to set the tooltip of each data knot. Defaults to: 
 	   * ```
@@ -655,10 +649,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  chart.tooltipContent = function (_) {
 	    if (!arguments.length) return tooltipContentFunc;
 	    tooltipContentFunc = _;
-
+	
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Set whether or not to show the tooltip. The tooltip gets displayed next to the threshold knot
 	   * @method showTooltip
@@ -671,10 +665,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  chart.showTooltip = function (_) {
 	    if (!arguments.length) return showTooltip;
 	    showTooltip = _;
-
+	
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Get/Set whether or not the tooltip generation will be handled outside the chart
 	   * This can be useful if the standard d3-tip solution doesn't fit your needs
@@ -688,10 +682,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  chart.handleTooltipExternally = function (_) {
 	    if (!arguments.length) return handleTooltipExternally;
 	    handleTooltipExternally = _;
-
+	
 	    return chart;
 	  };
-
+	
 	  /**
 	   * Set the text, that when hovered over will display the tooltip. The text gets displayed next to the threshold knot. It accepts unicode codes, so you can include icons from something like font-awesome if you have the unicode. 
 	   * @method tooltipLabel
@@ -704,22 +698,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	  chart.tooltipLabel = function (_) {
 	    if (!arguments.length) return tooltipLabel;
 	    tooltipLabel = _;
-
+	
 	    return chart;
 	  };
-
+	
 	  chart.generateNodes = function () {
 	    // derive node data & configure scale
 	    var topNode = chart.generateNode(max, topKnotClass, 2, 'top');
 	    var bottomNode = chart.generateNode(min, bottomKnotClass, 2, 'bottom');
-
+	
 	    var nodes, adjustedNodes;
-
+	
 	    focus = data.filter(function (d) {
 	      return chart.nameAccessor()(d) === chart.focusName();
 	    })[0];
 	    var focusNode = chart.generateNode(focus, focusKnotClass, 1, 'focus');
-
+	
 	    if (chart.showThreshold()) {
 	      var ttLabel = "";
 	      if (showTooltip) ttLabel = tooltipLabel;
@@ -741,24 +735,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	      nodes = [topNode, bottomNode, focusNode];
 	      adjustedNodes = chart.adjustForOverlapAndMultiples(topNode, bottomNode, focusNode);
 	    }
-
+	
 	    if (flipDirection) {
 	      var topValue = adjustedNodes[0].value,
 	          topLabel = adjustedNodes[0].label,
 	          bottomValue = adjustedNodes[1].value,
 	          bottomLabel = adjustedNodes[1].label;
-
+	
 	      adjustedNodes[0].value = bottomValue;
 	      adjustedNodes[0].label = bottomLabel;
 	      adjustedNodes[1].value = topValue;
 	      adjustedNodes[1].label = topLabel;
 	    }
-
+	
 	    return adjustedNodes;
 	  };
-
+	
 	  chart.generateNode = function (datum, className, labelOrderPriority, nodeName) {
-
+	
 	    return {
 	      x: ropeX,
 	      y: yScale(chart.valueAccessor()(datum)),
@@ -772,9 +766,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      nodeName: nodeName
 	    };
 	  };
-
+	
 	  chart.adjustForOverlapAndMultiples = function (top, bottom, focus, threshold) {
-
+	
 	    // if the focus is the max or min, show the max or min as the focus
 	    // if there are multiple maxes or mins show all of the maxes or mins
 	    var focusIsMax = false,
@@ -787,9 +781,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        focus = undefined;
 	      } else {
 	        top.label = "Multiple: ";
-	        multipleMaxes.forEach(function (d) {
-	          return top.label += chart.nameAccessor()(d) + ", ";
-	        });
+	        multipleMaxes.forEach(d => top.label += chart.nameAccessor()(d) + ", ");
 	        top.label = top.label.substring(0, top.label.length - 2);
 	      }
 	    }
@@ -799,7 +791,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        focus = undefined;
 	        top.className = "max-focus-knot";
 	      }
-
+	
 	    if (multipleMins) {
 	      if (focus && focus.value === bottom.value) {
 	        focusIsMin = true;
@@ -808,9 +800,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        focus = undefined;
 	      } else {
 	        bottom.label = "Multiple: ";
-	        multipleMins.forEach(function (d) {
-	          return bottom.label += chart.nameAccessor()(d) + ", ";
-	        });
+	        multipleMins.forEach(d => bottom.label += chart.nameAccessor()(d) + ", ");
 	        bottom.label = bottom.label.substring(0, bottom.label.length - 2);
 	      }
 	    }
@@ -820,11 +810,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        focus = undefined;
 	        bottom.className = "min-focus-knot";
 	      }
-
+	
 	    // Node overlapping algorithm for top/threshold/focus, or bottom/threshold/focus overlap
 	    var multiNodeOverlap = false;
 	    if (chart.showThreshold() && !focusIsMax && !focusIsMin) {
-
+	
 	      var topOverlapNodes = [top, threshold, focus];
 	      var bottomOverlapNodes = [bottom, threshold, focus];
 	      if (!nodesHaveMinimumSpace(topOverlapNodes)) {
@@ -841,10 +831,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        focus.adjustTextOverlap = stackedPositionFromOrientation(stackedIndex.focus, focus.y, stackFromBottom);
 	      }
 	    }
-
+	
 	    // Normal overlapping algorithm for top/focus, bottom/focus, threshold/focus, threshold/top(focus=top), threshold/bottom(focus=bottom)
 	    if (!multiNodeOverlap) {
-
+	
 	      // fix focus knot overlap with top/bottom
 	      if (!focusIsMax && !focusIsMin) {
 	        var topFocusOverlap = chart.nodeIsOverlapping(focus, top);
@@ -858,7 +848,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            focus.adjustTextOverlap = bottomFocusOverlap;
 	          } else if (threshold) {
 	            var thresholdOverlap = chart.nodeIsOverlapping(focus, threshold);
-
+	
 	            if (threshold.value === focus.value) {
 	              threshold.adjustTextOverlap = thresholdOverlap / 2;
 	              focus.adjustTextOverlap = -thresholdOverlap / 2;
@@ -870,7 +860,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      // fix threshold knot overlap with top/bottom or focus knot
 	      else if (threshold) {
-
+	
 	          if (focusIsMax) {
 	            var thresholdTopOverlap = chart.nodeIsOverlapping(threshold, top);
 	            threshold.adjustTextOverlap = thresholdTopOverlap;
@@ -879,7 +869,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            threshold.adjustTextOverlap = thresholdBottomOverlap;
 	          } else {
 	            var thresholdOverlap = chart.nodeIsOverlapping(focus, threshold);
-
+	
 	            if (threshold.value === focus.value) {
 	              threshold.adjustTextOverlap = thresholdOverlap / 2;
 	              focus.adjustTextOverlap = -thresholdOverlap / 2;
@@ -890,33 +880,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	        }
 	    }
-
+	
 	    // put back together the adjusted nodes
 	    var adjustedNodes = [top, bottom];
 	    if (chart.showThreshold()) adjustedNodes.push(threshold);
 	    if (focus) adjustedNodes.push(focus);
-
+	
 	    return adjustedNodes;
 	  };
-
+	
 	  chart.nodeIsOverlapping = function (node, compareToNode) {
 	    // if the center of the knot is within 2 knot radii of the other knot center
 	    if (node.y <= compareToNode.y + 2 * knotRadius && node.y >= compareToNode.y - 2 * knotRadius) {
 	      var nodeDistance = compareToNode.y - node.y;
-
+	
 	      // node is greater than compareToNode
 	      if (nodeDistance < 0) return 2 * knotRadius - Math.abs(nodeDistance);else if (nodeDistance > 0) return -(2 * knotRadius - nodeDistance);else return 2 * knotRadius;
 	    }
-
+	
 	    return false;
 	  };
-
+	
 	  // if the distance between any two of the nodes is >= the minimum distance needed for no overlap, then the nodesHaveMinimumSpace
 	  function nodesHaveMinimumSpace(nodes) {
 	    var nodeLength = nodes.length;
 	    var inOverlapRange = true;
 	    var minimumSpace = (nodeLength - 1) * 2 * knotRadius;
-
+	
 	    for (var i = 0; i < nodeLength; i++) {
 	      var yPosition = nodes[i].y;
 	      for (var j = 0; j < nodeLength; j++) {
@@ -927,16 +917,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	          break;
 	        }
 	      }
-
+	
 	      if (inOverlapRange === false) break;
 	    }
-
+	
 	    return !inOverlapRange;
 	  }
-
+	
 	  // Stack the nodes ascending by value, and higher priority first
 	  function getStackedIndex(nodes) {
-
+	
 	    var sortedNodes = nodes.sort(function (a, b) {
 	      if (a.value > b.value) return 1;
 	      if (a.value < b.value) return -1;
@@ -946,15 +936,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return 0;
 	      }
 	    });
-
+	
 	    var keyedNodes = {};
 	    sortedNodes.forEach(function (node, index) {
 	      keyedNodes[node.nodeName] = index;
 	    });
-
+	
 	    return keyedNodes;
 	  }
-
+	
 	  // Get the actual Y position to place the stacked text
 	  function stackedPositionFromOrientation(overlapIndex, nodePosition, bottom) {
 	    if (!bottom) {
@@ -963,10 +953,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return svgHeight - 2 * knotRadius * overlapIndex - nodePosition - chartGutter;
 	    }
 	  }
-
+	
 	  return chart;
 	};
-
+	
 	module.exports = RopeChart;
 
 /***/ },
@@ -983,7 +973,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// Copyright (c) 2013 Justin Palmer
 	//
 	// Tooltips for d3.js SVG visualizations
-
+	
 	(function (root, factory) {
 	  if (true) {
 	    // AMD. Register as an anonymous module with d3 as a dependency.
@@ -999,7 +989,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    factory(root.d3)
 	  }
 	}(this, function (d3) {
-
+	
 	  // Public - contructs a new tooltip
 	  //
 	  // Returns a tip
@@ -1012,20 +1002,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        point     = null,
 	        target    = null,
 	        positionAnchor = d3_tip_positionAnchor;
-
+	
 	    function tip(vis) {
 	      svg = getSVGNode(vis)
 	      point = svg.createSVGPoint()
 	      document.body.appendChild(node)
 	    }
-
+	
 	    // Public - show the tooltip on the screen
 	    //
 	    // Returns a tip
 	    tip.show = function() {
 	      var args = Array.prototype.slice.call(arguments)
 	      if(args[args.length - 1] instanceof SVGElement) target = args.pop()
-
+	
 	      var content = html.apply(this, args),
 	          poffset = offset.apply(this, args),
 	          dir     = direction.apply(this, args),
@@ -1034,10 +1024,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	          coords,
 	          scrollTop  = document.documentElement.scrollTop || document.body.scrollTop,
 	          scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
-
+	
 	      nodel.html(content)
 	        .style({ opacity: 1, 'pointer-events': 'all', 'z-index': 100, display: 'block' })
-
+	
 	      while(i--) nodel.classed(directions[i], false)
 	      coords = direction_callbacks.get(dir).apply(this)
 	      var rightEdge =  coords.left + poffset[1] + scrollLeft + nodel.property('offsetWidth');
@@ -1047,11 +1037,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var leftEdge = coords.left + poffset[1] + scrollLeft;
 	      var overFlowLeft = tipOverFlowLeft(leftEdge);
 	      var topEdge = coords.top + poffset[0] + scrollTop;
-
+	
 	      if(overFlowRight) leftEdge -= overFlowRight;
 	      if(overFlowLeft) leftEdge += overFlowLeft;
 	      if(overFlowBottom) topEdge -= overFlowBottom;
-
+	
 	      if(positionAnchor() === 'shape') {
 	        nodel.classed(dir, true).style({
 	          top: topEdge + 'px',
@@ -1065,7 +1055,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      
 	      return tip
 	    }
-
+	
 	    // Public - hide the tooltip
 	    //
 	    // Returns a tip
@@ -1074,7 +1064,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      nodel.style({ opacity: 0, 'pointer-events': 'none', 'z-index': -1, display: 'none' })
 	      return tip
 	    }
-
+	
 	    //Public - update position of tooltip based on mouse
 	    //
 	    // Returns a tip
@@ -1087,7 +1077,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var overFlowRight = tipOverFlowRight(rightEdge);
 	      var overFlowLeft = tipOverFlowLeft(mouseX);
 	      var overFlowBottom = tipOverFlowBottom(bottomEdge);
-
+	
 	      if(v.length) {
 	        mouseX += v[0];
 	        mouseY += v[1];
@@ -1095,14 +1085,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if(overFlowRight) mouseX -= overFlowRight;
 	      if(overFlowLeft) mouseX += overFlowLeft;
 	      if(overFlowBottom) mouseY -= overFlowBottom;
-
+	
 	      nodel.style({
 	        top: mouseY + 'px',
 	        left: mouseX + 'px'
 	      });
 	      return tip;
 	    };
-
+	
 	    function tipOverFlowRight(rightEdge) {
 	      var windowWidth = window.outerWidth;
 	      if(rightEdge > windowWidth)
@@ -1110,7 +1100,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      else
 	        return false;
 	    }
-
+	
 	    function tipOverFlowLeft(leftEdge) {
 	      var windowWidth = window.outerWidth;
 	      if(leftEdge < 0)
@@ -1118,7 +1108,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      else
 	        return false;
 	    }
-
+	
 	    function tipOverFlowBottom(bottomEdge) {
 	      var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
 	      var windowHeight = window.innerHeight + scrollTop;
@@ -1140,10 +1130,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var args =  Array.prototype.slice.call(arguments)
 	        d3.selection.prototype.attr.apply(d3.select(node), args)
 	      }
-
+	
 	      return tip
 	    }
-
+	
 	    // Public: Proxy style calls to the d3 tip container.  Sets or gets a style value.
 	    //
 	    // n - name of the property
@@ -1157,10 +1147,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var args =  Array.prototype.slice.call(arguments)
 	        d3.selection.prototype.style.apply(d3.select(node), args)
 	      }
-
+	
 	      return tip
 	    }
-
+	
 	    // Public: Set or get the direction of the tooltip
 	    //
 	    // v - One of n(north), s(south), e(east), or w(west), nw(northwest),
@@ -1170,10 +1160,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    tip.direction = function(v) {
 	      if (!arguments.length) return direction
 	      direction = v == null ? v : d3.functor(v)
-
+	
 	      return tip
 	    }
-
+	
 	    // Public: Set or get the position anchor of the tool tip.
 	    //
 	    // v - either 'ordinal' - the default position that uses ordinal positioning
@@ -1183,10 +1173,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    tip.positionAnchor = function(v) {
 	      if (!arguments.length) return positionAnchor;
 	      positionAnchor = v == null ? v : d3.functor(v);
-
+	
 	      return tip;
 	    };
-
+	
 	    // Public: Sets or gets the offset of the tip
 	    //
 	    // v - Array of [x, y] offset
@@ -1195,10 +1185,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    tip.offset = function(v) {
 	      if (!arguments.length) return offset
 	      offset = v == null ? v : d3.functor(v)
-
+	
 	      return tip
 	    }
-
+	
 	    // Public: sets or gets the html value of the tooltip
 	    //
 	    // v - String value of the tip
@@ -1207,15 +1197,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    tip.html = function(v) {
 	      if (!arguments.length) return html
 	      html = v == null ? v : d3.functor(v)
-
+	
 	      return tip
 	    }
-
+	
 	    function d3_tip_direction() { return 'n' }
 	    function d3_tip_offset() { return [0, 0] }
 	    function d3_tip_html() { return ' ' }
 	    function d3_tip_positionAnchor() { return 'shape';}
-
+	
 	    var direction_callbacks = d3.map({
 	      n:  direction_n,
 	      s:  direction_s,
@@ -1226,9 +1216,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      sw: direction_sw,
 	      se: direction_se
 	    }),
-
+	
 	    directions = direction_callbacks.keys()
-
+	
 	    function direction_n() {
 	      var bbox = getScreenBBox()
 	      return {
@@ -1236,7 +1226,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        left: bbox.n.x - node.offsetWidth / 2
 	      }
 	    }
-
+	
 	    function direction_s() {
 	      var bbox = getScreenBBox()
 	      return {
@@ -1244,7 +1234,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        left: bbox.s.x - node.offsetWidth / 2
 	      }
 	    }
-
+	
 	    function direction_e() {
 	      var bbox = getScreenBBox()
 	      return {
@@ -1252,7 +1242,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        left: bbox.e.x
 	      }
 	    }
-
+	
 	    function direction_w() {
 	      var bbox = getScreenBBox()
 	      return {
@@ -1260,7 +1250,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        left: bbox.w.x - node.offsetWidth
 	      }
 	    }
-
+	
 	    function direction_nw() {
 	      var bbox = getScreenBBox()
 	      return {
@@ -1268,7 +1258,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        left: bbox.nw.x - node.offsetWidth
 	      }
 	    }
-
+	
 	    function direction_ne() {
 	      var bbox = getScreenBBox()
 	      return {
@@ -1276,7 +1266,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        left: bbox.ne.x
 	      }
 	    }
-
+	
 	    function direction_sw() {
 	      var bbox = getScreenBBox()
 	      return {
@@ -1284,7 +1274,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        left: bbox.sw.x - node.offsetWidth
 	      }
 	    }
-
+	
 	    function direction_se() {
 	      var bbox = getScreenBBox()
 	      return {
@@ -1292,7 +1282,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        left: bbox.e.x
 	      }
 	    }
-
+	
 	    function initNode() {
 	      var node = d3.select(document.createElement('div'))
 	      node.style({
@@ -1302,18 +1292,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        'pointer-events': 'none',
 	        'box-sizing': 'border-box'
 	      })
-
+	
 	      return node.node()
 	    }
-
+	
 	    function getSVGNode(el) {
 	      el = el.node()
 	      if(el.tagName.toLowerCase() === 'svg')
 	        return el
-
+	
 	      return el.ownerSVGElement
 	    }
-
+	
 	    // Private - gets the screen coordinates of a shape
 	    //
 	    // Given a shape on the screen, will return an SVGPoint for the directions
@@ -1329,11 +1319,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // Returns an Object {n, s, e, w, nw, sw, ne, se}
 	    function getScreenBBox() {
 	      var targetel   = target || d3.event.target;
-
+	
 	      while ('undefined' === typeof targetel.getScreenCTM && 'undefined' === targetel.parentNode) {
 	          targetel = targetel.parentNode;
 	      }
-
+	
 	      var bbox       = {},
 	          matrix     = targetel.getScreenCTM(),
 	          tbbox      = targetel.getBBox(),
@@ -1341,7 +1331,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          height     = tbbox.height,
 	          x          = tbbox.x,
 	          y          = tbbox.y
-
+	
 	      point.x = x
 	      point.y = y
 	      bbox.nw = point.matrixTransform(matrix)
@@ -1360,10 +1350,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      bbox.n = point.matrixTransform(matrix)
 	      point.y += height
 	      bbox.s = point.matrixTransform(matrix)
-
+	
 	      return bbox
 	    }
-
+	
 	    return tip
 	  };
 	  return d3.tip
@@ -1375,7 +1365,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
-
+	
 	// load the styles
 	var content = __webpack_require__(4);
 	if(typeof content === 'string') content = [[module.id, content, '']];
@@ -1402,11 +1392,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports = module.exports = __webpack_require__(5)();
 	// imports
-
-
+	
+	
 	// module
 	exports.push([module.id, ".Rope-Chart .top-knot {\n  fill: #7DD0D4; }\n\n.Rope-Chart .bottom-knot {\n  fill: #7DD0D4; }\n\n.Rope-Chart .focus-knot {\n  fill: #338ED8;\n  stroke: #C55353;\n  stroke-width: 2px; }\n\n.Rope-Chart .max-focus-knot {\n  fill: #338ED8;\n  stroke: #C55353;\n  stroke-width: 2px; }\n\n.Rope-Chart .min-focus-knot {\n  fill: #338ED8;\n  stroke: #C55353;\n  stroke-width: 2px; }\n\n.Rope-Chart .threshold-knot {\n  fill: #105B98; }\n\n.Rope-Chart .bottom-rope {\n  fill: #B1B1B1; }\n\n.Rope-Chart .top-rope {\n  fill: #E4E4E4; }\n\n.Rope-Chart tspan.tooltip-label {\n  fill: #6482a5; }\n  .Rope-Chart tspan.tooltip-label:hover {\n    fill: #30619a; }\n", ""]);
-
+	
 	// exports
 
 
@@ -1421,7 +1411,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// css base code, injected by the css-loader
 	module.exports = function() {
 		var list = [];
-
+	
 		// return the list of modules as css string
 		list.toString = function toString() {
 			var result = [];
@@ -1435,7 +1425,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 			return result.join("");
 		};
-
+	
 		// import a list of modules into the list
 		list.i = function(modules, mediaQuery) {
 			if(typeof modules === "string")
@@ -1491,23 +1481,23 @@ return /******/ (function(modules) { // webpackBootstrap
 		singletonElement = null,
 		singletonCounter = 0,
 		styleElementsInsertedAtTop = [];
-
+	
 	module.exports = function(list, options) {
 		if(false) {
 			if(typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
 		}
-
+	
 		options = options || {};
 		// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
 		// tags it will allow on a page
 		if (typeof options.singleton === "undefined") options.singleton = isOldIE();
-
+	
 		// By default, add <style> tags to the bottom of <head>.
 		if (typeof options.insertAt === "undefined") options.insertAt = "bottom";
-
+	
 		var styles = listToStyles(list);
 		addStylesToDom(styles, options);
-
+	
 		return function update(newList) {
 			var mayRemove = [];
 			for(var i = 0; i < styles.length; i++) {
@@ -1530,7 +1520,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		};
 	}
-
+	
 	function addStylesToDom(styles, options) {
 		for(var i = 0; i < styles.length; i++) {
 			var item = styles[i];
@@ -1552,7 +1542,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		}
 	}
-
+	
 	function listToStyles(list) {
 		var styles = [];
 		var newStyles = {};
@@ -1570,7 +1560,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 		return styles;
 	}
-
+	
 	function insertStyleElement(options, styleElement) {
 		var head = getHeadElement();
 		var lastStyleElementInsertedAtTop = styleElementsInsertedAtTop[styleElementsInsertedAtTop.length - 1];
@@ -1589,7 +1579,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");
 		}
 	}
-
+	
 	function removeStyleElement(styleElement) {
 		styleElement.parentNode.removeChild(styleElement);
 		var idx = styleElementsInsertedAtTop.indexOf(styleElement);
@@ -1597,24 +1587,24 @@ return /******/ (function(modules) { // webpackBootstrap
 			styleElementsInsertedAtTop.splice(idx, 1);
 		}
 	}
-
+	
 	function createStyleElement(options) {
 		var styleElement = document.createElement("style");
 		styleElement.type = "text/css";
 		insertStyleElement(options, styleElement);
 		return styleElement;
 	}
-
+	
 	function createLinkElement(options) {
 		var linkElement = document.createElement("link");
 		linkElement.rel = "stylesheet";
 		insertStyleElement(options, linkElement);
 		return linkElement;
 	}
-
+	
 	function addStyle(obj, options) {
 		var styleElement, update, remove;
-
+	
 		if (options.singleton) {
 			var styleIndex = singletonCounter++;
 			styleElement = singletonElement || (singletonElement = createStyleElement(options));
@@ -1640,9 +1630,9 @@ return /******/ (function(modules) { // webpackBootstrap
 				removeStyleElement(styleElement);
 			};
 		}
-
+	
 		update(obj);
-
+	
 		return function updateStyle(newObj) {
 			if(newObj) {
 				if(newObj.css === obj.css && newObj.media === obj.media && newObj.sourceMap === obj.sourceMap)
@@ -1653,19 +1643,19 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		};
 	}
-
+	
 	var replaceText = (function () {
 		var textStore = [];
-
+	
 		return function (index, replacement) {
 			textStore[index] = replacement;
 			return textStore.filter(Boolean).join('\n');
 		};
 	})();
-
+	
 	function applyToSingletonTag(styleElement, index, remove, obj) {
 		var css = remove ? "" : obj.css;
-
+	
 		if (styleElement.styleSheet) {
 			styleElement.styleSheet.cssText = replaceText(index, css);
 		} else {
@@ -1679,15 +1669,15 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		}
 	}
-
+	
 	function applyToTag(styleElement, obj) {
 		var css = obj.css;
 		var media = obj.media;
-
+	
 		if(media) {
 			styleElement.setAttribute("media", media)
 		}
-
+	
 		if(styleElement.styleSheet) {
 			styleElement.styleSheet.cssText = css;
 		} else {
@@ -1697,22 +1687,22 @@ return /******/ (function(modules) { // webpackBootstrap
 			styleElement.appendChild(document.createTextNode(css));
 		}
 	}
-
+	
 	function updateLink(linkElement, obj) {
 		var css = obj.css;
 		var sourceMap = obj.sourceMap;
-
+	
 		if(sourceMap) {
 			// http://stackoverflow.com/a/26603875
 			css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
 		}
-
+	
 		var blob = new Blob([css], { type: "text/css" });
-
+	
 		var oldSrc = linkElement.href;
-
+	
 		linkElement.href = URL.createObjectURL(blob);
-
+	
 		if(oldSrc)
 			URL.revokeObjectURL(oldSrc);
 	}
@@ -1723,7 +1713,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
-
+	
 	// load the styles
 	var content = __webpack_require__(8);
 	if(typeof content === 'string') content = [[module.id, content, '']];
@@ -1750,11 +1740,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports = module.exports = __webpack_require__(5)();
 	// imports
-
-
+	
+	
 	// module
 	exports.push([module.id, ".d3-tip-mouse {\n  font-size: 13px;\n  line-height: 16px;\n  padding: 8px;\n  background: rgba(0, 0, 0, 0.8);\n  color: #fff;\n  border-radius: 2px;\n  pointer-events: none;\n  z-index: 100;\n  outline: none; }\n  .d3-tip-mouse label {\n    font-family: 'Abel', Helvetica, Arial, sans-serif;\n    font-weight: 400;\n    font-size: 13px;\n    line-height: 16px;\n    color: #fff;\n    display: inline; }\n\n.d3-tip {\n  font-size: 13px;\n  line-height: 16px;\n  padding: 8px;\n  background: rgba(0, 0, 0, 0.8);\n  color: #fff;\n  border-radius: 2px;\n  pointer-events: none;\n  z-index: 100;\n  outline: none;\n  /* Creates a small triangle extender for the tooltip */\n  /* Northward tooltips */\n  /* Eastward tooltips */\n  /* Southward tooltips */\n  /* Westward tooltips */ }\n  .d3-tip label {\n    font-family: 'Abel', Helvetica, Arial, sans-serif;\n    font-weight: 400; }\n  .d3-tip:after {\n    box-sizing: border-box;\n    display: inline;\n    font-size: 10px;\n    width: 100%;\n    line-height: 1;\n    color: rgba(0, 0, 0, 0.8);\n    position: absolute;\n    pointer-events: none;\n    z-index: 100; }\n  .d3-tip.n:after {\n    content: \"\\25BC\";\n    top: auto;\n    bottom: -7px;\n    left: 0;\n    text-align: center; }\n  .d3-tip.ne:after {\n    content: \"\\25BC\";\n    top: auto;\n    bottom: -7px;\n    left: 0;\n    text-align: left;\n    padding-left: 8px; }\n  .d3-tip.nw:after {\n    content: \"\\25BC\";\n    top: auto;\n    bottom: -7px;\n    left: 0;\n    text-align: right;\n    padding-right: 8px; }\n  .d3-tip.e:after {\n    content: \"\\25C0\";\n    margin: -4px 0 0 0;\n    top: 50%;\n    left: -7px; }\n  .d3-tip.s:after {\n    content: \"\\25B2\";\n    margin: 0 0 1px 0;\n    top: -8px;\n    left: 0;\n    text-align: center; }\n  .d3-tip.w:after {\n    content: \"\\25B6\";\n    margin: -4px 0 0 -2px;\n    top: 50%;\n    left: 100%; }\n", ""]);
-
+	
 	// exports
 
 
@@ -1762,3 +1752,4 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ ])
 });
 ;
+//# sourceMappingURL=ropeChart.js.map

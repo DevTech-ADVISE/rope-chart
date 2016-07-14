@@ -31,7 +31,7 @@ var RopeChart = function (selection){
       showTooltip = true,
       handleTooltipExternally = false,
       tooltipLabel = "&#8505;",
-      valueDisplayFormatter = function(d) { return d; };
+      valueDisplayFormatter = function(d) { return Math.round(d); };
 
   // css class names
   var d3TipClass = "d3-tip-mouse",
@@ -49,7 +49,7 @@ var RopeChart = function (selection){
   var thresholdGenerator = function(chartData) { return d3.mean(chartData, chart.valueAccessor());};
   var tooltipContentFunc = function(d) {
     var tooltipContent = "<label>Name: </label>" + d.label;
-    tooltipContent += "<br/><label>Value: " + d.value;
+    tooltipContent += "<br/><label>Value: " + valueDisplayFormatter(d.value);
 
     return tooltipContent;
   };
@@ -750,11 +750,10 @@ var RopeChart = function (selection){
           focus.adjustTextOverlap = topFocusOverlap;
         }
         // the focus is in overlap range of the bottom knot
-        if(bottomFocusOverlap !== false) {
+        else if(bottomFocusOverlap !== false) {
           focus.adjustTextOverlap = bottomFocusOverlap;
         }
-
-        if(threshold) {
+        else if(threshold) {
           var thresholdOverlap = chart.nodeIsOverlapping(focus, threshold);
 
           if(threshold.value === focus.value) {
