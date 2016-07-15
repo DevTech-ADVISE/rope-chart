@@ -36,7 +36,7 @@ describe('RopeChart', () => {
 
     var max = d3.max(data, RopeChart.valueAccessor());
     var min = d3.min(data, RopeChart.valueAccessor());
-    var threshold = d3.round(d3.mean(data, RopeChart.valueAccessor()));
+    var threshold = d3.mean(data, RopeChart.valueAccessor());
 
     it('should have a height set for the chart', () => {
       expect(RopeChart.height()).toEqual(HEIGHT);
@@ -113,8 +113,8 @@ describe('RopeChart', () => {
     });
   });
 
-  // The edge cases include things like multiple datum as the max or min, and datum that may overlap when rendered
-  describe('chart calculations for focus knot overlap', () => {
+  // Focus knot overlapping with top/bottom/threshold but NOT multiple(3) knot overlapping
+  describe('chart calculations for focus knot overlap with top or bottom or threshold knot', () => {
     var PARENT_ID = 'test';
     var RopeChart = require('../src/ropeChart.js')('#' + PARENT_ID);
 
@@ -141,7 +141,7 @@ describe('RopeChart', () => {
 
     var max = d3.max(data, RopeChart.valueAccessor());
     var min = d3.min(data, RopeChart.valueAccessor());
-    var threshold = d3.round(d3.mean(data, RopeChart.valueAccessor()));
+    var threshold = d3.mean(data, RopeChart.valueAccessor());
 
     it('should calculate the correct text adjustment when the focus overlaps with the top knot', () => {
       RopeChart.focusName('Annie').data(data);
@@ -201,6 +201,36 @@ describe('RopeChart', () => {
       var generatedTextOverlapAdjust = nodes[3].adjustTextOverlap;
 
       expect(generatedTextOverlapAdjust).toEqual(expectedTextOverlapAdjust);
+    });
+
+  });
+
+  // Threshold knot overlap with top/bottom, but NOT multiple(3) knot overlap, focus/threshold overlap is covered above
+  describe("chart calculations for threshold knot overlap with top or bottom knot", () => {
+
+    it('should calculate the correct text adjustment when the threshold knot overlaps with the top knot', () => {
+
+      expect(true).toBe(false);
+    });
+
+    it('should calculate the correct text adjustment when the threshold knot overlaps with the bottom knot', () => {
+
+      expect(true).toBe(false);
+    });
+
+  });
+
+  // Multiple(3) knot overlap, top/focus/threshold or bottom/focus/threshold
+  describe("chart calculations for multi-knot text over lap", () => {
+
+    it('should calculate the correct text adjustment when the top, focus and threshold knots text overlap', () => {
+
+      expect(true).toBe(false);
+    });
+
+    it('should calculate the correct text adjustment when the bottom, focus and threshold knots text overlap', () => {
+
+      expect(true).toBe(false);
     });
 
   });
@@ -440,7 +470,7 @@ describe('RopeChart', () => {
     });
 
     it('should have a getter for threshold generator function', () => {
-      var expectedThreshold = 40;
+      var expectedThreshold = 40.142857142857146;
       var generatedThreshold = RopeChart.thresholdGenerator()(data);
 
       expect(generatedThreshold).toEqual(expectedThreshold);
