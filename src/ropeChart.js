@@ -878,7 +878,6 @@ var RopeChart = function (selection){
             focus.adjustTextOverlap = thresholdOverlap /2;
           }
         }
-
       }
     }
 
@@ -951,7 +950,7 @@ var RopeChart = function (selection){
     return !inOverlapRange;
   }
 
-  // Stack the nodes ascending by value, and higher priority first
+  // Stack the nodes ascending by value, and higher priority number first(for nodes that have the same value)
   function getStackedIndex(nodes) {
 
     var sortedNodes = nodes.sort(function(a, b) {
@@ -975,6 +974,8 @@ var RopeChart = function (selection){
   // Get the actual Y position to place the stacked text
   function stackedPositionFromOrientation(overlapIndex, nodePosition, bottom) {
     if(!bottom) {
+      // start + desiredFinalPosition - nodePosition + chartGutter => adjustedTextPosition
+      // Resulting in only the extra y to 'adjustTextPosition' from where the node will be positioned by its original y value
       return 0 + (2 * knotRadius * overlapIndex) - nodePosition + chartGutter;
     }
     else {
