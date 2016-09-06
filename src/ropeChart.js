@@ -590,7 +590,7 @@ var RopeChart = function (selection){
    * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.tooltipContent = function(_) {
-    if(!arguments.length) return tooltipContentFunc;
+    if(!arguments.length) return tooltipContent;
     Object.assign(tooltipContent, _);
 
     return chart;

@@ -22,8 +22,7 @@ myRopeChart
   .focusName('Bob')
   .tooltipContent({ threshold: function(d) { return "Custom markup showing <em>" + d.label + "</em> score is <em>" + d.value + "</em>"; } })
   .tooltipLabel('&#128129;')
-  .showTooltip({ threshold: true, top: true, bottom: true, focus: true })
-  .flipDirection(true)
+  .showTooltip({ threshold: true, top: true})
   .marginLeftPercentage(25)
   .render(data);
 
@@ -31,7 +30,7 @@ averageJoe
   .knotRadius(10)
   .ropeWidth(4)
   .showThreshold(true)
-  .showTooltip({ threshold: true, top: true })
+  .showTooltip({ threshold: true })
   .focusName('Average Joe')
   .marginLeftPercentage(25)
   .render(data);
@@ -40,7 +39,7 @@ amazingPhil
  .knotRadius(10)
  .ropeWidth(4)
  .showThreshold(true)
- .showTooltip({ threshold: true, focus: true })
+ .showTooltip({ threshold: true, top: true })
  .focusName('Phil')
  .marginLeftPercentage(25)
  .render(data);
