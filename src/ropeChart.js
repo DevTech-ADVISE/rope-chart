@@ -817,7 +817,7 @@ var RopeChart = function (selection){
       }
     }
     
-    // Normal overlapping algorithm for top/focus, bottom/focus, threshold/focus, threshold/top(focus=top), threshold/bottom(focus=bottom)
+    // Normal overlapping algorithm for top/focus, bottom/focus, threshold/focus, threshold/top(top=focus), threshold/bottom(bottom=focus)
     if(!multiNodeOverlap) {
       
       // Adjust focus knot overlap with top/bottom
@@ -833,15 +833,25 @@ var RopeChart = function (selection){
           focus.adjustTextOverlap = bottomFocusOverlap;
         }
         else if(threshold) {
-          var thresholdOverlap = chart.nodeIsOverlapping(focus, threshold);
+          var thresholdOverlapWithFocus = chart.nodeIsOverlapping(focus, threshold);
+          var thresholdOverlapWithTop = chart.nodeIsOverlapping(threshold, top);
+          var thresholdOverlapWithBottom = chart.nodeIsOverlapping(threshold, bottom);
 
+          // Adjust threshold and focus in equal opposite directions if they are the same value
           if(threshold.value === focus.value) {
-            threshold.adjustTextOverlap = thresholdOverlap / 2;
-            focus.adjustTextOverlap = -thresholdOverlap / 2;
+            threshold.adjustTextOverlap = thresholdOverlapWithFocus / 2;
+            focus.adjustTextOverlap = -thresholdOverlapWithFocus / 2;
           }
-          else {
-            threshold.adjustTextOverlap = -(thresholdOverlap / 2);
-            focus.adjustTextOverlap = thresholdOverlap /2;
+          // Adjust threshold if it overlaps with the focus
+          else if(thresholdOverlapWithFocus !== false){
+            threshold.adjustTextOverlap = -(thresholdOverlapWithFocus / 2);
+            focus.adjustTextOverlap = thresholdOverlapWithFocus /2;
+          }
+          else if(thresholdOverlapWithTop !== false) {
+            threshold.adjustTextOverlap = thresholdOverlapWithTop;
+          }
+          else if(thresholdOverlapWithBottom !== false) {
+            threshold.adjustTextOverlap = thresholdOverlapWithBottom;
           }
         }
       }
@@ -873,6 +883,7 @@ var RopeChart = function (selection){
     }
 
     // Flip direction of top and bottom knots
+    // !!! Note: still need to implement the flipping of the threshold and focus knot position and top/bottom ropes!!!
     if(flipDirection) {
 
       var topValue = top.value,
