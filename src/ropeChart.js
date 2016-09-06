@@ -815,7 +815,7 @@ var RopeChart = function (selection){
     // Normal overlapping algorithm for top/focus, bottom/focus, threshold/focus, threshold/top(focus=top), threshold/bottom(focus=bottom)
     if(!multiNodeOverlap) {
       
-      // fix focus knot overlap with top/bottom
+      // Adjust focus knot overlap with top/bottom
       if(!focusIsMax && !focusIsMin) {
         var topFocusOverlap = chart.nodeIsOverlapping(focus, top);
         var bottomFocusOverlap = chart.nodeIsOverlapping(focus, bottom);
@@ -840,7 +840,7 @@ var RopeChart = function (selection){
           }
         }
       }
-      // fix threshold knot overlap with top/bottom or focus knot
+      // Adjust threshold knot overlap with top/bottom or focus knot
       else if(threshold) {
 
         if(focusIsMax) {

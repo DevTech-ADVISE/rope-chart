@@ -197,7 +197,7 @@ describe('RopeChart', () => {
       var focusY = yScale(40);
       var thresholdY = yScale(threshold);
       var nodeDistance = thresholdY - focusY;
-      var expectedTextOverlapAdjust = -(2 * RopeChart.knotRadius() -  nodeDistance) / 2;
+      var expectedTextOverlapAdjust = (2 * RopeChart.knotRadius() -  Math.abs(nodeDistance)) / 2;
       var generatedTextOverlapAdjust = nodes[3].adjustTextOverlap;
 
       expect(generatedTextOverlapAdjust).toEqual(expectedTextOverlapAdjust);
@@ -207,6 +207,15 @@ describe('RopeChart', () => {
 
   // Threshold knot overlap with top/bottom, but NOT multiple(3) knot overlap, focus/threshold overlap is covered above
   describe("chart calculations for threshold knot overlap with top or bottom knot", () => {
+    var data = [
+      {name:'Joe',value:'100'},
+      {name:'Top Bob',value:'100'},
+      {name:'Janet',value:'100'},
+      {name:'Phil',value:'100'},
+      {name:'James',value:'100'},
+      {name:'Annie',value: '100'},
+      {name:'Bottom Bo',value:'98'}
+    ];
 
     it('should calculate the correct text adjustment when the threshold knot overlaps with the top knot', () => {
 
