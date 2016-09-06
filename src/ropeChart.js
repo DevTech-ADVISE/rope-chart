@@ -221,7 +221,7 @@ var RopeChart = function (selection){
     if(!handleTooltipExternally) {
       for(var prop in tooltip) {
         var node = nodes.filter(function(node) { return node.nodeName === prop; })[0];
-        if(tooltip[prop] && node.tooltipLabel) chart.callTooltip(tooltip[prop]);
+        if(node && node.tooltipLabel && tooltip[prop]) chart.callTooltip(tooltip[prop]);
       }
     }
 
@@ -729,11 +729,13 @@ var RopeChart = function (selection){
         focusIsMax = true;
         
         top.className = "max-focus-knot";
-        if(showTooltip.focus) top.label = "Multiple";
+        if(showTooltip.top || showTooltip.focus) {
+          top.label = "Multiple";
+          top.tooltipLabel = tooltipLabel;
+        }
         else top.label = focus.label + " and others";   
          
-        top.tooltipLabel = focus.tooltipLabel;
-        top.nodeName = focus.nodeName;
+        // top.nodeName = focus.nodeName;
         focus = undefined;  
       }
       else {
@@ -753,7 +755,7 @@ var RopeChart = function (selection){
       focusIsMax = true;
       top.className = "max-focus-knot";
       top.tooltipLabel = focus.tooltipLabel;
-      top.nodeName = focus.nodeName;
+      // top.nodeName = focus.nodeName;
       focus = undefined;
     }
 
@@ -763,11 +765,14 @@ var RopeChart = function (selection){
       if(focus && focus.value === bottom.value) {
         focusIsMin = true;
         bottom.className = "min-focus-knot";
-        if(showTooltip.focus) bottom.label = "Multiple";
+        
+        if(showTooltip.bottom || showTooltip.focus) {
+          bottom.label = "Multiple";
+          bottom.tooltipLabel = focus.tooltipLabel;
+        }
         else bottom.label = focus.label + " and others";
 
-        bottom.tooltipLabel = focus.tooltipLabel;
-        bottom.nodeName = focus.nodeName;
+        // bottom.nodeName = focus.nodeName;
         focus = undefined;
       }
       else {
@@ -786,7 +791,7 @@ var RopeChart = function (selection){
       focusIsMin = true;
       bottom.className = "min-focus-knot";
       bottom.tooltipLabel = focus.tooltipLabel;
-      bottom.nodeName = focus.nodeName;
+      // bottom.nodeName = focus.nodeName;
       focus = undefined;
     }
 
@@ -883,11 +888,11 @@ var RopeChart = function (selection){
       bottom.value = topValue;
       bottom.label = topLabel;
       bottom.multipleData = topMultipleData;
-      
-      // Only show tooltip on the top/bottom knot if it has multiple members
-      if(!top.multipleData && tooltipOnlyForMultiple.top) top.tooltipLabel = undefined;
-      if(!bottom.multipleData && tooltipOnlyForMultiple.bottom) bottom.tooltipLabel = undefined;
     }
+
+    // Only show tooltip on the top/bottom knot if it has multiple members
+    if(!top.multipleData && tooltipOnlyForMultiple.top) top.tooltipLabel = undefined;
+    if(!bottom.multipleData && tooltipOnlyForMultiple.bottom) bottom.tooltipLabel = undefined;
 
     // put back together the adjusted nodes
     var adjustedNodes = [top, bottom];
