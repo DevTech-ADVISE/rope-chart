@@ -5,21 +5,21 @@ var james = RopeChart('div#james');
 var annie = RopeChart('div#annie');
 
 var data = [
-  {name:'Average Joe',value:'100'},
-  {name:'Bob',value:'50'},
-  {name:'Janet',value:'50'},
-  {name:'Phil',value:'50'},
-  {name:'James',value:'50'},
-  {name:'Annie',value: '50'},
-  {name:'Eloise',value:'50'},
-  {name: 'Bill', value: '52'}
+  {name:'Average Joe',value:'43'},
+  {name:'Bob',value:'38'},
+  {name:'Janet',value:'21'},
+  {name:'Phil',value:'60'},
+  {name:'James',value:'22'},
+  {name:'Annie',value: '57'},
+  {name:'Eloise',value:'41'},
+	{name: 'Bill', value: '60'}
 ];
 
 myRopeChart
   .knotRadius(10)
   .ropeWidth(4)
   .showThreshold(true)
-  .focusName('Bill')
+  .focusName('Eloise')
   .tooltipContent({ threshold: function(d) { return "Custom markup showing <em>" + d.label + "</em> score is <em>" + d.value + "</em>"; } })
   .tooltipLabel('&#128129;')
   .showTooltip({ threshold: true, top: true})
