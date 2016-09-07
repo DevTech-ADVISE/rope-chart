@@ -29,7 +29,7 @@ describe('RopeChart', () => {
       .focusName('Annie')
       .data(data);
 
-    var valueAccessor = function(d) { return d.value; };
+    var valueAccessor = function(d) { return Number(d.value); };
     var yScale = d3.scale.linear()
       .domain([d3.min(data, valueAccessor), d3.max(data, valueAccessor)])
       .range([HEIGHT - RopeChart.chartGutter(), RopeChart.chartGutter()]);
@@ -134,7 +134,7 @@ describe('RopeChart', () => {
       .height(HEIGHT)
       .showThreshold(true);
 
-    var valueAccessor = function(d) { return d.value; };
+    var valueAccessor = function(d) { return Number(d.value); };
     var yScale = d3.scale.linear()
       .domain([d3.min(data, valueAccessor), d3.max(data, valueAccessor)])
       .range([HEIGHT - RopeChart.chartGutter(), RopeChart.chartGutter()]);
@@ -197,7 +197,7 @@ describe('RopeChart', () => {
       var focusY = yScale(40);
       var thresholdY = yScale(threshold);
       var nodeDistance = thresholdY - focusY;
-      var expectedTextOverlapAdjust = -(2 * RopeChart.knotRadius() -  nodeDistance) / 2;
+      var expectedTextOverlapAdjust = (2 * RopeChart.knotRadius() -  Math.abs(nodeDistance)) / 2;
       var generatedTextOverlapAdjust = nodes[3].adjustTextOverlap;
 
       expect(generatedTextOverlapAdjust).toEqual(expectedTextOverlapAdjust);
@@ -207,32 +207,166 @@ describe('RopeChart', () => {
 
   // Threshold knot overlap with top/bottom, but NOT multiple(3) knot overlap, focus/threshold overlap is covered above
   describe("chart calculations for threshold knot overlap with top or bottom knot", () => {
+    var dataThresholdTopOverlap = [
+      {name: 'Joe',value: '100'},
+      {name: 'Janet',value: '100'},
+      {name: 'Average Joe',value: '100'},
+      {name: 'Phil',value: '100'},
+      {name: 'James',value: '100'},
+      {name: 'Bo',value: '98'},
+      {name: 'Annie',value: '100'},
+      {name: 'Annie2',value: '100'},
+      {name: 'Annie3',value: '100'},
+      {name: 'Annie4',value: '100'},
+      {name: 'Annie5',value: '100'},
+      {name: 'Annie6',value: '100'},
+      {name: 'Annie7',value: '100'},
+      {name: 'Annie8',value: '100'},
+      {name: 'Annie9',value: '100'},
+      {name: 'Annie10',value: '100'},
+      {name: 'Annie11',value: '100'},
+      {name: 'Annie12',value: '100'},
+      {name: 'Annie13',value: '100'},
+      {name: 'Focus Bob', value: '88'},
+      {name: 'Bottom Bo',value: '50'}
+    ];
+    var dataThresholdBottomOverlap = [
+      {name: 'Top Bob',value: '100'},
+      {name: 'Joe',value: '50'},
+      {name: 'Joe',value: '50'},
+      {name: 'Phil',value: '50'},
+      {name: 'James',value: '50'},
+      {name: 'Bo',value: '50'},
+      {name: 'Annie',value: '50'},
+      {name: 'Annie2',value: '50'},
+      {name: 'Annie3',value: '50'},
+      {name: 'Annie4',value: '50'},
+      {name: 'Annie5',value: '50'},
+      {name: 'Annie6',value: '50'},
+      {name: 'Annie7',value: '50'},
+      {name: 'Annie8',value: '50'},
+      {name: 'Annie9',value: '50'},
+      {name: 'Annie10',value: '50'},
+      {name: 'Annie11',value: '50'},
+      {name: 'Annie12',value: '50'},
+      {name: 'Annie13',value: '50'},
+      {name: 'Focus Bob', value: '65'},
+      {name:'Bottom Bo',value: '50'}
+    ];
+    var PARENT_ID = "test";
+    var RopeChart = require('../src/ropeChart.js')('#' + PARENT_ID);
+    var HEIGHT = 300, WIDTH = 300;
+    RopeChart
+      .width(WIDTH)
+      .height(HEIGHT)
+      .showThreshold(true);
+    var valueAccessor = function(d) { return Number(d.value); };
 
     it('should calculate the correct text adjustment when the threshold knot overlaps with the top knot', () => {
+      var yScale = d3.scale.linear()
+        .domain([d3.min(dataThresholdTopOverlap, valueAccessor), d3.max(dataThresholdTopOverlap, valueAccessor)])
+        .range([HEIGHT - RopeChart.chartGutter(), RopeChart.chartGutter()]);
 
-      expect(true).toBe(false);
+      RopeChart.focusName('Focus Bob').data(dataThresholdTopOverlap);
+      var threshold = d3.mean(dataThresholdTopOverlap, valueAccessor);
+      var thresholdY = yScale(threshold);
+      var topY = yScale(100);
+      var nodeDistance = thresholdY - topY;
+      var expectedTextOverlapAdjust = 2 * RopeChart.knotRadius() -  nodeDistance;
+      var nodes = RopeChart.generateNodes();
+      var generatedTextOverlapAdjust = nodes[2].adjustTextOverlap;
+
+      expect(generatedTextOverlapAdjust).toBe(expectedTextOverlapAdjust);
     });
 
     it('should calculate the correct text adjustment when the threshold knot overlaps with the bottom knot', () => {
+      var yScale = d3.scale.linear()
+        .domain([d3.min(dataThresholdBottomOverlap, valueAccessor), d3.max(dataThresholdBottomOverlap, valueAccessor)])
+        .range([HEIGHT - RopeChart.chartGutter(), RopeChart.chartGutter()]);
 
-      expect(true).toBe(false);
+      RopeChart.focusName('Focus Bob').data(dataThresholdBottomOverlap);
+      var threshold = d3.mean(dataThresholdBottomOverlap, valueAccessor);
+      var thresholdY = yScale(threshold);
+      var bottomY = yScale(50);
+      var nodeDistance = bottomY - thresholdY;
+      var expectedTextOverlapAdjust = -(2 * RopeChart.knotRadius() - nodeDistance);
+      var nodes = RopeChart.generateNodes();
+      var generatedTextOverlapAdjust = nodes[2].adjustTextOverlap;
+
+      expect(generatedTextOverlapAdjust).toBe(expectedTextOverlapAdjust);
     });
-
   });
 
   // Multiple(3) knot overlap, top/focus/threshold or bottom/focus/threshold
   describe("chart calculations for multi-knot text over lap", () => {
+    var dataMultiTopOverlap = [
+      {name:'Average Joe',value:'100'},
+      {name:'Bob',value:'100'},
+      {name:'Janet',value:'50'},
+      {name:'Phil',value:'100'},
+      {name:'James',value:'100'},
+      {name:'Annie',value: '100'},
+      {name:'Eloise',value:'100'},
+      {name: 'Bill', value: '98'}
+    ];
+    var dataMultiBottomOverlap = [
+      {name:'Average Joe',value:'100'},
+      {name:'Bob',value:'50'},
+      {name:'Janet',value:'50'},
+      {name:'Phil',value:'50'},
+      {name:'James',value:'50'},
+      {name:'Annie',value: '50'},
+      {name:'Eloise',value:'50'},
+      {name: 'Bill', value: '52'}
+    ];
+
+    var PARENT_ID = "test";
+    var RopeChart = require('../src/ropeChart.js')('#' + PARENT_ID);
+    var HEIGHT = 300, WIDTH = 300;
+    var valueAccessor = function(d) { return Number(d.value); };
+
+    RopeChart
+      .width(WIDTH)
+      .height(HEIGHT)
+      .showThreshold(true);
 
     it('should calculate the correct text adjustment when the top, focus and threshold knots text overlap', () => {
+      RopeChart.focusName('Bill').data(dataMultiTopOverlap);
+      var yScale = d3.scale.linear()
+        .domain([d3.min(dataMultiTopOverlap, valueAccessor), d3.max(dataMultiTopOverlap, valueAccessor)])
+        .range([HEIGHT - RopeChart.chartGutter(), RopeChart.chartGutter()]);
+      var threshold = d3.mean(dataMultiTopOverlap, valueAccessor);
+      var thresholdY = yScale(threshold);
+      var topY = yScale(100);
+      var focusY = yScale(98);
+      var expectedThresholdTextAdjust = (2 * RopeChart.knotRadius() * 2) - thresholdY + RopeChart.chartGutter();
+      var expectedFocusTextAdjust = (2 * RopeChart.knotRadius() * 1) - focusY + RopeChart.chartGutter();
+      var nodes = RopeChart.generateNodes();
+      var actualThresholdTextAdjust = nodes[2].adjustTextOverlap;
+      var actualFocusTextAdjust = nodes[3].adjustTextOverlap;
 
-      expect(true).toBe(false);
+      expect(actualThresholdTextAdjust).toBe(expectedThresholdTextAdjust);
+      expect(actualFocusTextAdjust).toBe(expectedFocusTextAdjust);
     });
 
     it('should calculate the correct text adjustment when the bottom, focus and threshold knots text overlap', () => {
+      RopeChart.focusName('Bill').data(dataMultiBottomOverlap);
+      var yScale = d3.scale.linear()
+        .domain([d3.min(dataMultiBottomOverlap, valueAccessor), d3.max(dataMultiBottomOverlap, valueAccessor)])
+        .range([HEIGHT - RopeChart.chartGutter(), RopeChart.chartGutter()]);
+      var threshold = d3.mean(dataMultiBottomOverlap, valueAccessor);
+      var thresholdY = yScale(threshold);
+      var bottomY = yScale(50);
+      var focusY = yScale(52);
+      var expectedThresholdTextAdjust = HEIGHT - (2 * RopeChart.knotRadius() * 2) - thresholdY - RopeChart.chartGutter();
+      var expectedFocusTextAdjust = HEIGHT - (2 * RopeChart.knotRadius() * 1) - focusY - RopeChart.chartGutter();
+      var nodes = RopeChart.generateNodes();
+      var actualThresholdTextAdjust = nodes[2].adjustTextOverlap;
+      var actualFocusTextAdjust = nodes[3].adjustTextOverlap;
 
-      expect(true).toBe(false);
+      expect(actualThresholdTextAdjust).toBe(expectedThresholdTextAdjust);
+      expect(actualFocusTextAdjust).toBe(expectedFocusTextAdjust);
     });
-
   });
 
   describe("how the chart will label multiple mins or multiple maxes", () => {
@@ -255,7 +389,7 @@ describe('RopeChart', () => {
       .height(HEIGHT)
       .showThreshold(true);
 
-    var valueAccessor = function(d) { return d.value; };
+    var valueAccessor = function(d) { return Number(d.value); };
     var yScale = d3.scale.linear()
       .domain([d3.min(data, valueAccessor), d3.max(data, valueAccessor)])
       .range([HEIGHT - RopeChart.chartGutter(), RopeChart.chartGutter()]);
@@ -398,7 +532,7 @@ describe('RopeChart', () => {
     ];
 
     var HEIGHT = 300, WIDTH = 300;
-    var valueAccessor = function(d) { return d.grade; };
+    var valueAccessor = function(d) { return Number(d.grade); };
     var nameAccessor = function(d) { return d.student; };
     RopeChart
       .width(WIDTH)
@@ -476,18 +610,21 @@ describe('RopeChart', () => {
       expect(generatedThreshold).toEqual(expectedThreshold);
     });
 
-    it('should have a getter/setter for tooltip content function', () => {
-      var expectedContentFunc = function(d) { return "<em>content test</em>" + d.name; };
-      RopeChart.tooltipContent(expectedContentFunc);
+    it('should have a getter/setter for tooltip content functions', () => {
+      var contentFunction = function(d) { return "<em>content test</em>" + d.name; };
+      var expectedContentFunctions = {threshold: contentFunction, top: contentFunction, bottom: contentFunction, focus: contentFunction };
+      
+      RopeChart.tooltipContent(expectedContentFunctions);
       var actualContentFunc = RopeChart.tooltipContent();
 
-      expect(actualContentFunc).toEqual(expectedContentFunc);
+      expect(actualContentFunc.threshold).toEqual(expectedContentFunctions.threshold);
     });
 
     it('should have a getter/setter for whether or not to show the tooltip', () => {
-      RopeChart.showTooltip(false);
+      var showTooltip = {threshold: false, top: true, bottom: false, focus: true };
+      RopeChart.showTooltip(showTooltip);
 
-      expect(RopeChart.showTooltip()).toBe(false);
+      expect(RopeChart.showTooltip()).toEqual(showTooltip);
     });
 
     it('should have a getter/setter for the tooltip label', () => {

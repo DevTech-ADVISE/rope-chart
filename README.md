@@ -1,12 +1,10 @@
 # ropeChart
 
-The rope chart provides a simplified visualization of where a particular value lies within a group. 
-
-Look at the [Demo](http://BI.github.io/rope-chart)
+The rope chart provides a simplified visualization of where a particular value lies within a group.
 
 # Getting Started
 
-LollipopChart is a UMD module, you can add the javascript in a scripts tag or require it using something like webpack. D3 must either be available in the global namespace or bundled in with your bundle tool. For the global namespace method download lollipopChart.js, put something like the following in your and you should be good to go.
+For now, you must use a script tag to include ropeChart. D3 must be available in the global namespace as well. Download ropeChart.js, put something like the following in your <head> and you should be good to go.
 
 ```
 <script src="d3.js" charset="utf-8"></script>
@@ -35,12 +33,12 @@ HTML would look something like this
 And the index.js here would contain something like this
 
 ```
-var data = [
-  {value: 5, label: 'Foo'},
-  {value: 95, label: 'Bar'},
-  {value: 60, label: 'Baz'},
-  {value: 45, label: 'Qux'}
-];
+var data = {
+  min: {value: 5, label: 'Country A'},
+  max: {value: 95, label: 'Country B'},
+  threshold: {value: 60, label: 'Region Average'},
+  focus: {value: 45, label: 'Mongolia'}
+}
 
 var myRopeChart = ropeChart('div#myRopeChart');
 	.data(data)
@@ -79,6 +77,8 @@ var myRopeChart = ropeChart('div#myRopeChart');
     * [.valueDisplayFormatter([valueFormatterFunction])](#RopeChart+valueDisplayFormatter) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.tooltipContent([tooltipContentFunction])](#RopeChart+tooltipContent) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.showTooltip([showTooltip])](#RopeChart+showTooltip) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.tooltipOnlyForMultiple([tooltipOnlyForMultiple])](#RopeChart+tooltipOnlyForMultiple) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.handleTooltipExternally([handleTooltipExternally])](#RopeChart+handleTooltipExternally) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.tooltipLabel([tooltipLabel])](#RopeChart+tooltipLabel) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
 
 <a name="new_RopeChart_new"></a>
@@ -342,7 +342,32 @@ Set whether or not to show the tooltip. The tooltip gets displayed next to the t
 
 | Param | Type |
 | --- | --- |
-| [showTooltip] | <code>boolean</code> | 
+| [showTooltip] | <code>Object</code> | 
+
+<a name="RopeChart+tooltipOnlyForMultiple"></a>
+
+### ropeChart.tooltipOnlyForMultiple([tooltipOnlyForMultiple]) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
+Set which knots should show the tooltip only when that knot has multiple members. The default is that top and bottom only show the tooltip for multiples.
+
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>function</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type |
+| --- | --- |
+| [tooltipOnlyForMultiple] | <code>Object</code> | 
+
+<a name="RopeChart+handleTooltipExternally"></a>
+
+### ropeChart.handleTooltipExternally([handleTooltipExternally]) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
+Get/Set whether or not the tooltip generation will be handled outside the chart
+This can be useful if the standard d3-tip solution doesn't fit your needs
+
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>function</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type |
+| --- | --- |
+| [handleTooltipExternally] | <code>boolean</code> | 
 
 <a name="RopeChart+tooltipLabel"></a>
 
