@@ -64,7 +64,7 @@ myRopeChart
   .ropeWidth(4)
   .showThreshold(true)
   .focusName('Bob')
-  .tooltipContent(function(d) { return "Custom markup showing <em>" + d.label + "</em> score is <em>" + d.value + "</em>"; })
+  .tooltipContent({ threshold: function(d) { return "Custom markup showing <em>" + d.label + "</em> score is <em>" + d.value + "</em>"; } })
   .tooltipLabel('&&#35;128129;') // HTML entities work great for tooltip icons, works with font-awesome entity codes
   .showTooltip({ threshold: true, top: true })
   .marginLeftPercentage(25)
