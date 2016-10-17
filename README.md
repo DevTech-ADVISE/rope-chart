@@ -1,6 +1,6 @@
 # ropeChart
 
-The rope chart provides a simplified visualization of where a particular value lies within a group. 
+The rope chart provides a simplified visualization of where a particular value lies within a group.
 
 Look at the [Demo](http://BI.github.io/rope-chart)
 
@@ -72,13 +72,14 @@ var myRopeChart = ropeChart('div#myRopeChart');
     * [.flipDirection([flipDirection])](#RopeChart+flipDirection) ⇒ <code>Boolean</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.showThreshold([showThreshold])](#RopeChart+showThreshold) ⇒ <code>Boolean</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.thresholdLabel([thresholdLabel])](#RopeChart+thresholdLabel) ⇒ <code>String</code> &#124; <code>[RopeChart](#RopeChart)</code>
-    * [.yScale([d3 scale])](#RopeChart+yScale) ⇒ <code>Object</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.thresholdGenerator([function])](#RopeChart+thresholdGenerator) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.labelMargin([labelMargin])](#RopeChart+labelMargin) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.valueAccessor([valueAccessorFunction])](#RopeChart+valueAccessor) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.nameAccessor([nameAccessorFunction])](#RopeChart+nameAccessor) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.valueDisplayFormatter([valueFormatterFunction])](#RopeChart+valueDisplayFormatter) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.tooltipContent([tooltipContentFunction])](#RopeChart+tooltipContent) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.showTooltip([showTooltip])](#RopeChart+showTooltip) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.handleTooltipExternally([handleTooltipExternally])](#RopeChart+handleTooltipExternally) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.tooltipLabel([tooltipLabel])](#RopeChart+tooltipLabel) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
 
 <a name="new_RopeChart_new"></a>
@@ -246,17 +247,17 @@ Get/set label for threshold knot location.
 | --- | --- | --- |
 | [thresholdLabel] | <code>String</code> | <code>&quot;Average&quot;</code> | 
 
-<a name="RopeChart+yScale"></a>
+<a name="RopeChart+thresholdGenerator"></a>
 
-### ropeChart.yScale([d3 scale]) ⇒ <code>Object</code> &#124; <code>[RopeChart](#RopeChart)</code>
+### ropeChart.thresholdGenerator([function]) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
 Get/set the threshold generator function
 
 **Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
-**Returns**: <code>Object</code> - [Acts as getter if called with no parameter. Returns the y-scale used to place knots on the rope.]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
+**Returns**: <code>function</code> - [Acts as getter if called with no parameter. Returns the threshold function that returns the value for the threshold knot.]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
 
 | Param | Type |
 | --- | --- |
-| [d3 scale] | <code>object</code> | 
+| [function] | <code>function</code> | 
 
 <a name="RopeChart+labelMargin"></a>
 
@@ -343,6 +344,19 @@ Set whether or not to show the tooltip. The tooltip gets displayed next to the t
 | Param | Type |
 | --- | --- |
 | [showTooltip] | <code>boolean</code> | 
+
+<a name="RopeChart+handleTooltipExternally"></a>
+
+### ropeChart.handleTooltipExternally([handleTooltipExternally]) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
+Get/Set whether or not the tooltip generation will be handled outside the chart
+This can be useful if the standard d3-tip solution doesn't fit your needs
+
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>function</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type |
+| --- | --- |
+| [handleTooltipExternally] | <code>boolean</code> | 
 
 <a name="RopeChart+tooltipLabel"></a>
 
