@@ -2,6 +2,8 @@
 
 The rope chart provides a simplified visualization of where a particular value lies within a group.
 
+Look at the [Demo](http://BI.github.io/rope-chart)
+
 # Getting Started
 
 For now, you must use a script tag to include ropeChart. D3 must be available in the global namespace as well. Download ropeChart.js, put something like the following in your <head> and you should be good to go.
@@ -70,7 +72,7 @@ var myRopeChart = ropeChart('div#myRopeChart');
     * [.flipDirection([flipDirection])](#RopeChart+flipDirection) ⇒ <code>Boolean</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.showThreshold([showThreshold])](#RopeChart+showThreshold) ⇒ <code>Boolean</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.thresholdLabel([thresholdLabel])](#RopeChart+thresholdLabel) ⇒ <code>String</code> &#124; <code>[RopeChart](#RopeChart)</code>
-    * [.yScale([d3 scale])](#RopeChart+yScale) ⇒ <code>Object</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.thresholdGenerator([function])](#RopeChart+thresholdGenerator) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.labelMargin([labelMargin])](#RopeChart+labelMargin) ⇒ <code>Integer</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.valueAccessor([valueAccessorFunction])](#RopeChart+valueAccessor) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.nameAccessor([nameAccessorFunction])](#RopeChart+nameAccessor) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
@@ -246,17 +248,17 @@ Get/set label for threshold knot location.
 | --- | --- | --- |
 | [thresholdLabel] | <code>String</code> | <code>&quot;Average&quot;</code> | 
 
-<a name="RopeChart+yScale"></a>
+<a name="RopeChart+thresholdGenerator"></a>
 
-### ropeChart.yScale([d3 scale]) ⇒ <code>Object</code> &#124; <code>[RopeChart](#RopeChart)</code>
+### ropeChart.thresholdGenerator([function]) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
 Get/set the threshold generator function
 
 **Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
-**Returns**: <code>Object</code> - [Acts as getter if called with no parameter. Returns the y-scale used to place knots on the rope.]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
+**Returns**: <code>function</code> - [Acts as getter if called with no parameter. Returns the threshold function that returns the value for the threshold knot.]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
 
 | Param | Type |
 | --- | --- |
-| [d3 scale] | <code>object</code> | 
+| [function] | <code>function</code> | 
 
 <a name="RopeChart+labelMargin"></a>
 
@@ -355,6 +357,19 @@ Set which knots should show the tooltip only when that knot has multiple members
 | Param | Type |
 | --- | --- |
 | [tooltipOnlyForMultiple] | <code>Object</code> | 
+
+<a name="RopeChart+handleTooltipExternally"></a>
+
+### ropeChart.handleTooltipExternally([handleTooltipExternally]) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
+Get/Set whether or not the tooltip generation will be handled outside the chart
+This can be useful if the standard d3-tip solution doesn't fit your needs
+
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>function</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
+
+| Param | Type |
+| --- | --- |
+| [handleTooltipExternally] | <code>boolean</code> | 
 
 <a name="RopeChart+handleTooltipExternally"></a>
 
