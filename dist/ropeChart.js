@@ -592,8 +592,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @method thresholdGenerator
 	   * @memberof RopeChart
 	   * @instance
-	   * @param {object} [function]
-	   * @return {Object} [Acts as getter if called with no parameter. Returns the threshold function that returns the value for the threshold knot.]
+	   * @param {Function} [function]
+	   * @return {Function} [Acts as getter if called with no parameter. Returns the threshold function that returns the value for the threshold knot.]
 	   * @return {RopeChart} [Acts as setter if called with parameter]
 	   */
 	  chart.thresholdGenerator = function (_) {
