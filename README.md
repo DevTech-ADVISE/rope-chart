@@ -214,7 +214,7 @@ Get/set the chart gutter to account for the knot radius
 <a name="RopeChart+flipDirection"></a>
 
 ### ropeChart.flipDirection([flipDirection]) ⇒ <code>Boolean</code> &#124; <code>[RopeChart](#RopeChart)</code>
-Get/set boolean that "flips direction" of the "good"/"bad" sides of threshold. By default the top section is "good" (green). If flipDirection is true, then top section becomes "bad" (red).
+Get/set boolean that "flips direction" of the "good"/"bad" sides of threshold. By default the top knot is the max value, and bottom knot is the min value.
 
 **Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
 **Returns**: <code>Boolean</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  

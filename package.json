@@ -35,7 +35,8 @@
   },
   "dependencies": {
     "d3": "^3.5.16",
-    "d3-tip": "git://github.com/BI/d3-tip"
+    "d3-tip": "git://github.com/BI/d3-tip",
+    "ordinal": "0.0.4"
   },
   "jest": {
     "moduleNameMapper": {
