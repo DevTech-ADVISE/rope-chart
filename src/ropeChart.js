@@ -281,21 +281,14 @@ var RopeChart = function (selection){
 
   // Use standard rank instead of dense rank
   chart.getRank = function(d) {
-    // Sort descending and return rank (max is rank 1)
-    if(!flipDirection) {
-      var sortedValues = data.sort(function(a, b) { return chart.valueAccessor()(b) - chart.valueAccessor()(a)}).map(function(d) { return chart.valueAccessor()(d)})
-      
-      return chart.calculateRankingFor(chart.valueAccessor()(d), sortedValues)
-    }
-    // Sort ascending and return rank (min is rank 1)
-    else {
-      var sortedValues = data.sort(function(a, b) { return chart.valueAccessor()(a) - chart.valueAccessor()(b)}).map(function(d) { return chart.valueAccessor()(d)})
-
-      return chart.calculateRankingFor(chart.valueAccessor()(d), sortedValues)
-    }
+    var values = data.map(function(d) { return chart.valueAccessor()(d)})
+    return chart.calculateRankingFor(chart.valueAccessor()(d), values, flipDirection)
   }
 
-  chart.calculateRankingFor = function(value, sortedValues) {
+  chart.calculateRankingFor = function(value, unsortedValues, ascending) {
+    var sortedValues = unsortedValues.sort(function(a, b) { return b - a})
+    if(ascending) sortedValues.reverse()
+
     var indexOfValue = sortedValues.indexOf(value)
     var rankArray = []
     var rankIncrement = 1
