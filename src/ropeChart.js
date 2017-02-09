@@ -31,7 +31,9 @@ var RopeChart = function (selection){
       showTooltip = true,
       handleTooltipExternally = false,
       tooltipLabel = "&#8505;",
-      valueDisplayFormatter = function(d) { return Math.round(d); };
+      valueDisplayFormatter = function(d) { return Math.round(d); },
+      badgePadding = { "top": 1, "right": 4, "bottom": 1, "left": 4 },
+      badgeMargin = { "right": 5, "left": 0 };
 
   // css class names
   var d3TipClass = "d3-tip-mouse",
@@ -161,26 +163,52 @@ var RopeChart = function (selection){
       // exit
     valueText.exit().remove();
 
+    // Add a g container to contain each knot rank/label
+    var labelContainer = svg.selectAll('g')
+      .data(nodes).enter().append('g')
+      .attr('x', function(d) { return d.x + (d.r + labelMargin); })
+      .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
+      .attr('class', function(d) { return d.className + '-label-container'; })
+
+    // render ranking badge
+      // combined enter and update because no nodes are being added/removed
+    var rankText = labelContainer
+      .append('text')
+      .classed('rank-label', true)
+      .attr('text-anchor', 'start')
+      .attr('x', function(d) { return d.x + (d.r + labelMargin) + badgeMargin.left + badgePadding.left; })
+      .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
+      .attr('dy', function(d) { return '.3em'; })
+      .attr('font-size', function(d) { return d.r * 2 + 'px'; })
+    .filter(function(d) { return d.nodeName !== "threshold"; }) // Don't add rank text for the threshold knot
+      .text(function(d) { return chart.getRank(d); });
+    var rankRect = labelContainer.filter(function(d) { return d.nodeName !== "threshold"; }) // Don't add rank rectangle for the threshold knot
+      .insert('rect', 'text')
+      .classed('rank-rect', true)
+      .attr('x', function(d) { return d.x + (d.r + labelMargin) + badgeMargin.left; })
+      .attr('y', function(d) { return d.y + d.adjustTextOverlap - (getBBoxForRankText(svg, d).height / 2) - (badgePadding.top + badgePadding.bottom) / 2; })
+      .attr('width', function(d) { return getBBoxForRankText(svg, d).width + badgePadding.left + badgePadding.right})
+      .attr('height', function(d) { return getBBoxForRankText(svg, d).height + badgePadding.top + badgePadding.bottom })
+      .attr('dy', function(d) { return '.3em'; })
+      .attr('font-size', function(d) { return d.r * 2 + 'px'; })
+    
     // render label text
       // update
-    var labelText = svg.selectAll('text.label')
-        .data(nodes)
+    var labelText = labelContainer.append('text')
         .attr('text-anchor', function(d) { return 'start'; })
-        .attr('x', function(d) { return d.x + (d.r + labelMargin); })
         .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
         .attr('dy', function(d) { return '.3em'; })
         .attr('font-size', function(d) { return d.r * 2 + 'px'; })
-        .text(function(d) { return d.label; });
-    
-      // enter
-    labelText.enter().append('text')
         .attr('class', function(d) { return d.className + '-label'; })
-        .attr('text-anchor', function(d) { return 'start'; })
-        .attr('x', function(d) { return d.x + (d.r + labelMargin); })
-        .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
-        .attr('dy', function(d) { return '.3em'; })
-        .attr('font-size', function(d) { return d.r * 2 + 'px'; })
         .text(function(d) { return d.label; })
+        .attr('x', function(d) {
+          var badgeAdjustment = 0
+          if(d.nodeName !== "threshold") {
+            badgeAdjustment = getBBoxForRankText(svg, d).width + badgePadding.left + badgePadding.right + badgeMargin.left + badgeMargin.right
+          }
+          return d.x + (d.r + labelMargin) + badgeAdjustment; 
+        })
+    labelText
       .filter(function(d) { return d.tooltipLabel !== undefined; })
         .append('tspan')
         .classed('tooltip-label', true)
@@ -188,8 +216,6 @@ var RopeChart = function (selection){
         .html(function(d) { 
           return " " + tooltipLabel;
         });
-      // exit
-    labelText.exit().remove();
 
     if(!handleTooltipExternally) {
       // remove previous tooltip if there was one for this chart
@@ -205,6 +231,7 @@ var RopeChart = function (selection){
 
     return chart;
   };
+
 
   /**
    * Get/set the data for the RopeChart instance
@@ -249,6 +276,62 @@ var RopeChart = function (selection){
     if(mins.length === 1) return false;
     return mins;
   };
+
+  // Use standard rank instead of dense rank
+  chart.getRank = function(d) {
+    // Sort descending and return rank (max is rank 1)
+    if(!flipDirection) {
+      var sortedValues = data.sort(function(a, b) { return chart.valueAccessor()(b) - chart.valueAccessor()(a)}).map(function(d) { return chart.valueAccessor()(d)})
+      var indexOfValue = sortedValues.indexOf(chart.valueAccessor()(d))
+      var rankArray = []
+      var rankIncrement = 1
+      for(var i = 0; i < sortedValues.length; i ++) {
+        if(sortedValues[i-1]) {
+          // If the previous value equals the current value, the current value is tied/set to the same rank as the previous value
+          if(sortedValues[i-1] === sortedValues[i]) {
+            rankArray.push(rankIncrement)
+          }
+          else {
+            rankIncrement ++
+            rankArray.push(rankIncrement)
+          }
+        }
+        else { // Start with rank 1 for the first element
+          rankArray.push(rankIncrement)
+        }
+        // If the rank array has gone far enough to rank the selected value then break out and return the rank
+        if(rankArray.length == indexOfValue + 1) {
+          return rankArray[indexOfValue]
+        }
+      }
+    }
+    // Sort ascending and return rank (min is rank 1)
+    else {
+      var sortedValues = data.sort(function(a, b) { return chart.valueAccessor()(a) - chart.valueAccessor()(b)}).map(function(d) { return chart.valueAccessor()(d)})
+      var indexOfValue = sortedValues.indexOf(chart.valueAccessor()(d))
+      var rankArray = []
+      var rankIncrement = 1
+      for(var i = 0; i < sortedValues.length; i ++) {
+        if(sortedValues[i-1]) {
+          // If the previous value equals the current value, the current value is tied/set to the same rank as the previous value
+          if(sortedValues[i-1] === sortedValues[i]) {
+            rankArray.push(rankIncrement)
+          }
+          else {
+            rankIncrement ++
+            rankArray.push(rankIncrement)
+          }
+        }
+        else { // Start with rank 1 for the first element
+          rankArray.push(rankIncrement)
+        }
+        // If the rank array has gone far enough to rank the selected value then break out and return the rank
+        if(rankArray.length == indexOfValue + 1) {
+          return rankArray[indexOfValue]
+        }
+      }
+    }
+  }
 
   /**
    * Get/set the y-scale
@@ -396,7 +479,7 @@ var RopeChart = function (selection){
   };
 
   /**
-   * Get/set boolean that "flips direction" of the "good"/"bad" sides of threshold. By default the top section is "good" (green). If flipDirection is true, then top section becomes "bad" (red).
+   * Get/set boolean that "flips direction" of the "good"/"bad" sides of threshold. By default the top knot is the max value, and bottom knot is the min value. 
    * @method flipDirection
    * @memberof RopeChart
    * @instance
@@ -868,6 +951,10 @@ var RopeChart = function (selection){
     else {
       return svgHeight - (2 * knotRadius * overlapIndex) - nodePosition - chartGutter;
     }
+  }
+
+  function getBBoxForRankText(svgRoot, d) {
+    return svgRoot.select('.' + d.className + '-label-container .rank-label')[0][0].getBBox()
   }
 
   return chart;
