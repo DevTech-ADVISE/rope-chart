@@ -9,6 +9,8 @@
 // d3 is an external, it won't be bundled in
 var d3 = require('d3');
 var dtip = require('d3-tip')(d3);
+var ordinal = require('ordinal').english
+
 require('./ropeChart.scss');
 require('./tooltips.scss');
 
@@ -282,53 +284,38 @@ var RopeChart = function (selection){
     // Sort descending and return rank (max is rank 1)
     if(!flipDirection) {
       var sortedValues = data.sort(function(a, b) { return chart.valueAccessor()(b) - chart.valueAccessor()(a)}).map(function(d) { return chart.valueAccessor()(d)})
-      var indexOfValue = sortedValues.indexOf(chart.valueAccessor()(d))
-      var rankArray = []
-      var rankIncrement = 1
-      for(var i = 0; i < sortedValues.length; i ++) {
-        if(sortedValues[i-1]) {
-          // If the previous value equals the current value, the current value is tied/set to the same rank as the previous value
-          if(sortedValues[i-1] === sortedValues[i]) {
-            rankArray.push(rankIncrement)
-          }
-          else {
-            rankIncrement ++
-            rankArray.push(rankIncrement)
-          }
-        }
-        else { // Start with rank 1 for the first element
-          rankArray.push(rankIncrement)
-        }
-        // If the rank array has gone far enough to rank the selected value then break out and return the rank
-        if(rankArray.length == indexOfValue + 1) {
-          return rankArray[indexOfValue]
-        }
-      }
+      
+      return chart.calculateRankingFor(chart.valueAccessor()(d), sortedValues)
     }
     // Sort ascending and return rank (min is rank 1)
     else {
       var sortedValues = data.sort(function(a, b) { return chart.valueAccessor()(a) - chart.valueAccessor()(b)}).map(function(d) { return chart.valueAccessor()(d)})
-      var indexOfValue = sortedValues.indexOf(chart.valueAccessor()(d))
-      var rankArray = []
-      var rankIncrement = 1
-      for(var i = 0; i < sortedValues.length; i ++) {
-        if(sortedValues[i-1]) {
-          // If the previous value equals the current value, the current value is tied/set to the same rank as the previous value
-          if(sortedValues[i-1] === sortedValues[i]) {
-            rankArray.push(rankIncrement)
-          }
-          else {
-            rankIncrement ++
-            rankArray.push(rankIncrement)
-          }
-        }
-        else { // Start with rank 1 for the first element
+
+      return chart.calculateRankingFor(chart.valueAccessor()(d), sortedValues)
+    }
+  }
+
+  chart.calculateRankingFor = function(value, sortedValues) {
+    var indexOfValue = sortedValues.indexOf(value)
+    var rankArray = []
+    var rankIncrement = 1
+    for(var i = 0; i < sortedValues.length; i ++) {
+      if(sortedValues[i-1]) {
+        // If the previous value equals the current value, the current value is tied/set to the same rank as the previous value
+        if(sortedValues[i-1] === sortedValues[i]) {
           rankArray.push(rankIncrement)
         }
-        // If the rank array has gone far enough to rank the selected value then break out and return the rank
-        if(rankArray.length == indexOfValue + 1) {
-          return rankArray[indexOfValue]
+        else {
+          rankIncrement ++
+          rankArray.push(rankIncrement)
         }
+      }
+      else { // Start with rank 1 for the first element
+        rankArray.push(rankIncrement)
+      }
+      // If the rank array has gone far enough to rank the selected value then break out and return the rank
+      if(rankArray.length == indexOfValue + 1) {
+        return ordinal(rankArray[indexOfValue])
       }
     }
   }
