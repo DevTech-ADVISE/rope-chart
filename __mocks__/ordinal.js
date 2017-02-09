@@ -1,2 +1,2 @@
 
-module.exports = function(value) { return value }
+module.exports = { english: function(value) { return value } }

@@ -6,23 +6,22 @@ var NumberRank = function(value, unsortedValues, ascending) {
 
   var indexOfValue = sortedValues.indexOf(value)
   var rankArray = []
-  var rankIncrement = 1
   for(var i = 0; i < sortedValues.length; i ++) {
     if(sortedValues[i-1]) {
       // If the previous value equals the current value, the current value is tied/set to the same rank as the previous value
       if(sortedValues[i-1] === sortedValues[i]) {
-        rankArray.push(rankIncrement)
+        rankArray.push(rankArray[i-1])
       }
       else {
-        rankIncrement ++
-        rankArray.push(rankIncrement)
+        rankArray.push(i+1)
       }
     }
     else { // Start with rank 1 for the first element
-      rankArray.push(rankIncrement)
+      rankArray.push(1)
     }
     // If the rank array has gone far enough to rank the selected value then break out and return the rank
     if(rankArray.length == indexOfValue + 1) {
+      console.log(rankArray)
       return ordinal(rankArray[indexOfValue])
     }
   }
