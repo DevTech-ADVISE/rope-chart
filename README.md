@@ -81,6 +81,7 @@ var myRopeChart = ropeChart('div#myRopeChart');
     * [.showTooltip([showTooltip])](#RopeChart+showTooltip) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.handleTooltipExternally([handleTooltipExternally])](#RopeChart+handleTooltipExternally) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
     * [.tooltipLabel([tooltipLabel])](#RopeChart+tooltipLabel) ⇒ <code>function</code> &#124; <code>[RopeChart](#RopeChart)</code>
+    * [.showRank([showRank])](#RopeChart+showRank) ⇒ <code>boolean</code> &#124; <code>[RopeChart](#RopeChart)</code>
 
 <a name="new_RopeChart_new"></a>
 
@@ -214,7 +215,7 @@ Get/set the chart gutter to account for the knot radius
 <a name="RopeChart+flipDirection"></a>
 
 ### ropeChart.flipDirection([flipDirection]) ⇒ <code>Boolean</code> &#124; <code>[RopeChart](#RopeChart)</code>
-Get/set boolean that "flips direction" of the "good"/"bad" sides of threshold. By default the top section is "good" (green). If flipDirection is true, then top section becomes "bad" (red).
+Get/set boolean that "flips direction" of the "good"/"bad" sides of threshold. By default the top knot is the max value, and bottom knot is the min value.
 
 **Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
 **Returns**: <code>Boolean</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as setter if called with parameter]  
@@ -369,4 +370,16 @@ Set the text, that when hovered over will display the tooltip. The text gets dis
 | Param | Type |
 | --- | --- |
 | [tooltipLabel] | <code>string</code> | 
+
+<a name="RopeChart+showRank"></a>
+
+### ropeChart.showRank([showRank]) ⇒ <code>boolean</code> &#124; <code>[RopeChart](#RopeChart)</code>
+Show the rank text next to the knots
+
+**Kind**: instance method of <code>[RopeChart](#RopeChart)</code>  
+**Returns**: <code>boolean</code> - [Acts as getter if called with no parameter]<code>[RopeChart](#RopeChart)</code> - [Acts as chainable setter if called with parameter]  
+
+| Param | Type |
+| --- | --- |
+| [showRank] | <code>boolean</code> | 
 

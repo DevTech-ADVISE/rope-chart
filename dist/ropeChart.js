@@ -67,8 +67,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	// d3 is an external, it won't be bundled in
 	var d3 = __webpack_require__(1);
 	var dtip = __webpack_require__(2)(d3);
-	__webpack_require__(3);
-	__webpack_require__(7);
+	var NumberRank = __webpack_require__(3);
+
+	__webpack_require__(6);
+	__webpack_require__(10);
 
 	var RopeChart = function RopeChart(selection) {
 	  var chart = {};
@@ -91,7 +93,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      tooltipLabel = "&#8505;",
 	      valueDisplayFormatter = function valueDisplayFormatter(d) {
 	    return Math.round(d);
-	  };
+	  },
+	      badgePadding = { "top": 1, "right": 4, "bottom": 1, "left": 4 },
+	      badgeMargin = { "right": 5, "left": 0 },
+	      showRank = true;
 
 	  // css class names
 	  var d3TipClass = "d3-tip-mouse",
@@ -137,7 +142,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!!arguments.length) chart.data(_);
 
-	    // size the svg, and reset the center         
+	    // size the svg, and reset the center          
 	    svg.attr("width", function () {
 	      return svgWidth;
 	    });
@@ -163,7 +168,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    var bars = [bottomBar, topBar];
 
-	    // render bar svg
+	    // render bar svg 
 	    // update
 	    var barSvg = svg.selectAll('rect').data(bars).attr('x', function (d) {
 	      return d.x;
@@ -191,7 +196,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // exit
 	    barSvg.exit().remove();
 
-	    // render nodes svg
+	    // render nodes svg 
 	    // update
 	    var circleSvg = svg.selectAll('circle').data(nodes).attr('cx', function (d) {
 	      return d.x;
@@ -249,44 +254,70 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // exit
 	    valueText.exit().remove();
 
-	    // render label text
-	    // update
-	    var labelText = svg.selectAll('text.label').data(nodes).attr('text-anchor', function (d) {
-	      return 'start';
-	    }).attr('x', function (d) {
+	    // Add a g container to contain each knot rank/label
+	    var labelContainer = svg.selectAll('g').data(nodes).enter().append('g').attr('x', function (d) {
 	      return d.x + (d.r + labelMargin);
 	    }).attr('y', function (d) {
 	      return d.y + d.adjustTextOverlap;
-	    }).attr('dy', function (d) {
-	      return '.3em';
-	    }).attr('font-size', function (d) {
-	      return d.r * 2 + 'px';
-	    }).text(function (d) {
-	      return d.label;
+	    }).attr('class', function (d) {
+	      return d.className + '-label-container';
 	    });
 
-	    // enter
-	    labelText.enter().append('text').attr('class', function (d) {
-	      return d.className + '-label';
-	    }).attr('text-anchor', function (d) {
-	      return 'start';
-	    }).attr('x', function (d) {
-	      return d.x + (d.r + labelMargin);
+	    // render ranking badge
+	    // combined enter and update because no nodes are being added/removed
+	    var rankText = labelContainer.append('text').classed('rank-label', true).attr('text-anchor', 'start').attr('x', function (d) {
+	      return d.x + (d.r + labelMargin) + badgeMargin.left + badgePadding.left;
 	    }).attr('y', function (d) {
 	      return d.y + d.adjustTextOverlap;
 	    }).attr('dy', function (d) {
 	      return '.3em';
 	    }).attr('font-size', function (d) {
 	      return d.r * 2 + 'px';
+	    }).filter(shouldShowRankForNode) // Don't add rank text for the threshold knot or if showRank is false
+	    .text(function (d) {
+	      return chart.getRank(d);
+	    });
+	    var rankRect = labelContainer.filter(shouldShowRankForNode) // Don't add rank rectangle for the threshold knot
+	    .insert('rect', 'text').classed('rank-rect', true).attr('x', function (d) {
+	      return d.x + (d.r + labelMargin) + badgeMargin.left;
+	    }).attr('y', function (d) {
+	      return d.y + d.adjustTextOverlap - getBBoxForRankText(svg, d).height / 2 - (badgePadding.top + badgePadding.bottom) / 2;
+	    }).attr('width', function (d) {
+	      return getBBoxForRankText(svg, d).width + badgePadding.left + badgePadding.right;
+	    }).attr('height', function (d) {
+	      return getBBoxForRankText(svg, d).height + badgePadding.top + badgePadding.bottom;
+	    }).attr('dy', function (d) {
+	      return '.3em';
+	    }).attr('font-size', function (d) {
+	      return d.r * 2 + 'px';
+	    });
+
+	    // render label text
+	    // update
+	    var labelText = labelContainer.append('text').attr('text-anchor', function (d) {
+	      return 'start';
+	    }).attr('y', function (d) {
+	      return d.y + d.adjustTextOverlap;
+	    }).attr('dy', function (d) {
+	      return '.3em';
+	    }).attr('font-size', function (d) {
+	      return d.r * 2 + 'px';
+	    }).attr('class', function (d) {
+	      return d.className + '-label';
 	    }).text(function (d) {
 	      return d.label;
-	    }).filter(function (d) {
+	    }).attr('x', function (d) {
+	      var badgeAdjustment = 0;
+	      if (shouldShowRankForNode(d)) {
+	        badgeAdjustment = getBBoxForRankText(svg, d).width + badgePadding.left + badgePadding.right + badgeMargin.left + badgeMargin.right;
+	      }
+	      return d.x + (d.r + labelMargin) + badgeAdjustment;
+	    });
+	    labelText.filter(function (d) {
 	      return d.tooltipLabel !== undefined;
 	    }).append('tspan').classed('tooltip-label', true).style("cursor", "default").html(function (d) {
 	      return " " + tooltipLabel;
 	    });
-	    // exit
-	    labelText.exit().remove();
 
 	    if (!handleTooltipExternally) {
 	      // remove previous tooltip if there was one for this chart
@@ -348,6 +379,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    if (mins.length === 1) return false;
 	    return mins;
+	  };
+
+	  // Use standard rank instead of dense rank
+	  chart.getRank = function (d) {
+	    var values = data.map(function (d) {
+	      return chart.valueAccessor()(d);
+	    });
+	    return NumberRank(chart.valueAccessor()(d), values, flipDirection);
 	  };
 
 	  /**
@@ -496,7 +535,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get/set boolean that "flips direction" of the "good"/"bad" sides of threshold. By default the top section is "good" (green). If flipDirection is true, then top section becomes "bad" (red).
+	   * Get/set boolean that "flips direction" of the "good"/"bad" sides of threshold. By default the top knot is the max value, and bottom knot is the min value. 
 	   * @method flipDirection
 	   * @memberof RopeChart
 	   * @instance
@@ -551,8 +590,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @method thresholdGenerator
 	   * @memberof RopeChart
 	   * @instance
-	   * @param {object} [function]
-	   * @return {Object} [Acts as getter if called with no parameter. Returns the threshold function that returns the value for the threshold knot.]
+	   * @param {Function} [function]
+	   * @return {Function} [Acts as getter if called with no parameter. Returns the threshold function that returns the value for the threshold knot.]
 	   * @return {RopeChart} [Acts as setter if called with parameter]
 	   */
 	  chart.thresholdGenerator = function (_) {
@@ -962,6 +1001,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      return svgHeight - 2 * knotRadius * overlapIndex - nodePosition - chartGutter;
 	    }
+	  }
+
+	  function getBBoxForRankText(svgRoot, d) {
+	    return svgRoot.select('.' + d.className + '-label-container .rank-label')[0][0].getBBox();
+	  }
+
+	  /**
+	   * Show the rank text next to the knots
+	   * @method showRank
+	   * @memberof RopeChart
+	   * @instance
+	   * @param {boolean} [showRank]
+	   * @return {boolean} [Acts as getter if called with no parameter]
+	   * @return {RopeChart} [Acts as chainable setter if called with parameter]
+	   */
+	  chart.showRank = function (_) {
+	    if (!arguments.length) return showRank;
+	    showRank = _;
+
+	    return chart;
+	  };
+
+	  function shouldShowRankForNode(d) {
+	    return d.nodeName !== "threshold" && chart.showRank();
 	  }
 
 	  return chart;
@@ -1374,13 +1437,109 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
+	'use strict';
+
+	var ordinal = __webpack_require__(4).english;
+
+	var NumberRank = function NumberRank(value, unsortedValues, ascending) {
+	  var sortedValues = unsortedValues.sort(function (a, b) {
+	    return b - a;
+	  });
+	  if (ascending) sortedValues.reverse();
+
+	  var indexOfValue = sortedValues.indexOf(value);
+	  var rankArray = [1]; // Start with rank 1 for the first element
+	  for (var i = 1; i < sortedValues.length; i++) {
+	    // If the rank array has gone far enough to rank the selected value then break out and return the rank
+	    if (rankArray.length == indexOfValue + 1) {
+	      return ordinal(rankArray[indexOfValue]);
+	    }
+
+	    // If the previous value equals the current value, the current value is tied/set to the same rank as the previous value
+	    if (sortedValues[i - 1] === sortedValues[i]) {
+	      rankArray.push(rankArray[i - 1]);
+	    } else {
+	      rankArray.push(i + 1);
+	    }
+	  }
+	};
+
+	module.exports = NumberRank;
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports.english = __webpack_require__(5);
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	function blank(n) {
+	  return 'string' === typeof n && 0 === n.trim().length;
+	}
+
+	function numeric(n) {
+	  return 'number' === typeof +n && !Number.isNaN(+n);
+	}
+
+	function valid(n) {
+	  return numeric(n) && !blank(n) && 'object' !== typeof n;
+	}
+
+	function validate(n) {
+	  if(!valid(n)) {
+	    throw new Error('Must be a number or numeric string');
+	  }
+	}
+
+	function hasOneInTens(n) {
+	  return 1 === Math.floor(n / 10 % 10);
+	};
+
+	function indicator(n) {
+	  validate(n);
+
+	  var remainder = n % 10;
+	  if(hasOneInTens(n)) {
+	    return 'th';
+	  }
+	  switch(n % 10) {
+	    case 1:
+	      return 'st';
+	      break;
+	    case 2:
+	      return 'nd';
+	      break;
+	    case 3:
+	      return 'rd';
+	      break;
+	    default:
+	      return 'th';
+	  }
+	};
+
+	function english(n) {
+	  return n + indicator(n);
+	};
+
+	module.exports = english;
+	module.exports.indicator = indicator;
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(4);
+	var content = __webpack_require__(7);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(6)(content, {});
+	var update = __webpack_require__(9)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -1397,21 +1556,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 4 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(5)();
+	exports = module.exports = __webpack_require__(8)();
 	// imports
 
 
 	// module
-	exports.push([module.id, ".Rope-Chart .top-knot {\n  fill: #7DD0D4; }\n\n.Rope-Chart .bottom-knot {\n  fill: #7DD0D4; }\n\n.Rope-Chart .focus-knot {\n  fill: #338ED8;\n  stroke: #C55353;\n  stroke-width: 2px; }\n\n.Rope-Chart .max-focus-knot {\n  fill: #338ED8;\n  stroke: #C55353;\n  stroke-width: 2px; }\n\n.Rope-Chart .min-focus-knot {\n  fill: #338ED8;\n  stroke: #C55353;\n  stroke-width: 2px; }\n\n.Rope-Chart .threshold-knot {\n  fill: #105B98; }\n\n.Rope-Chart .bottom-rope {\n  fill: #B1B1B1; }\n\n.Rope-Chart .top-rope {\n  fill: #E4E4E4; }\n\n.Rope-Chart tspan.tooltip-label {\n  fill: #6482a5; }\n  .Rope-Chart tspan.tooltip-label:hover {\n    fill: #30619a; }\n", ""]);
+	exports.push([module.id, ".Rope-Chart .top-knot {\n  fill: #7DD0D4; }\n\n.Rope-Chart .bottom-knot {\n  fill: #7DD0D4; }\n\n.Rope-Chart .focus-knot {\n  fill: #338ED8;\n  stroke: #C55353;\n  stroke-width: 2px; }\n\n.Rope-Chart .max-focus-knot {\n  fill: #338ED8;\n  stroke: #C55353;\n  stroke-width: 2px; }\n\n.Rope-Chart .min-focus-knot {\n  fill: #338ED8;\n  stroke: #C55353;\n  stroke-width: 2px; }\n\n.Rope-Chart .threshold-knot {\n  fill: #105B98; }\n\n.Rope-Chart .bottom-rope {\n  fill: #B1B1B1; }\n\n.Rope-Chart .top-rope {\n  fill: #E4E4E4; }\n\n.Rope-Chart tspan.tooltip-label {\n  fill: #6482a5; }\n  .Rope-Chart tspan.tooltip-label:hover {\n    fill: #30619a; }\n\n.Rope-Chart .rank-rect {\n  fill: red;\n  rx: 4px;\n  ry: 4px; }\n\n.Rope-Chart .rank-label {\n  font-size: 14px;\n  fill: white; }\n", ""]);
 
 	// exports
 
 
 /***/ },
-/* 5 */
+/* 8 */
 /***/ function(module, exports) {
 
 	/*
@@ -1467,7 +1626,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 6 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -1719,16 +1878,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 7 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(8);
+	var content = __webpack_require__(11);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(6)(content, {});
+	var update = __webpack_require__(9)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -1745,10 +1904,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 8 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(5)();
+	exports = module.exports = __webpack_require__(8)();
 	// imports
 
 
