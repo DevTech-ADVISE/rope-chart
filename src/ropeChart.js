@@ -9,6 +9,8 @@
 // d3 is an external, it won't be bundled in
 var d3 = require('d3');
 var dtip = require('d3-tip')(d3);
+var NumberRank = require('./util/NumberRank.js')
+
 require('./ropeChart.scss');
 require('./tooltips.scss');
 
@@ -33,7 +35,10 @@ var RopeChart = function (selection){
       tooltip = { threshold: undefined, top: undefined, bottom: undefined, focus: undefined},
       handleTooltipExternally = false,
       tooltipLabel = "&#8505;",
-      valueDisplayFormatter = function(d) { return Math.round(d); };
+      valueDisplayFormatter = function(d) { return Math.round(d); },
+      badgePadding = { "top": 1, "right": 4, "bottom": 1, "left": 4 },
+      badgeMargin = { "right": 5, "left": 0 },
+      showRank = true;
 
   // css class names
   var d3TipClass = "d3-tip-mouse",
@@ -187,26 +192,52 @@ var RopeChart = function (selection){
       // exit
     valueText.exit().remove();
 
+    // Add a g container to contain each knot rank/label
+    var labelContainer = svg.selectAll('g')
+      .data(nodes).enter().append('g')
+      .attr('x', function(d) { return d.x + (d.r + labelMargin); })
+      .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
+      .attr('class', function(d) { return d.className + '-label-container'; })
+
+    // render ranking badge
+      // combined enter and update because no nodes are being added/removed
+    var rankText = labelContainer
+      .append('text')
+      .classed('rank-label', true)
+      .attr('text-anchor', 'start')
+      .attr('x', function(d) { return d.x + (d.r + labelMargin) + badgeMargin.left + badgePadding.left; })
+      .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
+      .attr('dy', function(d) { return '.3em'; })
+      .attr('font-size', function(d) { return d.r * 2 + 'px'; })
+    .filter(shouldShowRankForNode) // Don't add rank text for the threshold knot or if showRank is false
+      .text(function(d) { return chart.getRank(d); });
+    var rankRect = labelContainer.filter(shouldShowRankForNode) // Don't add rank rectangle for the threshold knot
+      .insert('rect', 'text')
+      .classed('rank-rect', true)
+      .attr('x', function(d) { return d.x + (d.r + labelMargin) + badgeMargin.left; })
+      .attr('y', function(d) { return d.y + d.adjustTextOverlap - (getBBoxForRankText(svg, d).height / 2) - (badgePadding.top + badgePadding.bottom) / 2; })
+      .attr('width', function(d) { return getBBoxForRankText(svg, d).width + badgePadding.left + badgePadding.right})
+      .attr('height', function(d) { return getBBoxForRankText(svg, d).height + badgePadding.top + badgePadding.bottom })
+      .attr('dy', function(d) { return '.3em'; })
+      .attr('font-size', function(d) { return d.r * 2 + 'px'; })
+    
     // render label text
       // update
-    var labelText = svg.selectAll('text.label')
-        .data(nodes)
+    var labelText = labelContainer.append('text')
         .attr('text-anchor', function(d) { return 'start'; })
-        .attr('x', function(d) { return d.x + (d.r + labelMargin); })
         .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
         .attr('dy', function(d) { return '.3em'; })
         .attr('font-size', function(d) { return d.r * 2 + 'px'; })
-        .text(function(d) { return d.label; });
-    
-      // enter
-    labelText.enter().append('text')
         .attr('class', function(d) { return d.className + '-label'; })
-        .attr('text-anchor', function(d) { return 'start'; })
-        .attr('x', function(d) { return d.x + (d.r + labelMargin); })
-        .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
-        .attr('dy', function(d) { return '.3em'; })
-        .attr('font-size', function(d) { return d.r * 2 + 'px'; })
         .text(function(d) { return d.label; })
+        .attr('x', function(d) {
+          var badgeAdjustment = 0
+          if(shouldShowRankForNode(d)) {
+            badgeAdjustment = getBBoxForRankText(svg, d).width + badgePadding.left + badgePadding.right + badgeMargin.left + badgeMargin.right
+          }
+          return d.x + (d.r + labelMargin) + badgeAdjustment; 
+        })
+    labelText
       .filter(function(d) { return d.tooltipLabel !== undefined; })
         .append('tspan')
         .attr('class', function(d) { return chart.tooltipLabelClass(d.nodeName); })
@@ -214,8 +245,6 @@ var RopeChart = function (selection){
         .html(function(d) { 
           return " " + d.tooltipLabel;
         });
-      // exit
-    labelText.exit().remove();
 
     // Call the tooltips on their anchor element if the parent app isn't handling tooltips externally
     if(!handleTooltipExternally) {
@@ -286,6 +315,12 @@ var RopeChart = function (selection){
     if(mins.length === 1) return false;
     return mins;
   };
+
+  // Use standard rank instead of dense rank
+  chart.getRank = function(d) {
+    var values = data.map(function(d) { return chart.valueAccessor()(d)})
+    return NumberRank(chart.valueAccessor()(d), values, flipDirection)
+  }
 
   /**
    * Get/set the y-scale
@@ -433,7 +468,7 @@ var RopeChart = function (selection){
   };
 
   /**
-   * Get/set boolean that "flips direction" of the "good"/"bad" sides of threshold. By default the top section is "good" (green). If flipDirection is true, then top section becomes "bad" (red).
+   * Get/set boolean that "flips direction" of the "good"/"bad" sides of threshold. By default the top knot is the max value, and bottom knot is the min value. 
    * @method flipDirection
    * @memberof RopeChart
    * @instance
@@ -981,6 +1016,30 @@ var RopeChart = function (selection){
     else {
       return svgHeight - (2 * knotRadius * overlapIndex) - nodePosition - chartGutter;
     }
+  }
+
+  function getBBoxForRankText(svgRoot, d) {
+    return svgRoot.select('.' + d.className + '-label-container .rank-label')[0][0].getBBox()
+  }
+
+  /**
+   * Show the rank text next to the knots
+   * @method showRank
+   * @memberof RopeChart
+   * @instance
+   * @param {boolean} [showRank]
+   * @return {boolean} [Acts as getter if called with no parameter]
+   * @return {RopeChart} [Acts as chainable setter if called with parameter]
+   */
+  chart.showRank = function(_) {
+    if(!arguments.length) return showRank;
+    showRank = _;
+
+    return chart;
+  }
+
+  function shouldShowRankForNode(d) {
+    return d.nodeName !== "threshold" && chart.showRank()
   }
 
   return chart;
