@@ -35,7 +35,8 @@ var RopeChart = function (selection){
       tooltipLabel = "&#8505;",
       valueDisplayFormatter = function(d) { return Math.round(d); },
       badgePadding = { "top": 1, "right": 4, "bottom": 1, "left": 4 },
-      badgeMargin = { "right": 5, "left": 0 };
+      badgeMargin = { "right": 5, "left": 0 },
+      showRank = true;
 
   // css class names
   var d3TipClass = "d3-tip-mouse",
@@ -182,9 +183,9 @@ var RopeChart = function (selection){
       .attr('y', function(d) { return d.y + d.adjustTextOverlap; })
       .attr('dy', function(d) { return '.3em'; })
       .attr('font-size', function(d) { return d.r * 2 + 'px'; })
-    .filter(function(d) { return d.nodeName !== "threshold"; }) // Don't add rank text for the threshold knot
+    .filter(shouldShowRankForNode) // Don't add rank text for the threshold knot or if showRank is false
       .text(function(d) { return chart.getRank(d); });
-    var rankRect = labelContainer.filter(function(d) { return d.nodeName !== "threshold"; }) // Don't add rank rectangle for the threshold knot
+    var rankRect = labelContainer.filter(shouldShowRankForNode) // Don't add rank rectangle for the threshold knot
       .insert('rect', 'text')
       .classed('rank-rect', true)
       .attr('x', function(d) { return d.x + (d.r + labelMargin) + badgeMargin.left; })
@@ -205,7 +206,7 @@ var RopeChart = function (selection){
         .text(function(d) { return d.label; })
         .attr('x', function(d) {
           var badgeAdjustment = 0
-          if(d.nodeName !== "threshold") {
+          if(shouldShowRankForNode(d)) {
             badgeAdjustment = getBBoxForRankText(svg, d).width + badgePadding.left + badgePadding.right + badgeMargin.left + badgeMargin.right
           }
           return d.x + (d.r + labelMargin) + badgeAdjustment; 
@@ -907,6 +908,26 @@ var RopeChart = function (selection){
 
   function getBBoxForRankText(svgRoot, d) {
     return svgRoot.select('.' + d.className + '-label-container .rank-label')[0][0].getBBox()
+  }
+
+  /**
+   * Show the rank text next to the knots
+   * @method showRank
+   * @memberof RopeChart
+   * @instance
+   * @param {boolean} [showRank]
+   * @return {boolean} [Acts as getter if called with no parameter]
+   * @return {RopeChart} [Acts as chainable setter if called with parameter]
+   */
+  chart.showRank = function(_) {
+    if(!arguments.length) return showRank;
+    showRank = _;
+
+    return chart;
+  }
+
+  function shouldShowRankForNode(d) {
+    return d.nodeName !== "threshold" && chart.showRank()
   }
 
   return chart;

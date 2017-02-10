@@ -21,7 +21,6 @@ var NumberRank = function(value, unsortedValues, ascending) {
     }
     // If the rank array has gone far enough to rank the selected value then break out and return the rank
     if(rankArray.length == indexOfValue + 1) {
-      console.log(rankArray)
       return ordinal(rankArray[indexOfValue])
     }
   }
