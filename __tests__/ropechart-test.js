@@ -196,8 +196,8 @@ describe('RopeChart', () => {
       var nodes = RopeChart.generateNodes();
       var focusY = yScale(40);
       var thresholdY = yScale(threshold);
-      var nodeDistance = thresholdY - focusY;
-      var expectedTextOverlapAdjust = (2 * RopeChart.knotRadius() -  Math.abs(nodeDistance)) / 2;
+      var nodeDistance = Math.abs(thresholdY - focusY);
+      var expectedTextOverlapAdjust = (2 * RopeChart.knotRadius() -  nodeDistance) / 2;
       var generatedTextOverlapAdjust = nodes[3].adjustTextOverlap;
 
       expect(generatedTextOverlapAdjust).toEqual(expectedTextOverlapAdjust);

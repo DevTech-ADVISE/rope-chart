@@ -162,7 +162,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!!arguments.length) chart.data(_);
 
-	    // size the svg, and reset the center         
+	    // size the svg, and reset the center          
 	    svg.attr("width", function () {
 	      return svgWidth;
 	    });
@@ -188,7 +188,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    var bars = [bottomBar, topBar];
 
-	    // render bar svg
+	    // render bar svg 
 	    // update
 	    var barSvg = svg.selectAll('rect').data(bars).attr('x', function (d) {
 	      return d.x;
@@ -216,7 +216,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // exit
 	    barSvg.exit().remove();
 
-	    // render nodes svg
+	    // render nodes svg 
 	    // update
 	    var circleSvg = svg.selectAll('circle').data(nodes).attr('cx', function (d) {
 	      return d.x;
