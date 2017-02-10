@@ -39,7 +39,8 @@
 		fill: #E4E4E4;
 	}
 
-	tspan.tooltip-label {
+	tspan.tooltip-label-threshold, tspan.tooltip-label-top,
+	tspan.tooltip-label-bottom, tspan.tooltip-label-focus {
 		fill: #6482a5;
 		
 		&:hover {

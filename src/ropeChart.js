@@ -30,7 +30,9 @@ var RopeChart = function (selection){
       showThreshold      = false,
       thresholdLabel     = "Average",
       ttOffset = [0, 0],
-      showTooltip = true,
+      showTooltip = { threshold: false, top: false, bottom: false, focus: false },
+      tooltipOnlyForMultiple = { top: true, bottom: true},
+      tooltip = { threshold: undefined, top: undefined, bottom: undefined, focus: undefined},
       handleTooltipExternally = false,
       tooltipLabel = "&#8505;",
       valueDisplayFormatter = function(d) { return Math.round(d); },
@@ -52,12 +54,40 @@ var RopeChart = function (selection){
   var valueAccessor = function (d) { return Number(d.value); };
   var nameAccessor  = function (d) { return d.name; };
   var thresholdGenerator = function(chartData) { return d3.mean(chartData, chart.valueAccessor());};
-  var tooltipContentFunc = function(d) {
-    var tooltipContent = "<label>Name: </label>" + d.label;
-    tooltipContent += "<br/><label>Value: " + valueDisplayFormatter(d.value);
+  var defaultTooltipContentFunc = function(d) {
+    var tooltipContent = "";
+    if(d.multipleData) {
+      d.multipleData.forEach(function(datum) {
+        tooltipContent += "<label>Name: </label>" + chart.nameAccessor()(datum);
+        tooltipContent += "<br/><label>Value: " + chart.valueAccessor()(datum) + "<br/>";
+      });
+    }
+    else {
+      tooltipContent = "<label>Name: </label>" + d.label;
+      tooltipContent += "<br/><label>Value: " + valueDisplayFormatter(d.value);
+    }
 
     return tooltipContent;
   };
+  var tooltipContent = { 
+    threshold: defaultTooltipContentFunc,
+    top: defaultTooltipContentFunc,
+    bottom: defaultTooltipContentFunc,
+    focus: defaultTooltipContentFunc
+  }
+
+  chart.setupTooltip = function(key) {
+    var id = d3.select(selection).attr('id') + '-tip-' + key;
+    var tip = d3.tip()
+      .attr("class", d3TipClass)
+      .attr("id", id)
+      .html(tooltipContent[key])
+      .offset(ttOffset)
+      .positionAnchor("mouse");
+    tip['key'] = key;
+
+    return tip;
+  }
 
   /**
    * Render the RopeChart instance. Simply renders chart when called with no parameter. Updates data, then renders, if called with parameter
@@ -71,13 +101,9 @@ var RopeChart = function (selection){
 
     // initialize svg
     svg = d3.select(selection).html('').classed('Rope-Chart', true).append('svg');
-    var ttId = d3.select(selection).attr('id') + '-tip';
-    var tt = d3.tip()
-      .attr("class", d3TipClass)
-      .attr("id", ttId)
-      .html(tooltipContentFunc)
-      .offset(ttOffset)
-      .positionAnchor("mouse");
+    for(var prop in showTooltip) {
+      if(showTooltip[prop]) tooltip[prop] = chart.setupTooltip(prop);
+    }
 
     if (!!arguments.length)
       chart.data(_);
@@ -214,27 +240,37 @@ var RopeChart = function (selection){
     labelText
       .filter(function(d) { return d.tooltipLabel !== undefined; })
         .append('tspan')
-        .classed('tooltip-label', true)
+        .attr('class', function(d) { return chart.tooltipLabelClass(d.nodeName); })
         .style("cursor", "default")
         .html(function(d) { 
-          return " " + tooltipLabel;
+          return " " + d.tooltipLabel;
         });
 
+    // Call the tooltips on their anchor element if the parent app isn't handling tooltips externally
     if(!handleTooltipExternally) {
-      // remove previous tooltip if there was one for this chart
-      if (!d3.select('#' + tt.attr("id")).empty()) d3.select('#' + tt.attr("id")).remove(); 
-
-      var tippables = svg.selectAll("tspan.tooltip-label");
-      tippables.call(tt);
-      tippables.on("mouseover", tt.show)
-        .on("mouseout", tt.hide)
-        .on("mousemove", tt.updatePosition);
+      for(var prop in tooltip) {
+        var node = nodes.filter(function(node) { return node.nodeName === prop; })[0];
+        if(node && node.tooltipLabel && tooltip[prop]) chart.callTooltip(tooltip[prop]);
+      }
     }
-
 
     return chart;
   };
 
+  chart.tooltipLabelClass = function(key) {
+    return 'tooltip-label-' + key;
+  }
+
+  chart.callTooltip = function(tooltip) {
+    // remove previous tooltip if there was one for this chart
+    if (!d3.select('#' + tooltip.attr("id")).empty()) d3.select('#' + tooltip.attr("id")).remove(); 
+
+    var tippables = svg.selectAll('.' + chart.tooltipLabelClass(tooltip.key));
+    tippables.call(tooltip);
+    tippables.on("mouseover", tooltip.show)
+      .on("mouseout", tooltip.hide)
+      .on("mousemove", tooltip.updatePosition);
+  }
 
   /**
    * Get/set the data for the RopeChart instance
@@ -589,8 +625,8 @@ var RopeChart = function (selection){
    * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.tooltipContent = function(_) {
-    if(!arguments.length) return tooltipContentFunc;
-    tooltipContentFunc = _;
+    if(!arguments.length) return tooltipContent;
+    Object.assign(tooltipContent, _);
 
     return chart;
   };
@@ -600,13 +636,29 @@ var RopeChart = function (selection){
    * @method showTooltip
    * @memberof RopeChart
    * @instance
-   * @param  {boolean} [showTooltip]
+   * @param  {Object} [showTooltip]
    * @return {Function} [Acts as getter if called with no parameter]
    * @return {RopeChart} [Acts as setter if called with parameter]
    */
   chart.showTooltip = function(_) {
     if(!arguments.length) return showTooltip;
-    showTooltip = _;
+    Object.assign(showTooltip, _);
+
+    return chart;
+  };
+
+  /**
+   * Set which knots should show the tooltip only when that knot has multiple members. The default is that top and bottom only show the tooltip for multiples. 
+   * @method tooltipOnlyForMultiple
+   * @memberof RopeChart
+   * @instance
+   * @param  {Object} [tooltipOnlyForMultiple]
+   * @return {Function} [Acts as getter if called with no parameter]
+   * @return {RopeChart} [Acts as setter if called with parameter]
+   */
+  chart.tooltipOnlyForMultiple = function(_) {
+    if(!arguments.length) return tooltipOnlyForMultiple;
+    Object.assign(tooltipOnlyForMultiple, _);
 
     return chart;
   };
@@ -655,8 +707,8 @@ var RopeChart = function (selection){
     var focusNode   = chart.generateNode(focus, focusKnotClass, 1, 'focus');
 
     if (chart.showThreshold()) {
-      var ttLabel = "";
-      if(showTooltip) ttLabel = tooltipLabel;
+      var ttLabel = undefined;
+      if(showTooltip.threshold) ttLabel = tooltipLabel;
       var thresholdNode = {x: ropeX, 
         y: yScale(thresholdValue), 
         adjustTextOverlap: 0,
@@ -676,22 +728,12 @@ var RopeChart = function (selection){
       adjustedNodes = chart.adjustForOverlapAndMultiples(topNode, bottomNode, focusNode);
     }
 
-    if(flipDirection) {
-      var topValue = adjustedNodes[0].value,
-        topLabel = adjustedNodes[0].label,
-        bottomValue = adjustedNodes[1].value,
-        bottomLabel = adjustedNodes[1].label;
-
-      adjustedNodes[0].value = bottomValue
-      adjustedNodes[0].label = bottomLabel
-      adjustedNodes[1].value = topValue
-      adjustedNodes[1].label = topLabel
-    }
-
     return adjustedNodes;
   }
 
   chart.generateNode = function(datum, className, labelOrderPriority, nodeName) {
+    var ttLabel = undefined;
+    if(showTooltip[nodeName]) ttLabel = tooltipLabel;
 
     return {
       x: ropeX,
@@ -702,54 +744,90 @@ var RopeChart = function (selection){
       value: chart.valueAccessor()(datum),
       name: chart.nameAccessor()(datum),
       label: chart.nameAccessor()(datum),
+      tooltipLabel: ttLabel,
       labelOrderPriority: labelOrderPriority,
       nodeName: nodeName
     };
   };
 
+  // All of the edge cases are taken care of in this function, refactor in the future if possible.
+  // This function handles what to do when knots overlap, and when knots contain multiple members
   chart.adjustForOverlapAndMultiples = function(top, bottom, focus, threshold) {
 
     // if the focus is the max or min, show the max or min as the focus
     // if there are multiple maxes or mins show all of the maxes or mins
     var focusIsMax = false, focusIsMin = false;
     if(multipleMaxes) {
+      top.multipleData = multipleMaxes; // For use in tooltip
+
       if(focus.value === top.value) {
         focusIsMax = true;
+        
         top.className = "max-focus-knot";
-        top.label = focus.label + " and others";    
+        if(showTooltip.top || showTooltip.focus) {
+          top.label = "Multiple";
+          top.tooltipLabel = tooltipLabel;
+        }
+        else top.label = focus.label + " and others";   
+         
+        // top.nodeName = focus.nodeName;
         focus = undefined;  
       }
       else {
-        top.label = "Multiple: ";
-        multipleMaxes.forEach( d => top.label += chart.nameAccessor()(d) + ", " );
-        top.label = top.label.substring(0, top.label.length - 2);
+        if((showTooltip.top && !flipDirection) || (showTooltip.bottom && flipDirection)) {
+          top.label = "Multiple";
+        }
+        else {
+          top.label = "Multiple: ";
+          multipleMaxes.forEach( d => top.label += chart.nameAccessor()(d) + ", " );
+          top.label = top.label.substring(0, top.label.length - 2);
+        }
+        
       } 
     }
     // remove the focus knot if the focus is the only max, show the max as the focus
     else if(focus.value === top.value) {
       focusIsMax = true;
-      focus = undefined;
       top.className = "max-focus-knot";
+      top.tooltipLabel = focus.tooltipLabel;
+      // top.nodeName = focus.nodeName;
+      focus = undefined;
     }
 
     if(multipleMins) {
+      bottom.multipleData = multipleMins; // For use in tooltip
+
       if(focus && focus.value === bottom.value) {
         focusIsMin = true;
         bottom.className = "min-focus-knot";
-        bottom.label = focus.label + " and others";
+        
+        if(showTooltip.bottom || showTooltip.focus) {
+          bottom.label = "Multiple";
+          bottom.tooltipLabel = focus.tooltipLabel;
+        }
+        else bottom.label = focus.label + " and others";
+
+        // bottom.nodeName = focus.nodeName;
         focus = undefined;
       }
       else {
-        bottom.label = "Multiple: ";
-        multipleMins.forEach( d => bottom.label += chart.nameAccessor()(d) + ", " );
-        bottom.label = bottom.label.substring(0, bottom.label.length - 2);
+        if((showTooltip.bottom && !flipDirection) || (showTooltip.top && flipDirection)) {
+          bottom.label = "Multiple";
+        }
+        else {
+          bottom.label = "Multiple: ";
+          multipleMins.forEach( d => bottom.label += chart.nameAccessor()(d) + ", " );
+          bottom.label = bottom.label.substring(0, bottom.label.length - 2);
+        }
       }
     }
     // remove the focus knot if the focus is the only min, show the min as the focus
     else if(focus && focus.value === bottom.value) {
       focusIsMin = true;
-      focus = undefined;
       bottom.className = "min-focus-knot";
+      bottom.tooltipLabel = focus.tooltipLabel;
+      // bottom.nodeName = focus.nodeName;
+      focus = undefined;
     }
 
     // Node overlapping algorithm for top/threshold/focus, or bottom/threshold/focus overlap
@@ -774,10 +852,10 @@ var RopeChart = function (selection){
       }
     }
     
-    // Normal overlapping algorithm for top/focus, bottom/focus, threshold/focus, threshold/top(focus=top), threshold/bottom(focus=bottom)
+    // Normal overlapping algorithm for top/focus, bottom/focus, threshold/focus, threshold/top(top=focus), threshold/bottom(bottom=focus)
     if(!multiNodeOverlap) {
       
-      // fix focus knot overlap with top/bottom
+      // Adjust focus knot overlap with top/bottom
       if(!focusIsMax && !focusIsMin) {
         var topFocusOverlap = chart.nodeIsOverlapping(focus, top);
         var bottomFocusOverlap = chart.nodeIsOverlapping(focus, bottom);
@@ -790,19 +868,29 @@ var RopeChart = function (selection){
           focus.adjustTextOverlap = bottomFocusOverlap;
         }
         else if(threshold) {
-          var thresholdOverlap = chart.nodeIsOverlapping(focus, threshold);
+          var thresholdOverlapWithFocus = chart.nodeIsOverlapping(focus, threshold);
+          var thresholdOverlapWithTop = chart.nodeIsOverlapping(threshold, top);
+          var thresholdOverlapWithBottom = chart.nodeIsOverlapping(threshold, bottom);
 
+          // Adjust threshold and focus in equal opposite directions if they are the same value
           if(threshold.value === focus.value) {
-            threshold.adjustTextOverlap = thresholdOverlap / 2;
-            focus.adjustTextOverlap = -thresholdOverlap / 2;
+            threshold.adjustTextOverlap = thresholdOverlapWithFocus / 2;
+            focus.adjustTextOverlap = -thresholdOverlapWithFocus / 2;
           }
-          else {
-            threshold.adjustTextOverlap = -(thresholdOverlap / 2);
-            focus.adjustTextOverlap = thresholdOverlap /2;
+          // Adjust threshold if it overlaps with the focus
+          else if(thresholdOverlapWithFocus !== false){
+            threshold.adjustTextOverlap = -(thresholdOverlapWithFocus / 2);
+            focus.adjustTextOverlap = thresholdOverlapWithFocus /2;
+          }
+          else if(thresholdOverlapWithTop !== false) {
+            threshold.adjustTextOverlap = thresholdOverlapWithTop;
+          }
+          else if(thresholdOverlapWithBottom !== false) {
+            threshold.adjustTextOverlap = thresholdOverlapWithBottom;
           }
         }
       }
-      // fix threshold knot overlap with top/bottom or focus knot
+      // Adjust threshold knot overlap with top/bottom or focus knot
       else if(threshold) {
 
         if(focusIsMax) {
@@ -825,9 +913,31 @@ var RopeChart = function (selection){
             focus.adjustTextOverlap = thresholdOverlap /2;
           }
         }
-
       }
     }
+
+    // Flip direction of top and bottom knots
+    // !!! Note: still need to implement the flipping of the threshold and focus knot position and top/bottom ropes!!!
+    if(flipDirection) {
+
+      var topValue = top.value,
+        topLabel = top.label,
+        topMultipleData = top.multipleData,
+        bottomValue = bottom.value,
+        bottomLabel = bottom.label,
+        bottomMultipleData = bottom.multipleData;
+        
+      top.value = bottomValue;
+      top.label = bottomLabel;
+      top.multipleData = bottomMultipleData;
+      bottom.value = topValue;
+      bottom.label = topLabel;
+      bottom.multipleData = topMultipleData;
+    }
+
+    // Only show tooltip on the top/bottom knot if it has multiple members
+    if(!top.multipleData && tooltipOnlyForMultiple.top) top.tooltipLabel = undefined;
+    if(!bottom.multipleData && tooltipOnlyForMultiple.bottom) bottom.tooltipLabel = undefined;
 
     // put back together the adjusted nodes
     var adjustedNodes = [top, bottom];
@@ -875,7 +985,7 @@ var RopeChart = function (selection){
     return !inOverlapRange;
   }
 
-  // Stack the nodes ascending by value, and higher priority first
+  // Stack the nodes ascending by value, and higher priority number first(for nodes that have the same value)
   function getStackedIndex(nodes) {
 
     var sortedNodes = nodes.sort(function(a, b) {
@@ -899,6 +1009,8 @@ var RopeChart = function (selection){
   // Get the actual Y position to place the stacked text
   function stackedPositionFromOrientation(overlapIndex, nodePosition, bottom) {
     if(!bottom) {
+      // start + desiredFinalPosition - nodePosition + chartGutter => adjustedTextPosition
+      // Resulting in only the extra y to 'adjustTextPosition' from where the node will be positioned by its original y value
       return 0 + (2 * knotRadius * overlapIndex) - nodePosition + chartGutter;
     }
     else {
