@@ -67,8 +67,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	// d3 is an external, it won't be bundled in
 	var d3 = __webpack_require__(1);
 	var dtip = __webpack_require__(2)(d3);
-	__webpack_require__(3);
-	__webpack_require__(7);
+	var NumberRank = __webpack_require__(3);
+
+	__webpack_require__(6);
+	__webpack_require__(10);
 
 	var RopeChart = function RopeChart(selection) {
 	  var chart = {};
@@ -86,12 +88,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      showThreshold = false,
 	      thresholdLabel = "Average",
 	      ttOffset = [0, 0],
-	      showTooltip = true,
+	      showTooltip = { threshold: false, top: false, bottom: false, focus: false },
+	      tooltipOnlyForMultiple = { top: true, bottom: true },
+	      tooltip = { threshold: undefined, top: undefined, bottom: undefined, focus: undefined },
 	      handleTooltipExternally = false,
 	      tooltipLabel = "&#8505;",
 	      valueDisplayFormatter = function valueDisplayFormatter(d) {
 	    return Math.round(d);
-	  };
+	  },
+	      badgePadding = { "top": 1, "right": 4, "bottom": 1, "left": 4 },
+	      badgeMargin = { "right": 5, "left": 0 },
+	      showRank = true;
 
 	  // css class names
 	  var d3TipClass = "d3-tip-mouse",
@@ -113,11 +120,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var thresholdGenerator = function thresholdGenerator(chartData) {
 	    return d3.mean(chartData, chart.valueAccessor());
 	  };
-	  var tooltipContentFunc = function tooltipContentFunc(d) {
-	    var tooltipContent = "<label>Name: </label>" + d.label;
-	    tooltipContent += "<br/><label>Value: " + valueDisplayFormatter(d.value);
+	  var defaultTooltipContentFunc = function defaultTooltipContentFunc(d) {
+	    var tooltipContent = "";
+	    if (d.multipleData) {
+	      d.multipleData.forEach(function (datum) {
+	        tooltipContent += "<label>Name: </label>" + chart.nameAccessor()(datum);
+	        tooltipContent += "<br/><label>Value: " + chart.valueAccessor()(datum) + "<br/>";
+	      });
+	    } else {
+	      tooltipContent = "<label>Name: </label>" + d.label;
+	      tooltipContent += "<br/><label>Value: " + valueDisplayFormatter(d.value);
+	    }
 
 	    return tooltipContent;
+	  };
+	  var tooltipContent = {
+	    threshold: defaultTooltipContentFunc,
+	    top: defaultTooltipContentFunc,
+	    bottom: defaultTooltipContentFunc,
+	    focus: defaultTooltipContentFunc
+	  };
+
+	  chart.setupTooltip = function (key) {
+	    var id = d3.select(selection).attr('id') + '-tip-' + key;
+	    var tip = d3.tip().attr("class", d3TipClass).attr("id", id).html(tooltipContent[key]).offset(ttOffset).positionAnchor("mouse");
+	    tip['key'] = key;
+
+	    return tip;
 	  };
 
 	  /**
@@ -132,12 +161,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    // initialize svg
 	    svg = d3.select(selection).html('').classed('Rope-Chart', true).append('svg');
-	    var ttId = d3.select(selection).attr('id') + '-tip';
-	    var tt = d3.tip().attr("class", d3TipClass).attr("id", ttId).html(tooltipContentFunc).offset(ttOffset).positionAnchor("mouse");
+	    for (var prop in showTooltip) {
+	      if (showTooltip[prop]) tooltip[prop] = chart.setupTooltip(prop);
+	    }
 
 	    if (!!arguments.length) chart.data(_);
 
-	    // size the svg, and reset the center         
+	    // size the svg, and reset the center          
 	    svg.attr("width", function () {
 	      return svgWidth;
 	    });
@@ -163,7 +193,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    var bars = [bottomBar, topBar];
 
-	    // render bar svg
+	    // render bar svg 
 	    // update
 	    var barSvg = svg.selectAll('rect').data(bars).attr('x', function (d) {
 	      return d.x;
@@ -191,7 +221,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // exit
 	    barSvg.exit().remove();
 
-	    // render nodes svg
+	    // render nodes svg 
 	    // update
 	    var circleSvg = svg.selectAll('circle').data(nodes).attr('cx', function (d) {
 	      return d.x;
@@ -249,55 +279,97 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // exit
 	    valueText.exit().remove();
 
+	    // Add a g container to contain each knot rank/label
+	    var labelContainer = svg.selectAll('g').data(nodes).enter().append('g').attr('x', function (d) {
+	      return d.x + (d.r + labelMargin);
+	    }).attr('y', function (d) {
+	      return d.y + d.adjustTextOverlap;
+	    }).attr('class', function (d) {
+	      return d.className + '-label-container';
+	    });
+
+	    // render ranking badge
+	    // combined enter and update because no nodes are being added/removed
+	    var rankText = labelContainer.append('text').classed('rank-label', true).attr('text-anchor', 'start').attr('x', function (d) {
+	      return d.x + (d.r + labelMargin) + badgeMargin.left + badgePadding.left;
+	    }).attr('y', function (d) {
+	      return d.y + d.adjustTextOverlap;
+	    }).attr('dy', function (d) {
+	      return '.3em';
+	    }).attr('font-size', function (d) {
+	      return d.r * 2 + 'px';
+	    }).filter(shouldShowRankForNode) // Don't add rank text for the threshold knot or if showRank is false
+	    .text(function (d) {
+	      return chart.getRank(d);
+	    });
+	    var rankRect = labelContainer.filter(shouldShowRankForNode) // Don't add rank rectangle for the threshold knot
+	    .insert('rect', 'text').classed('rank-rect', true).attr('x', function (d) {
+	      return d.x + (d.r + labelMargin) + badgeMargin.left;
+	    }).attr('y', function (d) {
+	      return d.y + d.adjustTextOverlap - getBBoxForRankText(svg, d).height / 2 - (badgePadding.top + badgePadding.bottom) / 2;
+	    }).attr('width', function (d) {
+	      return getBBoxForRankText(svg, d).width + badgePadding.left + badgePadding.right;
+	    }).attr('height', function (d) {
+	      return getBBoxForRankText(svg, d).height + badgePadding.top + badgePadding.bottom;
+	    }).attr('dy', function (d) {
+	      return '.3em';
+	    }).attr('font-size', function (d) {
+	      return d.r * 2 + 'px';
+	    });
+
 	    // render label text
 	    // update
-	    var labelText = svg.selectAll('text.label').data(nodes).attr('text-anchor', function (d) {
+	    var labelText = labelContainer.append('text').attr('text-anchor', function (d) {
 	      return 'start';
-	    }).attr('x', function (d) {
-	      return d.x + (d.r + labelMargin);
 	    }).attr('y', function (d) {
 	      return d.y + d.adjustTextOverlap;
 	    }).attr('dy', function (d) {
 	      return '.3em';
 	    }).attr('font-size', function (d) {
 	      return d.r * 2 + 'px';
-	    }).text(function (d) {
-	      return d.label;
-	    });
-
-	    // enter
-	    labelText.enter().append('text').attr('class', function (d) {
+	    }).attr('class', function (d) {
 	      return d.className + '-label';
-	    }).attr('text-anchor', function (d) {
-	      return 'start';
-	    }).attr('x', function (d) {
-	      return d.x + (d.r + labelMargin);
-	    }).attr('y', function (d) {
-	      return d.y + d.adjustTextOverlap;
-	    }).attr('dy', function (d) {
-	      return '.3em';
-	    }).attr('font-size', function (d) {
-	      return d.r * 2 + 'px';
 	    }).text(function (d) {
 	      return d.label;
-	    }).filter(function (d) {
-	      return d.tooltipLabel !== undefined;
-	    }).append('tspan').classed('tooltip-label', true).style("cursor", "default").html(function (d) {
-	      return " " + tooltipLabel;
+	    }).attr('x', function (d) {
+	      var badgeAdjustment = 0;
+	      if (shouldShowRankForNode(d)) {
+	        badgeAdjustment = getBBoxForRankText(svg, d).width + badgePadding.left + badgePadding.right + badgeMargin.left + badgeMargin.right;
+	      }
+	      return d.x + (d.r + labelMargin) + badgeAdjustment;
 	    });
-	    // exit
-	    labelText.exit().remove();
+	    labelText.filter(function (d) {
+	      return d.tooltipLabel !== undefined;
+	    }).append('tspan').attr('class', function (d) {
+	      return chart.tooltipLabelClass(d.nodeName);
+	    }).style("cursor", "default").html(function (d) {
+	      return " " + d.tooltipLabel;
+	    });
 
+	    // Call the tooltips on their anchor element if the parent app isn't handling tooltips externally
 	    if (!handleTooltipExternally) {
-	      // remove previous tooltip if there was one for this chart
-	      if (!d3.select('#' + tt.attr("id")).empty()) d3.select('#' + tt.attr("id")).remove();
-
-	      var tippables = svg.selectAll("tspan.tooltip-label");
-	      tippables.call(tt);
-	      tippables.on("mouseover", tt.show).on("mouseout", tt.hide).on("mousemove", tt.updatePosition);
+	      for (var prop in tooltip) {
+	        var node = nodes.filter(function (node) {
+	          return node.nodeName === prop;
+	        })[0];
+	        if (node && node.tooltipLabel && tooltip[prop]) chart.callTooltip(tooltip[prop]);
+	      }
 	    }
 
 	    return chart;
+	  };
+
+	  chart.tooltipLabelClass = function (key) {
+	    return 'tooltip-label-' + key;
+	  };
+
+	  chart.callTooltip = function (tooltip) {
+	    // remove previous tooltip if there was one for this chart
+	    if (!d3.select('#' + tooltip.attr("id")).empty()) d3.select('#' + tooltip.attr("id")).remove();
+
+	    var tippables = svg.selectAll('.' + chart.tooltipLabelClass(tooltip.key));
+	    tippables.call(tooltip);
+	    tippables.on("mouseover", tooltip.show).on("mouseout", tooltip.hide).on("mousemove", tooltip.updatePosition);
 	  };
 
 	  /**
@@ -348,6 +420,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    if (mins.length === 1) return false;
 	    return mins;
+	  };
+
+	  // Use standard rank instead of dense rank
+	  chart.getRank = function (d) {
+	    var values = data.map(function (d) {
+	      return chart.valueAccessor()(d);
+	    });
+	    return NumberRank(chart.valueAccessor()(d), values, flipDirection);
 	  };
 
 	  /**
@@ -496,7 +576,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get/set boolean that "flips direction" of the "good"/"bad" sides of threshold. By default the top section is "good" (green). If flipDirection is true, then top section becomes "bad" (red).
+	   * Get/set boolean that "flips direction" of the "good"/"bad" sides of threshold. By default the top knot is the max value, and bottom knot is the min value. 
 	   * @method flipDirection
 	   * @memberof RopeChart
 	   * @instance
@@ -551,8 +631,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @method thresholdGenerator
 	   * @memberof RopeChart
 	   * @instance
-	   * @param {object} [function]
-	   * @return {Object} [Acts as getter if called with no parameter. Returns the threshold function that returns the value for the threshold knot.]
+	   * @param {Function} [function]
+	   * @return {Function} [Acts as getter if called with no parameter. Returns the threshold function that returns the value for the threshold knot.]
 	   * @return {RopeChart} [Acts as setter if called with parameter]
 	   */
 	  chart.thresholdGenerator = function (_) {
@@ -653,8 +733,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @return {RopeChart} [Acts as setter if called with parameter]
 	   */
 	  chart.tooltipContent = function (_) {
-	    if (!arguments.length) return tooltipContentFunc;
-	    tooltipContentFunc = _;
+	    if (!arguments.length) return tooltipContent;
+	    Object.assign(tooltipContent, _);
 
 	    return chart;
 	  };
@@ -664,13 +744,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @method showTooltip
 	   * @memberof RopeChart
 	   * @instance
-	   * @param  {boolean} [showTooltip]
+	   * @param  {Object} [showTooltip]
 	   * @return {Function} [Acts as getter if called with no parameter]
 	   * @return {RopeChart} [Acts as setter if called with parameter]
 	   */
 	  chart.showTooltip = function (_) {
 	    if (!arguments.length) return showTooltip;
-	    showTooltip = _;
+	    Object.assign(showTooltip, _);
+
+	    return chart;
+	  };
+
+	  /**
+	   * Set which knots should show the tooltip only when that knot has multiple members. The default is that top and bottom only show the tooltip for multiples. 
+	   * @method tooltipOnlyForMultiple
+	   * @memberof RopeChart
+	   * @instance
+	   * @param  {Object} [tooltipOnlyForMultiple]
+	   * @return {Function} [Acts as getter if called with no parameter]
+	   * @return {RopeChart} [Acts as setter if called with parameter]
+	   */
+	  chart.tooltipOnlyForMultiple = function (_) {
+	    if (!arguments.length) return tooltipOnlyForMultiple;
+	    Object.assign(tooltipOnlyForMultiple, _);
 
 	    return chart;
 	  };
@@ -721,8 +817,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var focusNode = chart.generateNode(focus, focusKnotClass, 1, 'focus');
 
 	    if (chart.showThreshold()) {
-	      var ttLabel = "";
-	      if (showTooltip) ttLabel = tooltipLabel;
+	      var ttLabel = undefined;
+	      if (showTooltip.threshold) ttLabel = tooltipLabel;
 	      var thresholdNode = { x: ropeX,
 	        y: yScale(thresholdValue),
 	        adjustTextOverlap: 0,
@@ -742,22 +838,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      adjustedNodes = chart.adjustForOverlapAndMultiples(topNode, bottomNode, focusNode);
 	    }
 
-	    if (flipDirection) {
-	      var topValue = adjustedNodes[0].value,
-	          topLabel = adjustedNodes[0].label,
-	          bottomValue = adjustedNodes[1].value,
-	          bottomLabel = adjustedNodes[1].label;
-
-	      adjustedNodes[0].value = bottomValue;
-	      adjustedNodes[0].label = bottomLabel;
-	      adjustedNodes[1].value = topValue;
-	      adjustedNodes[1].label = topLabel;
-	    }
-
 	    return adjustedNodes;
 	  };
 
 	  chart.generateNode = function (datum, className, labelOrderPriority, nodeName) {
+	    var ttLabel = undefined;
+	    if (showTooltip[nodeName]) ttLabel = tooltipLabel;
 
 	    return {
 	      x: ropeX,
@@ -768,11 +854,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      value: chart.valueAccessor()(datum),
 	      name: chart.nameAccessor()(datum),
 	      label: chart.nameAccessor()(datum),
+	      tooltipLabel: ttLabel,
 	      labelOrderPriority: labelOrderPriority,
 	      nodeName: nodeName
 	    };
 	  };
 
+	  // All of the edge cases are taken care of in this function, refactor in the future if possible.
+	  // This function handles what to do when knots overlap, and when knots contain multiple members
 	  chart.adjustForOverlapAndMultiples = function (top, bottom, focus, threshold) {
 
 	    // if the focus is the max or min, show the max or min as the focus
@@ -780,45 +869,73 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var focusIsMax = false,
 	        focusIsMin = false;
 	    if (multipleMaxes) {
+	      top.multipleData = multipleMaxes; // For use in tooltip
+
 	      if (focus.value === top.value) {
 	        focusIsMax = true;
+
 	        top.className = "max-focus-knot";
-	        top.label = focus.label + " and others";
+	        if (showTooltip.top || showTooltip.focus) {
+	          top.label = "Multiple";
+	          top.tooltipLabel = tooltipLabel;
+	        } else top.label = focus.label + " and others";
+
+	        // top.nodeName = focus.nodeName;
 	        focus = undefined;
 	      } else {
-	        top.label = "Multiple: ";
-	        multipleMaxes.forEach(function (d) {
-	          return top.label += chart.nameAccessor()(d) + ", ";
-	        });
-	        top.label = top.label.substring(0, top.label.length - 2);
+	        if (showTooltip.top && !flipDirection || showTooltip.bottom && flipDirection) {
+	          top.label = "Multiple";
+	        } else {
+	          top.label = "Multiple: ";
+	          multipleMaxes.forEach(function (d) {
+	            return top.label += chart.nameAccessor()(d) + ", ";
+	          });
+	          top.label = top.label.substring(0, top.label.length - 2);
+	        }
 	      }
 	    }
 	    // remove the focus knot if the focus is the only max, show the max as the focus
 	    else if (focus.value === top.value) {
 	        focusIsMax = true;
-	        focus = undefined;
 	        top.className = "max-focus-knot";
+	        top.tooltipLabel = focus.tooltipLabel;
+	        // top.nodeName = focus.nodeName;
+	        focus = undefined;
 	      }
 
 	    if (multipleMins) {
+	      bottom.multipleData = multipleMins; // For use in tooltip
+
 	      if (focus && focus.value === bottom.value) {
 	        focusIsMin = true;
 	        bottom.className = "min-focus-knot";
-	        bottom.label = focus.label + " and others";
+
+	        if (showTooltip.bottom || showTooltip.focus) {
+	          bottom.label = "Multiple";
+	          bottom.tooltipLabel = focus.tooltipLabel;
+	        } else bottom.label = focus.label + " and others";
+
+	        // bottom.nodeName = focus.nodeName;
 	        focus = undefined;
 	      } else {
-	        bottom.label = "Multiple: ";
-	        multipleMins.forEach(function (d) {
-	          return bottom.label += chart.nameAccessor()(d) + ", ";
-	        });
-	        bottom.label = bottom.label.substring(0, bottom.label.length - 2);
+	        if (showTooltip.bottom && !flipDirection || showTooltip.top && flipDirection) {
+	          bottom.label = "Multiple";
+	        } else {
+	          bottom.label = "Multiple: ";
+	          multipleMins.forEach(function (d) {
+	            return bottom.label += chart.nameAccessor()(d) + ", ";
+	          });
+	          bottom.label = bottom.label.substring(0, bottom.label.length - 2);
+	        }
 	      }
 	    }
 	    // remove the focus knot if the focus is the only min, show the min as the focus
 	    else if (focus && focus.value === bottom.value) {
 	        focusIsMin = true;
-	        focus = undefined;
 	        bottom.className = "min-focus-knot";
+	        bottom.tooltipLabel = focus.tooltipLabel;
+	        // bottom.nodeName = focus.nodeName;
+	        focus = undefined;
 	      }
 
 	    // Node overlapping algorithm for top/threshold/focus, or bottom/threshold/focus overlap
@@ -842,10 +959,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 
-	    // Normal overlapping algorithm for top/focus, bottom/focus, threshold/focus, threshold/top(focus=top), threshold/bottom(focus=bottom)
+	    // Normal overlapping algorithm for top/focus, bottom/focus, threshold/focus, threshold/top(top=focus), threshold/bottom(bottom=focus)
 	    if (!multiNodeOverlap) {
 
-	      // fix focus knot overlap with top/bottom
+	      // Adjust focus knot overlap with top/bottom
 	      if (!focusIsMax && !focusIsMin) {
 	        var topFocusOverlap = chart.nodeIsOverlapping(focus, top);
 	        var bottomFocusOverlap = chart.nodeIsOverlapping(focus, bottom);
@@ -857,18 +974,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	        else if (bottomFocusOverlap !== false) {
 	            focus.adjustTextOverlap = bottomFocusOverlap;
 	          } else if (threshold) {
-	            var thresholdOverlap = chart.nodeIsOverlapping(focus, threshold);
+	            var thresholdOverlapWithFocus = chart.nodeIsOverlapping(focus, threshold);
+	            var thresholdOverlapWithTop = chart.nodeIsOverlapping(threshold, top);
+	            var thresholdOverlapWithBottom = chart.nodeIsOverlapping(threshold, bottom);
 
+	            // Adjust threshold and focus in equal opposite directions if they are the same value
 	            if (threshold.value === focus.value) {
-	              threshold.adjustTextOverlap = thresholdOverlap / 2;
-	              focus.adjustTextOverlap = -thresholdOverlap / 2;
-	            } else {
-	              threshold.adjustTextOverlap = -(thresholdOverlap / 2);
-	              focus.adjustTextOverlap = thresholdOverlap / 2;
+	              threshold.adjustTextOverlap = thresholdOverlapWithFocus / 2;
+	              focus.adjustTextOverlap = -thresholdOverlapWithFocus / 2;
 	            }
+	            // Adjust threshold if it overlaps with the focus
+	            else if (thresholdOverlapWithFocus !== false) {
+	                threshold.adjustTextOverlap = -(thresholdOverlapWithFocus / 2);
+	                focus.adjustTextOverlap = thresholdOverlapWithFocus / 2;
+	              } else if (thresholdOverlapWithTop !== false) {
+	                threshold.adjustTextOverlap = thresholdOverlapWithTop;
+	              } else if (thresholdOverlapWithBottom !== false) {
+	                threshold.adjustTextOverlap = thresholdOverlapWithBottom;
+	              }
 	          }
 	      }
-	      // fix threshold knot overlap with top/bottom or focus knot
+	      // Adjust threshold knot overlap with top/bottom or focus knot
 	      else if (threshold) {
 
 	          if (focusIsMax) {
@@ -890,6 +1016,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	        }
 	    }
+
+	    // Flip direction of top and bottom knots
+	    // !!! Note: still need to implement the flipping of the threshold and focus knot position and top/bottom ropes!!!
+	    if (flipDirection) {
+
+	      var topValue = top.value,
+	          topLabel = top.label,
+	          topMultipleData = top.multipleData,
+	          bottomValue = bottom.value,
+	          bottomLabel = bottom.label,
+	          bottomMultipleData = bottom.multipleData;
+
+	      top.value = bottomValue;
+	      top.label = bottomLabel;
+	      top.multipleData = bottomMultipleData;
+	      bottom.value = topValue;
+	      bottom.label = topLabel;
+	      bottom.multipleData = topMultipleData;
+	    }
+
+	    // Only show tooltip on the top/bottom knot if it has multiple members
+	    if (!top.multipleData && tooltipOnlyForMultiple.top) top.tooltipLabel = undefined;
+	    if (!bottom.multipleData && tooltipOnlyForMultiple.bottom) bottom.tooltipLabel = undefined;
 
 	    // put back together the adjusted nodes
 	    var adjustedNodes = [top, bottom];
@@ -934,7 +1083,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return !inOverlapRange;
 	  }
 
-	  // Stack the nodes ascending by value, and higher priority first
+	  // Stack the nodes ascending by value, and higher priority number first(for nodes that have the same value)
 	  function getStackedIndex(nodes) {
 
 	    var sortedNodes = nodes.sort(function (a, b) {
@@ -958,10 +1107,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Get the actual Y position to place the stacked text
 	  function stackedPositionFromOrientation(overlapIndex, nodePosition, bottom) {
 	    if (!bottom) {
+	      // start + desiredFinalPosition - nodePosition + chartGutter => adjustedTextPosition
+	      // Resulting in only the extra y to 'adjustTextPosition' from where the node will be positioned by its original y value
 	      return 0 + 2 * knotRadius * overlapIndex - nodePosition + chartGutter;
 	    } else {
 	      return svgHeight - 2 * knotRadius * overlapIndex - nodePosition - chartGutter;
 	    }
+	  }
+
+	  function getBBoxForRankText(svgRoot, d) {
+	    return svgRoot.select('.' + d.className + '-label-container .rank-label')[0][0].getBBox();
+	  }
+
+	  /**
+	   * Show the rank text next to the knots
+	   * @method showRank
+	   * @memberof RopeChart
+	   * @instance
+	   * @param {boolean} [showRank]
+	   * @return {boolean} [Acts as getter if called with no parameter]
+	   * @return {RopeChart} [Acts as chainable setter if called with parameter]
+	   */
+	  chart.showRank = function (_) {
+	    if (!arguments.length) return showRank;
+	    showRank = _;
+
+	    return chart;
+	  };
+
+	  function shouldShowRankForNode(d) {
+	    return d.nodeName !== "threshold" && chart.showRank();
 	  }
 
 	  return chart;
@@ -1374,13 +1549,114 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
+	'use strict';
+
+	var ordinal = __webpack_require__(4).english;
+
+	var NumberRank = function NumberRank(value, unsortedValues, ascending) {
+	  var sortedValues = unsortedValues.sort(function (a, b) {
+	    return b - a;
+	  });
+	  if (ascending) sortedValues.reverse();
+
+	  var indexOfValue = sortedValues.indexOf(value);
+	  // If the value is already the first element, it is in first place so return
+	  if (indexOfValue === 0) {
+	    return ordinal(1);
+	  }
+
+	  var rankArray = [1]; // Start with rank 1 for the first element
+	  for (var i = 1; i < sortedValues.length; i++) {
+	    // If the previous value equals the current value, the current value is tied/set to the same rank as the previous value
+	    if (sortedValues[i - 1] === sortedValues[i]) {
+	      rankArray.push(rankArray[i - 1]);
+	    } else {
+	      rankArray.push(i + 1);
+	    }
+
+	    // If the rank array has gone far enough to rank the selected value then break out and return the rank
+	    if (rankArray.length == indexOfValue + 1) {
+	      return ordinal(rankArray[indexOfValue]);
+	    }
+	  }
+	};
+
+	module.exports = NumberRank;
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports.english = __webpack_require__(5);
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	function blank(n) {
+	  return 'string' === typeof n && 0 === n.trim().length;
+	}
+
+	function numeric(n) {
+	  return 'number' === typeof +n && !Number.isNaN(+n);
+	}
+
+	function valid(n) {
+	  return numeric(n) && !blank(n) && 'object' !== typeof n;
+	}
+
+	function validate(n) {
+	  if(!valid(n)) {
+	    throw new Error('Must be a number or numeric string');
+	  }
+	}
+
+	function hasOneInTens(n) {
+	  return 1 === Math.floor(n / 10 % 10);
+	};
+
+	function indicator(n) {
+	  validate(n);
+
+	  var remainder = n % 10;
+	  if(hasOneInTens(n)) {
+	    return 'th';
+	  }
+	  switch(n % 10) {
+	    case 1:
+	      return 'st';
+	      break;
+	    case 2:
+	      return 'nd';
+	      break;
+	    case 3:
+	      return 'rd';
+	      break;
+	    default:
+	      return 'th';
+	  }
+	};
+
+	function english(n) {
+	  return n + indicator(n);
+	};
+
+	module.exports = english;
+	module.exports.indicator = indicator;
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(4);
+	var content = __webpack_require__(7);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(6)(content, {});
+	var update = __webpack_require__(9)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -1397,21 +1673,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 4 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(5)();
+	exports = module.exports = __webpack_require__(8)();
 	// imports
 
 
 	// module
-	exports.push([module.id, ".Rope-Chart .top-knot {\n  fill: #7DD0D4; }\n\n.Rope-Chart .bottom-knot {\n  fill: #7DD0D4; }\n\n.Rope-Chart .focus-knot {\n  fill: #338ED8;\n  stroke: #C55353;\n  stroke-width: 2px; }\n\n.Rope-Chart .max-focus-knot {\n  fill: #338ED8;\n  stroke: #C55353;\n  stroke-width: 2px; }\n\n.Rope-Chart .min-focus-knot {\n  fill: #338ED8;\n  stroke: #C55353;\n  stroke-width: 2px; }\n\n.Rope-Chart .threshold-knot {\n  fill: #105B98; }\n\n.Rope-Chart .bottom-rope {\n  fill: #B1B1B1; }\n\n.Rope-Chart .top-rope {\n  fill: #E4E4E4; }\n\n.Rope-Chart tspan.tooltip-label {\n  fill: #6482a5; }\n  .Rope-Chart tspan.tooltip-label:hover {\n    fill: #30619a; }\n", ""]);
+	exports.push([module.id, ".Rope-Chart .top-knot {\n  fill: #7DD0D4; }\n\n.Rope-Chart .bottom-knot {\n  fill: #7DD0D4; }\n\n.Rope-Chart .focus-knot {\n  fill: #338ED8;\n  stroke: #C55353;\n  stroke-width: 2px; }\n\n.Rope-Chart .max-focus-knot {\n  fill: #338ED8;\n  stroke: #C55353;\n  stroke-width: 2px; }\n\n.Rope-Chart .min-focus-knot {\n  fill: #338ED8;\n  stroke: #C55353;\n  stroke-width: 2px; }\n\n.Rope-Chart .threshold-knot {\n  fill: #105B98; }\n\n.Rope-Chart .bottom-rope {\n  fill: #B1B1B1; }\n\n.Rope-Chart .top-rope {\n  fill: #E4E4E4; }\n\n.Rope-Chart tspan.tooltip-label-threshold, .Rope-Chart tspan.tooltip-label-top,\n.Rope-Chart tspan.tooltip-label-bottom, .Rope-Chart tspan.tooltip-label-focus {\n  fill: #6482a5; }\n  .Rope-Chart tspan.tooltip-label-threshold:hover, .Rope-Chart tspan.tooltip-label-top:hover,\n  .Rope-Chart tspan.tooltip-label-bottom:hover, .Rope-Chart tspan.tooltip-label-focus:hover {\n    fill: #30619a; }\n\n.Rope-Chart .rank-rect {\n  fill: red;\n  rx: 4px;\n  ry: 4px; }\n\n.Rope-Chart .rank-label {\n  font-size: 14px;\n  fill: white; }\n", ""]);
 
 	// exports
 
 
 /***/ },
-/* 5 */
+/* 8 */
 /***/ function(module, exports) {
 
 	/*
@@ -1467,7 +1743,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 6 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -1719,16 +1995,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 7 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(8);
+	var content = __webpack_require__(11);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(6)(content, {});
+	var update = __webpack_require__(9)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -1745,10 +2021,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 8 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(5)();
+	exports = module.exports = __webpack_require__(8)();
 	// imports
 
 

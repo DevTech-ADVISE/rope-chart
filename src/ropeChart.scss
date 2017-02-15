@@ -39,11 +39,23 @@
 		fill: #E4E4E4;
 	}
 
-	tspan.tooltip-label {
+	tspan.tooltip-label-threshold, tspan.tooltip-label-top,
+	tspan.tooltip-label-bottom, tspan.tooltip-label-focus {
 		fill: #6482a5;
 		
 		&:hover {
 			fill: #30619a;
 		}
+	}
+
+	.rank-rect {
+		fill: red;
+		rx: 4px;
+		ry: 4px;
+	}
+
+	.rank-label {
+		font-size: 14px;
+		fill: white;
 	}
 }
