@@ -135,6 +135,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    if (!!arguments.length) chart.data(_);
 	
+		// check data for 0s
+ 		max = d3.max(data, chart.valueAccessor());
+	    if (max === 0){
+		    svg.attr("width", function () {
+		      return 200;
+		    });
+		    svg.attr("height", function () {
+		      return 40;
+		    });
+	    	return svg.append("text").attr('x',5).attr('y',15).style({'font-size':'20px'}).text('Not enough data.');
+	    }
+
 	    // size the svg, and reset the center         
 	    svg.attr("width", function () {
 	      return svgWidth;

@@ -382,6 +382,45 @@ describe('RopeChart', () => {
    
   });
 
+  describe('no chart rendered upon all data being equal', () => {
+    var PARENT_ID = 'test';
+    var RopeChart = require('../src/ropeChart.js')('div#' + PARENT_ID);
+
+    // Add the parent element to the document to render into
+    document.body.innerHTML = '<div id=' + PARENT_ID + '></div>';
+
+    var data = [
+      {name:'Average Joe',value:'0'},
+      {name:'Bob',value:'0'},
+      {name:'Janet',value:'0'},
+      {name:'Phil',value:'0'},
+      {name:'James',value:'0'},
+      {name:'Annie',value: '0'},
+      {name:'Eloise',value:'0'}
+    ];
+
+    var HEIGHT = 300, WIDTH = 300;
+    RopeChart
+      .width(WIDTH)
+      .height(HEIGHT)
+      .showThreshold(true)
+      .focusName('Annie')
+      .noneText("Nope.")
+      .data(data);
+
+    it('should not render a RopeChart into the parent selection', () => {
+
+      RopeChart.render(data);
+      var svg = d3.select('#' + PARENT_ID)[0][0];
+
+      var actualText = document.body.innerHTML;
+      var expectedText = 'Nope.';
+
+      expect(svg).not.toBeNull();
+      expect(actualText).toContain(expectedText);
+    });
+  });
+
   // Some remaining coverage of getters and setters
   describe('getters and setters', () => {
      var PARENT_ID = 'test';
@@ -406,6 +445,7 @@ describe('RopeChart', () => {
       .focusName('Annie')
       .valueAccessor(valueAccessor)
       .nameAccessor(nameAccessor)
+      .noneText("Nope.")
       .data(data);
 
     
@@ -417,6 +457,12 @@ describe('RopeChart', () => {
       var expectedDataValue = data[0].value;
 
       expect(RopeChart.data()[0].value).toEqual(expectedDataValue);
+    });
+
+    it('should have a getter for noneText', () => {
+      var expectedNoneText = "Nope.";
+
+      expect(RopeChart.noneText()).toEqual(expectedNoneText);
     });
 
     it('should have a getter/setter for the y-scale', () => {
@@ -497,5 +543,6 @@ describe('RopeChart', () => {
       expect(RopeChart.tooltipLabel()).toEqual(label);
     });
   });
+
 
 });
