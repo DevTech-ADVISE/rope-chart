@@ -35,6 +35,7 @@ var RopeChart = function (selection){
       tooltip = { threshold: undefined, top: undefined, bottom: undefined, focus: undefined},
       handleTooltipExternally = false,
       tooltipLabel = "&#8505;",
+      noneText = "No data available.",
       valueDisplayFormatter = function(d) { return Math.round(d); },
       badgePadding = { "top": 1, "right": 4, "bottom": 1, "left": 4 },
       badgeMargin = { "right": 5, "left": 0 },
@@ -115,6 +116,13 @@ var RopeChart = function (selection){
     svg.attr("height",function(){
       return svgHeight;
     }); 
+
+    // check data for 0s
+    max = d3.max(data, chart.valueAccessor());
+    min = d3.min(data, chart.valueAccessor());
+    if (max === min){
+      return chart.noData(svg);
+    }
 
     // derive bar data
     var barX = ropeX - (ropeWidth/2);
@@ -273,6 +281,45 @@ var RopeChart = function (selection){
   }
 
   /**
+   * Returns a message if RopeChart has competely equal data.
+   * @method noData
+   * @memberof RopeChart
+   * @instance
+   * @param  {Object} [SVG]
+   * @return {SVG} [Returns SVG for declaring no data]
+   */
+  chart.noData = function(_) {
+    if (!arguments.length){
+      return noData;
+    }
+    var svg = _;
+    svg.append("text")
+        .attr("x", svgWidth/4)
+        .attr("y", svgHeight/4)
+        .attr("font-size", fontSize)
+        .text(noneText);
+    return svg;
+  };
+
+  /**
+   * Get/set the no available data text
+   * @method noneText
+   * @memberof RopeChart
+   * @instance
+   * @param {Object} [d3 scale]
+   * @return {Object} [Acts as getter if called with no parameter. Returns the No Available Data text.]
+   * @return {RopeChart} [Acts as setter if called with parameter]
+   */
+  chart.noneText = function(_) {
+    if(!arguments.length){
+      return noneText;
+    }
+    noneText = _;
+
+    return chart;
+  };
+
+  /**
    * Get/set the data for the RopeChart instance
    * @method data
    * @memberof RopeChart
@@ -289,6 +336,7 @@ var RopeChart = function (selection){
     data   = _;
     max    = data.filter(function(d) { return chart.valueAccessor()(d) === d3.max(data, chart.valueAccessor()); })[0];
     min    = data.filter(function(d) { return chart.valueAccessor()(d) === d3.min(data, chart.valueAccessor()); })[0];
+
     thresholdValue = thresholdGenerator(data);
     multipleMaxes = chart.getMultipleMaxes();
     multipleMins = chart.getMultipleMins();
