@@ -2,7 +2,7 @@
   "name": "rope-chart",
   "version": "0.1.0",
   "description": "provides a simplified visualization of where a particular value lies within a group.",
-  "repository": "BI/rope-chart",
+  "repository": "DevTech-ADVISE/rope-chart",
   "main": "dist/ropeChart.js",
   "scripts": {
     "dev": "webpack-dev-server --inline --hot --config webpack.demo.config.js --content-base demo/",
@@ -17,7 +17,7 @@
     "visualization",
     "dataviz"
   ],
-  "author": "Barquin International",
+  "author": "DevTech Systems Inc",
   "license": "ISC",
   "devDependencies": {
     "babel-jest": "^12.1.0",
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "d3": "^3.5.16",
-    "d3-tip": "git://github.com/BI/d3-tip",
+    "d3-tip": "git+ssh://git@github.com:DevTech-ADVISE/d3-tip.git",
     "ordinal": "0.0.4"
   },
   "jest": {
